@@ -13,5 +13,7 @@ public class MatcherUtil {
 		return matchers.stream().allMatch(matcher->matcher.matches(value));
 	}
 	
-	
+	public static boolean anyMatches(Collection<? extends Matcher> matchers,Object value) {
+		return matchers.stream().anyMatch(matcher->matcher.matches(value));
+	}
 }
