@@ -1,6 +1,6 @@
 package com.caotc.util.excel.config;
 
-import com.caotc.util.excel.matcher.DataMatcher;
+import com.caotc.util.excel.matcher.data.DataMatcher;
 
 public class DataConfig<T extends Comparable<T>> {
 	private Boolean nullAllow;

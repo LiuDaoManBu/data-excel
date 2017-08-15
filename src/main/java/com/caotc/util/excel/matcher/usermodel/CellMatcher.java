@@ -6,9 +6,9 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import com.caotc.util.excel.ExcelUtil;
 import com.caotc.util.excel.MatcherUtil;
-import com.caotc.util.excel.matcher.ComparableValueMatcher;
-import com.caotc.util.excel.matcher.DataMatcher;
-import com.caotc.util.excel.matcher.StringMatcher;
+import com.caotc.util.excel.matcher.data.DataMatcher;
+import com.caotc.util.excel.matcher.data.value.ComparableValueMatcher;
+import com.caotc.util.excel.matcher.data.value.StringMatcher;
 
 public class CellMatcher{
 	private DataMatcher valueMatcher;

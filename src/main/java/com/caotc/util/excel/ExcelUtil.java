@@ -22,6 +22,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.caotc.util.excel.config.SheetConfig;
 import com.caotc.util.excel.config.WorkbookConfig;
+import com.caotc.util.excel.parse.result.SheetParseResult;
 import com.google.common.collect.Sets;
 
 
@@ -152,13 +153,13 @@ public class ExcelUtil {
 //		return true;
 //	}
 	
-	public static ParseResult parseMenu(Sheet sheet,SheetConfig sheetConfig){
-		ParseResult result=new ParseResult(sheet,sheetConfig);
+	public static SheetParseResult parseMenu(Sheet sheet,SheetConfig sheetConfig){
+		SheetParseResult result=new SheetParseResult(sheet,sheetConfig);
 		return result;
 	}
 	
-	public static ParseResult parse(Sheet sheet,SheetConfig sheetConfig){
-		ParseResult result=parseMenu(sheet,sheetConfig);
+	public static SheetParseResult parse(Sheet sheet,SheetConfig sheetConfig){
+		SheetParseResult result=parseMenu(sheet,sheetConfig);
 		result.parseDatas();
 		return result;
 	}

@@ -3,9 +3,9 @@ package com.caotc.util.excel.config;
 import java.util.Collection;
 
 import com.caotc.util.excel.config.TableConfig.Direction;
-import com.caotc.util.excel.matcher.DataMatcher;
-import com.caotc.util.excel.matcher.StringValueMatcher;
-import com.caotc.util.excel.matcher.StringValueMatcher.StringValueMatcherType;
+import com.caotc.util.excel.matcher.data.DataMatcher;
+import com.caotc.util.excel.matcher.data.value.StringValueMatcher;
+import com.caotc.util.excel.matcher.data.value.StringValueMatcher.StringValueMatcherType;
 
 public class MenuConfig{
 	private static final StringValueMatcherType DEFAULT_STRING_MATCH_TYPE=StringValueMatcherType.EQUALS;
