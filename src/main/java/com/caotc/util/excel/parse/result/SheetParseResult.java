@@ -314,34 +314,6 @@ public class SheetParseResult {
 //		this.menuConfigs = menuConfigs;
 //	}
 
-
-	public class Error{
-		private Cell cell;
-		private String errorMessage;
-		
-		public Error(String errorMessage) {
-			super();
-			this.errorMessage = errorMessage;
-		}
-		public Error(Cell cell, String errorMessage) {
-			super();
-			this.cell = cell;
-			this.errorMessage = errorMessage;
-		}
-		public Cell getCell() {
-			return cell;
-		}
-		public void setCell(Cell cell) {
-			this.cell = cell;
-		}
-		public String getErrorMessage() {
-			return errorMessage;
-		}
-		public void setErrorMessage(String errorMessage) {
-			this.errorMessage = errorMessage;
-		}
-	}
-	
 	public class Data{
 		private final Map<Menu,Cell> menuToCells;
 		private final JSONObject jsonData=new JSONObject();
