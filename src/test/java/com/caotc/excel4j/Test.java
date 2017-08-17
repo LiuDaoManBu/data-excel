@@ -1,12 +1,11 @@
-package com.caotc.util.excel;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+package com.caotc.excel4j;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
 
 class A{
 	private String id=null;
-	private int value=-1;
+	private Set<Integer> values;
 	
 
 	public String getId() {
@@ -17,27 +16,40 @@ class A{
 		System.out.println("setId");
 		this.id = id;
 	}
-	public int getValue() {
-		System.out.println("getValue");
-		return value;
+	public Set<Integer> getValues() {
+		return values;
 	}
-	public void setValue(int value) {
-		System.out.println("setValue");
-		this.value = value;
+	public void setValues(Set<Integer> values) {
+		this.values = values;
 	}
 	@Override
 	public String toString() {
-		return "A [id=" + id + ", value=" + value + "]";
+		return "A [id=" + id + ", values=" + values + "]";
 	}
+}
+class B extends A{
+	private int id;
+
+//	public int getId() {
+//		return id;
+//	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 }
 public class Test {
 	public static void main(String[] args) {
+//		JSONObject jsonObject=new JSONObject();
+//		jsonObject.put("id", "1");
+//		System.out.println(JSONObject.toJavaObject(jsonObject, B.class));
+//		System.out.println(ClassUtils.getAllFields(B.class).stream().collect(Collectors.toMap(Field::getName, Function.identity())));
 		JSONObject jsonObject=new JSONObject();
-		jsonObject.put("id", "aaaa");
-		jsonObject.put("value", 123);
-		System.out.println(jsonObject.toJavaObject(A.class));
-		Workbook workbook=null;
-		Sheet sheet=workbook.getSheetAt(0);
-		
+		jsonObject.put("value1", 1);
+		jsonObject.put("value2", 2);
+		jsonObject.put("value3", 3);
+		jsonObject.forEach((key,value)->{jsonObject.put(key, (int)value*10);});
+		System.out.println(jsonObject);
 	}
 }
