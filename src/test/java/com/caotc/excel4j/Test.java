@@ -51,5 +51,12 @@ public class Test {
 		jsonObject.put("value3", 3);
 		jsonObject.forEach((key,value)->{jsonObject.put(key, (int)value*10);});
 		System.out.println(jsonObject);
+		System.out.println(1);
+		System.out.println(getValue(String.class));
+	}
+	
+	public static <T> T getValue(Class<T> type) {
+		Object value=1;
+		return (T) value;
 	}
 }
