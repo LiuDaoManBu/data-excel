@@ -1,6 +1,7 @@
 package com.caotc.excel4j.parse.result;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -15,15 +16,15 @@ import com.caotc.excel4j.util.ExcelUtil;
 
 public class Data{
 	private SheetParseResult sheetParseResult;
-	private final Map<Menu,Cell> menuToValueCells;
+	private final Collection<CellData> cellDatas;
 	private final JSONObject jsonData=new JSONObject();
 	
-	public Data(Map<Menu, Cell> menuToCells) {
+	public Data(Collection<CellData> cellDatas) {
 		super();
-		this.menuToValueCells = menuToCells;
-		for(Entry<Menu,Cell> entry:menuToCells.entrySet()){
-			Menu menu=entry.getKey();
-			Object dataValue=ExcelUtil.getValue(entry.getValue());
+		this.cellDatas = cellDatas;
+		for(CellData cellData:cellDatas){
+			Menu menu=cellData.getMenu();
+			Object dataValue=cellData.getValue();
 			if(dataValue!=null){
 				jsonData.put(menu.getName(), dataValue);
 				if(menu.getMenuConfig()!=null){
@@ -39,12 +40,8 @@ public class Data{
 		}
 	}
 	
-	public Cell getCell(String fieldName){
-		return menuToValueCells.get(sheetParseResult.getMenu(fieldName));
-	}
-	
-	public Map<Menu, Cell> getMenuToCells() {
-		return menuToValueCells;
+	public Collection<CellData> getMenuToCells() {
+		return cellDatas;
 	}
 
 	public JSONObject getJsonData() {
@@ -52,16 +49,11 @@ public class Data{
 	}
 	
 	public <T> T toJavaObject(Class<T> type) {
-		Map<String,Field> nameToFields=ClassUtils.getAllFieldStream(type).collect(Collectors.toMap(Field::getName, Function.identity()
-				,(field1, field2) -> field1.getDeclaringClass().isAssignableFrom(field2.getDeclaringClass())?field2:field1));
-		menuToValueCells.forEach((menu,cell)->{
-			String key=menu.getCheckMenuConfig().getFieldName();
-			Object value=ExcelUtil.getValue(cell);
+		Map<String,Field> nameToFields=ClassUtils.getNameToFields(type);
+		cellDatas.forEach((cellData)->{
+			String key=cellData.getMenu().getCheckMenuConfig().getFieldName();
 			if(nameToFields.containsKey(key)) {
-				Class<?> fieldType=nameToFields.get(key).getType();
-				if(!fieldType.equals(value.getClass())) {
-					jsonData.put(key, menu.getCheckMenuConfig().getDataMatcher().getDataType().cast(value, fieldType));
-				}
+				jsonData.put(key,cellData.getValue(nameToFields.get(key).getType()));
 			}
 		});
 		return jsonData.toJavaObject(type);

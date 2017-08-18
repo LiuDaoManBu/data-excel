@@ -12,13 +12,28 @@ public class CellData {
 		return ExcelUtil.getValue(valueCell);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <T> T getValue(Class<T> type) {
-		if(type==null) {
-			throw new IllegalArgumentException("class type can't be null");
-		}
 		Object value=getValue();
-		if(!type.equals(value.getClass())) {
-			
+		if(value!=null && !value.getClass().equals(type)) {
+			value=menu.getCheckMenuConfig().getDataMatcher().getDataType().cast(value, type);
 		}
+		return (T) value;
+	}
+
+	public Menu getMenu() {
+		return menu;
+	}
+
+	public void setMenu(Menu menu) {
+		this.menu = menu;
+	}
+
+	public Cell getValueCell() {
+		return valueCell;
+	}
+
+	public void setValueCell(Cell valueCell) {
+		this.valueCell = valueCell;
 	}
 }
