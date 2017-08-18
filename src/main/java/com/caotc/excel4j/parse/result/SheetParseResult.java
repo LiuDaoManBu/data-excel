@@ -43,14 +43,11 @@ public class SheetParseResult {
 	}
 	
 	public boolean hasError(){
-		return !errors.isEmpty();
+		return !sheetErrors.isEmpty();
 	}
 	
-	public Error getFirstError(){
-		if(CollectionUtils.isEmpty(errors)){
-			return null;
-		}
-		return errors.iterator().next();
+	public SheetError getFirstError(){
+		return sheetErrors.get(0);
 	}
 	
 	public Menu getMenu(String fieldName){
@@ -76,21 +73,15 @@ public class SheetParseResult {
 		return collection;
 	}
 	
-	public boolean addError(Error error){
-		if(!errors.contains(error)){
-			return errors.add(error);
+	public boolean addError(SheetError sheetError){
+		if(!sheetErrors.contains(sheetError)){
+			return sheetErrors.add(sheetError);
 		}
 		return Boolean.FALSE;
 	}
 	
-	public Error addError(String errorMessage){
-		Error error= new Error(errorMessage);
-		addError(error);
-		return error;
-	}
-	
-	public Error addError(Cell cell, String errorMessage){
-		Error error= new Error(cell,errorMessage);
+	public SheetError addError(String errorMessage){
+		SheetError error= new SheetError(errorMessage);
 		addError(error);
 		return error;
 	}

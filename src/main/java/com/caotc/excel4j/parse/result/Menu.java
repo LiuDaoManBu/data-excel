@@ -106,7 +106,7 @@ public class Menu{
 	public List<Menu> findChildrenMenus(){
 		List<Menu> childrenMenus=Lists.newArrayList();
 		if(menuConfig!=null){
-			if(menuConfig.isDynamicFlag() || !CollectionUtils.isEmpty(menuConfig.getChildrenMenuConfigs())){
+			if(menuConfig.getDynamic() || !CollectionUtils.isEmpty(menuConfig.getChildrenMenuConfigs())){
 				Cell menuCell=this.cell;
 				CellRangeAddress menuMergedRegion=ExcelUtil.getMergedRegion(menuCell);
 				int startRowIndex,endRowIndex,startColumnIndex,endColumnIndex;
@@ -140,7 +140,7 @@ public class Menu{
 //										childrenMenu=new Menu(cell,childrenMenuConfig);
 //									}
 //								}
-								if(childrenMenu==null && menuConfig.isDynamicFlag()){
+								if(childrenMenu==null && menuConfig.getDynamic()){
 									childrenMenu=new Menu(cell);
 								}
 								if(childrenMenu!=null){
