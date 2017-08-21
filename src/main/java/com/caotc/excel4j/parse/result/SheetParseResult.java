@@ -93,14 +93,14 @@ public class SheetParseResult {
 			if(menu.getMenuConfig()!=null && menu.getMenuConfig().getFieldName()!=null){
 				fieldNameToMenus.put(menu.getMenuConfig().getFieldName(), menu);
 			}
-			MenuConfig menuConfig=menu.checkMenuConfig;
-			if(menuConfig.isDataFlag() || menu.menuConfig==null){
-				if(menuConfig.isSingleDataFlag()){
+			MenuConfig menuConfig=menu.getCheckMenuConfig();
+			if(menuConfig.getData() || menu.getMenuConfig()==null){
+				if(menuConfig.getSingleData()){
 					fixedMenus.add(menu);
 				}else{
 					noFixedMenus.add(menu);
 				}
-				if(menuConfig.isDynamicFlag()){
+				if(menuConfig.getDynamic()){
 					dynamicMenus.add(menu);
 				}
 			}
@@ -158,8 +158,8 @@ public class SheetParseResult {
 	public void checkMenus(){
 		Map<MenuConfig,Menu> menuConfigToMenus=Maps.newHashMap();
 		for(Menu menu:menus){
-			if(menu.menuConfig!=null){
-				menuConfigToMenus.put(menu.menuConfig, menu);
+			if(menu.getMenuConfig()!=null){
+				menuConfigToMenus.put(menu.getMenuConfig(), menu);
 			}
 		}
 //		for(MenuConfig menuConfig:menuConfigs){
@@ -170,17 +170,20 @@ public class SheetParseResult {
 	}
 	
 	public void parseFixedMenuDatas(){
-		Map<Menu, Cell> menuToCells=Maps.newHashMap();
+		Collection<CellData> cellDatas=Lists.newArrayList();
 		for(Menu fixedMenu:fixedMenus){
 			Cell dataCell=fixedMenu.nextDataCell(fixedMenu.getCell());
 			if(fixedMenu.hasCheckMenuConfig()){
 				fixedMenu.checkDataCell(dataCell);
 			}
 			if(StringUtils.isNotBlank(ExcelUtil.getStringValue(dataCell))){
-				menuToCells.put(fixedMenu, dataCell);
+				CellData cellData=new CellData();
+				cellData.setMenu(fixedMenu);
+				cellData.setValueCell(dataCell);
+				cellDatas.add(cellData);
 			}
 		}
-		fiexdData=new Data(menuToCells);
+		fiexdData=new Data(cellDatas);
 	}
 	
 	public void parseNoFixedMenuDatas(){
@@ -200,12 +203,12 @@ public class SheetParseResult {
 //			}
 			for (Iterator<Data> iter = noFiexdDatas.iterator(); iter.hasNext();) {  
 				Data data=iter.next();
-				if(data.jsonData.isEmpty()){
+				if(data.getJsonData().isEmpty()){
 					iter.remove();
 				}else{
-					for(Entry<Menu,Cell> entry:data.menuToCells.entrySet()){
-						Menu menu=entry.getKey();
-						Cell dataCell=entry.getValue();
+					for(CellData cellData:data.getMenuToCells()){
+						Menu menu=cellData.getMenu();
+						Cell dataCell=cellData.getValueCell();
 						if(menu.hasCheckMenuConfig()){
 							menu.checkDataCell(dataCell);
 						}
@@ -219,9 +222,9 @@ public class SheetParseResult {
 		parseFixedMenuDatas();
 		parseNoFixedMenuDatas();
 		for(Data noFiexData:noFiexdDatas){
-			Map<Menu,Cell> menuToCells=Maps.newHashMap(noFiexData.menuToCells);
-			menuToCells.putAll(fiexdData.menuToCells);
-			datas.add(new Data(menuToCells));
+			Collection<CellData> cellDatas=Lists.newLinkedList(noFiexData.getMenuToCells());
+			cellDatas.addAll(fiexdData.getMenuToCells());
+			datas.add(new Data(cellDatas));
 		}
 	}
 	
@@ -249,12 +252,12 @@ public class SheetParseResult {
 		this.noFixedMenus = noFixedMenus;
 	}
 
-	public Collection<Error> getErrors() {
-		return errors;
+	public List<SheetError> getErrors() {
+		return sheetErrors;
 	}
 
-	public void setErrors(List<Error> errors) {
-		this.errors = errors;
+	public void setErrors(List<SheetError> errors) {
+		this.sheetErrors = errors;
 	}
 
 	public Data getFiexdData() {
