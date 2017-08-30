@@ -3,6 +3,9 @@ package com.caotc.excel4j.config;
 import java.util.Collection;
 
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.constant.MenuChildrenType;
+import com.caotc.excel4j.constant.MenuDataType;
+import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.data.value.StringValueMatcher.StringValueMatcherType;
 import com.caotc.excel4j.matcher.usermodel.CellMatcher;
@@ -17,10 +20,9 @@ public class MenuConfig{
 	private Direction direction;	
 	//第一个数据单元格相对于菜单单元格的单元格距离
 	private Integer firstDataDistance;
-	private Boolean data;
-	private Boolean singleData;
-	private Boolean must;
-	private Boolean dynamic;
+	private MenuDataType menuDataType;
+	private MenuNecessity menuNecessity;
+	private MenuChildrenType menuChildrenType;
 	//属性名字
 	private String fieldName;
 	private MenuConfig parentMenuConfig;
@@ -49,30 +51,7 @@ public class MenuConfig{
 	public void setFirstDataDistance(Integer firstDataDistance) {
 		this.firstDataDistance = firstDataDistance;
 	}
-	public Boolean getData() {
-		return data;
-	}
-	public void setData(Boolean data) {
-		this.data = data;
-	}
-	public Boolean getSingleData() {
-		return singleData;
-	}
-	public void setSingleData(Boolean singleData) {
-		this.singleData = singleData;
-	}
-	public Boolean getMust() {
-		return must;
-	}
-	public void setMust(Boolean must) {
-		this.must = must;
-	}
-	public Boolean getDynamic() {
-		return dynamic;
-	}
-	public void setDynamic(Boolean dynamic) {
-		this.dynamic = dynamic;
-	}
+
 	public String getFieldName() {
 		return fieldName;
 	}
