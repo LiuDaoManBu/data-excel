@@ -3,8 +3,7 @@ package com.caotc.excel4j.config;
 import java.util.Collection;
 
 import com.caotc.excel4j.constant.Direction;
-import com.caotc.excel4j.constant.MenuChildrenType;
-import com.caotc.excel4j.constant.MenuDataType;
+import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.data.value.StringValueMatcher.StringValueMatcherType;
@@ -19,10 +18,10 @@ public class MenuConfig{
 	//数据单元格相对于菜单的方向
 	private Direction direction;	
 	//第一个数据单元格相对于菜单单元格的单元格距离
-	private Integer firstDataDistance;
-	private MenuDataType menuDataType;
+	private Integer firstDistance;
+	private LoadType menuDataLoadType;
 	private MenuNecessity menuNecessity;
-	private MenuChildrenType menuChildrenType;
+	private LoadType menuChildrenLoadType;
 	//属性名字
 	private String fieldName;
 	private MenuConfig parentMenuConfig;
@@ -45,11 +44,11 @@ public class MenuConfig{
 	public void setDirection(Direction direction) {
 		this.direction = direction;
 	}
-	public Integer getFirstDataDistance() {
-		return firstDataDistance;
+	public Integer getFirstDistance() {
+		return firstDistance;
 	}
-	public void setFirstDataDistance(Integer firstDataDistance) {
-		this.firstDataDistance = firstDataDistance;
+	public void setFirstDistance(Integer firstDataDistance) {
+		this.firstDistance = firstDataDistance;
 	}
 
 	public String getFieldName() {

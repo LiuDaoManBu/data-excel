@@ -86,7 +86,7 @@ public class Menu{
 	public Cell nextDataCell(Cell cell){
 		Direction direction=checkMenuConfig.getDirection();
 		if(cell==null || this.cell.equals(cell)){
-			return direction.getCell(this.cell, checkMenuConfig.getFirstDataDistance());
+			return direction.getCell(this.cell, checkMenuConfig.getFirstDistance());
 		}
 		return direction.nextCell(cell);
 	}
