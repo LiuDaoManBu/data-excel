@@ -23,6 +23,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.parse.result.SheetParseResult;
+import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.collect.Sets;
 
 
@@ -264,6 +265,9 @@ public class ExcelUtil {
 		return cell;
 	}
 	
+	public static StandardCell getStandardCellByIndex(Sheet sheet,int rowIndex,int columnIndex) {
+		return StandardCell.valueOf(getCellByIndex(sheet,rowIndex,columnIndex));
+	}
 	
 	public static boolean isMergedRegion(Cell cell) {
 		return getMergedRegion(cell)==null;
@@ -292,18 +296,14 @@ public class ExcelUtil {
 	* @param columnIndex 列下标  
 	* @return 该合并单元格对象，不是则为null
 	*/  
-	public static CellRangeAddress getMergedRegion(Sheet sheet,int rowIndex ,int columnIndex) {  
+	public static CellRangeAddress s(Sheet sheet,int rowIndex ,int columnIndex) {  
 		if(sheet!=null){
-			int sheetMergeCount = sheet.getNumMergedRegions();  
+			int sheetMergeCount = sheet.getNumMergedRegions(); 
 			for (int i = 0; i < sheetMergeCount; i++) {  
 				CellRangeAddress range = sheet.getMergedRegion(i);  
-				int firstColumnIndex = range.getFirstColumn();  
-				int lastColumnIndex = range.getLastColumn();  
-				int firstRowIndex = range.getFirstRow();  
-				int lastRowIndex = range.getLastRow();  
-				if(rowIndex >= firstRowIndex && rowIndex <= lastRowIndex && columnIndex >= firstColumnIndex && columnIndex <= lastColumnIndex){  
-					return range;  
-				}  
+				if(range.isInRange(rowIndex, columnIndex)){
+					return range;
+				}
 			}
 		}
 		return null;  

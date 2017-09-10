@@ -1,9 +1,8 @@
 package com.caotc.excel4j.constant;
 
-import java.util.List;
-
 import org.apache.poi.ss.usermodel.Cell;
 
+import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.ExcelUtil;
 
 public enum Direction {
@@ -14,8 +13,8 @@ public enum Direction {
 		}
 
 		@Override
-		Index getMergedRegionIndex(Cell cell) {
-			return new Index(ExcelUtil.getMergedRegion(cell).getFirstRow(),cell.getColumnIndex());
+		Index getIndex(StandardCell cell) {
+			return new Index(cell.getFirstRow(),cell.getValueCell().getColumnIndex());
 		}
 		
 		@Override
@@ -30,8 +29,8 @@ public enum Direction {
 		}
 
 		@Override
-		Index getMergedRegionIndex(Cell cell) {
-			return new Index(ExcelUtil.getMergedRegion(cell).getLastRow(),cell.getColumnIndex());
+		Index getIndex(StandardCell cell) {
+			return new Index(cell.getLastRow(),cell.getValueCell().getColumnIndex());
 		}
 		
 		@Override
@@ -46,8 +45,8 @@ public enum Direction {
 		}
 
 		@Override
-		Index getMergedRegionIndex(Cell cell) {
-			return new Index(cell.getRowIndex(),ExcelUtil.getMergedRegion(cell).getFirstColumn());
+		Index getIndex(StandardCell cell) {
+			return new Index(cell.getValueCell().getRowIndex(),cell.getFirstColumn());
 		}
 		
 		@Override
@@ -62,8 +61,8 @@ public enum Direction {
 		}
 
 		@Override
-		Index getMergedRegionIndex(Cell cell) {
-			return new Index(cell.getRowIndex(),ExcelUtil.getMergedRegion(cell).getLastColumn());
+		Index getIndex(StandardCell cell) {
+			return new Index(cell.getValueCell().getRowIndex(),cell.getLastColumn());
 		}
 		
 		@Override
@@ -71,20 +70,11 @@ public enum Direction {
 			return new Index(index.rowIndex,++index.columnIndex);
 		}
 	};
-	private static final boolean DEFAULT_MERGED_REGION_FLAG=Boolean.TRUE;
 	public abstract Direction getNegativeDirection();
 	
-	Cell getFirstCell(Cell cell,boolean mergedRegionFlag){
-		if(mergedRegionFlag){
-			cell = ExcelUtil.getFirstCell(cell);
-		}
-		return cell;
-	}
-	
-	public Cell nextCell(Cell cell,boolean mergedRegionFlag){
-		Index index=getTargetIndex(getIndex(cell, mergedRegionFlag));
-		return getFirstCell(ExcelUtil.getCellByIndex(cell.getSheet(), index.rowIndex, index.columnIndex)
-				,mergedRegionFlag);
+	public StandardCell nextCell(StandardCell cell){
+		Index index=getTargetIndex(getIndex(cell));
+		return ExcelUtil.getStandardCellByIndex(cell.getSheet(), index.rowIndex, index.columnIndex);
 	}
 	
 //	public List<Cell> nextCells(Cell cell,boolean mergedRegionFlag){
@@ -93,35 +83,15 @@ public enum Direction {
 //				,mergedRegionFlag);
 //	}
 	
-	public Cell nextCell(Cell cell){
-		return nextCell(cell,DEFAULT_MERGED_REGION_FLAG);
-	}
-	
-	public Cell getCell(Cell cell, int distance,boolean mergedRegionFlag){
+	public StandardCell getCell(StandardCell cell, int distance){
 		for(int i=0;i<distance;i++){
-			cell=nextCell(cell,mergedRegionFlag);
+			cell=nextCell(cell);
 		}
 		return cell;
 	}
 	
-	public Cell getCell(Cell cell, int distance){
-		return getCell(cell,distance,DEFAULT_MERGED_REGION_FLAG);
-	}
-	
-	abstract Index getMergedRegionIndex(Cell cell);
+	abstract Index getIndex(StandardCell cell);
 	abstract Index getTargetIndex(Index index);
-	
-	private Index getCellIndex(Cell cell){
-		return new Index(cell.getRowIndex(),cell.getColumnIndex());
-	}
-	
-	Index getIndex(Cell cell,boolean mergedRegionFlag){
-		if(mergedRegionFlag && ExcelUtil.isMergedRegion(cell)){
-			return getMergedRegionIndex(cell);
-		}else{
-			return getCellIndex(cell);
-		}
-	}
 	
 	private static class Index{
 		private Integer rowIndex;
