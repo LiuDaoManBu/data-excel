@@ -1,5 +1,7 @@
 package com.caotc.excel4j.parse.result;
 
+import java.util.Collection;
+
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,12 +26,14 @@ public class StandardCell{
 	private final Sheet sheet;
 	private final CellRangeAddress cellRangeAddress;
 	private final Cell valueCell;
+	private final Collection<Cell> cells;
 	
 	private StandardCell(Sheet sheet,CellRangeAddress cellRangeAddress) {
 		super();
 		this.sheet=sheet;
 		this.cellRangeAddress = cellRangeAddress;
 		this.valueCell=ExcelUtil.getFirstCell(sheet, cellRangeAddress);
+		this.cells=ExcelUtil.getCells(sheet, cellRangeAddress);
 	}
 	
 	private StandardCell(Cell cell) {
@@ -42,6 +46,7 @@ public class StandardCell{
 			this.cellRangeAddress = new CellRangeAddress(cell.getRowIndex(), cell.getRowIndex(), cell.getColumnIndex(), cell.getColumnIndex());
 			this.valueCell=cell;
 		}
+		this.cells=ExcelUtil.getCells(sheet, cellRangeAddress);
 	}
 	
 	public Object getValue(){
@@ -146,6 +151,10 @@ public class StandardCell{
 
 	public Cell getValueCell() {
 		return valueCell;
+	}
+
+	public Collection<Cell> getCells() {
+		return cells;
 	}
 	
 }

@@ -3,6 +3,7 @@ package com.caotc.excel4j.util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.caotc.excel4j.parse.result.StandardCell;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -296,7 +298,7 @@ public class ExcelUtil {
 	* @param columnIndex 列下标  
 	* @return 该合并单元格对象，不是则为null
 	*/  
-	public static CellRangeAddress s(Sheet sheet,int rowIndex ,int columnIndex) {  
+	public static CellRangeAddress getMergedRegion(Sheet sheet,int rowIndex ,int columnIndex) {  
 		if(sheet!=null){
 			int sheetMergeCount = sheet.getNumMergedRegions(); 
 			for (int i = 0; i < sheetMergeCount; i++) {  
@@ -308,6 +310,19 @@ public class ExcelUtil {
 		}
 		return null;  
 	}  
+	
+	public static Collection<Cell> getCells(Sheet sheet,CellRangeAddress cellRangeAddress){
+		if(sheet==null || cellRangeAddress==null){
+			return Collections.emptyList();
+		}
+		List<Cell> cells=Lists.newLinkedList();
+		for(int rowIndex=cellRangeAddress.getFirstRow();rowIndex<=cellRangeAddress.getLastRow();rowIndex++){
+			for(int columnIndex=cellRangeAddress.getFirstColumn();columnIndex<=cellRangeAddress.getLastColumn();columnIndex++){
+				cells.add(getCellByIndex(sheet, rowIndex, columnIndex));
+			}
+		}
+		return cells;
+	}
 	
 	/**  
 	* 判断传入的工作簿中是否含有合并单元格
