@@ -156,5 +156,48 @@ public class StandardCell{
 	public Collection<Cell> getCells() {
 		return cells;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cellRangeAddress == null) ? 0 : cellRangeAddress.hashCode());
+		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
+		result = prime * result + ((sheet == null) ? 0 : sheet.hashCode());
+		result = prime * result + ((valueCell == null) ? 0 : valueCell.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		StandardCell other = (StandardCell) obj;
+		if (cellRangeAddress == null) {
+			if (other.cellRangeAddress != null)
+				return false;
+		} else if (!cellRangeAddress.equals(other.cellRangeAddress))
+			return false;
+		if (cells == null) {
+			if (other.cells != null)
+				return false;
+		} else if (!cells.equals(other.cells))
+			return false;
+		if (sheet == null) {
+			if (other.sheet != null)
+				return false;
+		} else if (!sheet.equals(other.sheet))
+			return false;
+		if (valueCell == null) {
+			if (other.valueCell != null)
+				return false;
+		} else if (!valueCell.equals(other.valueCell))
+			return false;
+		return true;
+	}
 	
 }

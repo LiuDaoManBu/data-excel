@@ -12,18 +12,18 @@ import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.Lists;
 
 public class Menu{
-	private Cell cell;
+	private StandardCell cell;
 	private MenuConfig menuConfig;
 	private MenuConfig checkMenuConfig;
 	private Menu parentMenu;
 	private List<Menu> childrenMenus=Lists.newArrayList();
 	
-	public Menu(Cell cell) {
+	public Menu(StandardCell cell) {
 		super();
 		this.cell = cell;
 	}
 
-	public Menu(Cell cell, MenuConfig menuConfig) {
+	public Menu(StandardCell cell, MenuConfig menuConfig) {
 		super();
 		this.cell = cell;
 		this.menuConfig = menuConfig;
@@ -35,9 +35,9 @@ public class Menu{
 		}
 	}
 	
-	public void checkDataCell(Cell dataCell){
+	public void checkDataCell(StandardCell dataCell){
 		if(hasCheckMenuConfig()){
-			Object value=ExcelUtil.getValue(dataCell);
+			Object value=dataCell.getValue();
 //			if(!checkMenuConfig.getDataMatcher().matches(value)){
 //				StringBuffer errorMessage=new StringBuffer();
 //				errorMessage.append("工作簿").append(dataCell.getSheet().getSheetName()).append("第").append(dataCell
@@ -75,15 +75,15 @@ public class Menu{
 		}
 	}
 	
-	public Cell getDataCell(int serialNumber){
-		Cell dataCell=cell;
+	public StandardCell getDataCell(int serialNumber){
+		StandardCell dataCell=cell;
 		for(int i=1;i<=serialNumber;i++){
 			dataCell=nextDataCell(dataCell);
 		}
 		return dataCell;
 	}
 	
-	public Cell nextDataCell(Cell cell){
+	public StandardCell nextDataCell(StandardCell cell){
 		Direction direction=checkMenuConfig.getDirection();
 		if(cell==null || this.cell.equals(cell)){
 			return direction.getCell(this.cell, checkMenuConfig.getFirstDistance());
@@ -107,7 +107,7 @@ public class Menu{
 		List<Menu> childrenMenus=Lists.newArrayList();
 		if(menuConfig!=null){
 			if(menuConfig.getDynamic() || !CollectionUtils.isEmpty(menuConfig.getChildrenMenuConfigs())){
-				Cell menuCell=this.cell;
+				StandardCell menuCell=this.cell;
 				CellRangeAddress menuMergedRegion=ExcelUtil.getMergedRegion(menuCell);
 				int startRowIndex,endRowIndex,startColumnIndex,endColumnIndex;
 				if(menuMergedRegion==null){
@@ -129,7 +129,7 @@ public class Menu{
 				}
 				for(int rowIndex=startRowIndex;rowIndex<=endRowIndex;rowIndex++){
 					for(int columnIndex=startColumnIndex;columnIndex<=endColumnIndex;columnIndex++){
-						Cell cell=ExcelUtil.getCellByIndex(menuCell.getSheet(), rowIndex, columnIndex);
+						StandardCell cell=ExcelUtil.getCellByIndex(menuCell.getSheet(), rowIndex, columnIndex);
 						if(!childrenMenus.contains(cell)){
 							CellRangeAddress mergedRegion=ExcelUtil.getMergedRegion(cell);
 							if(mergedRegion==null || (cell.getRowIndex()==mergedRegion.getFirstRow() && cell.getColumnIndex()
@@ -158,17 +158,17 @@ public class Menu{
 	}
 	
 	public String getName(){
-		return cell.getStringCellValue();
+		return cell.getValueCell().getStringCellValue();
 	}
 	
 //	public String getMatchName(){
 //		return menuConfig.getMenuNameMatcher().getMatchString();
 //	}
 	
-	public Cell getCell() {
+	public StandardCell getCell() {
 		return cell;
 	}
-	public void setCell(Cell cell) {
+	public void setCell(StandardCell cell) {
 		this.cell = cell;
 	}
 	public MenuConfig getMenuConfig() {

@@ -1,12 +1,12 @@
 package com.caotc.excel4j;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
+
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.caotc.excel4j.matcher.data.type.NaturalDataType;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 class A{
 	private String id=null;
@@ -31,8 +31,11 @@ class A{
 	public String toString() {
 		return "A [id=" + id + ", values=" + values + "]";
 	}
+	public void test(){
+		System.out.println("A test");
+	}
 }
-class B{
+class B extends A{
 	private final int id;
 	private final Collection<Integer> values;
 	public B() {
@@ -44,11 +47,9 @@ class B{
 	public String toString() {
 		return "B [id=" + id + ", values=" + values + "]";
 	}
-	public int getId() {
-		return id;
-	}
-	public Collection<Integer> getValues() {
-		return values;
+	public void test(){
+		System.out.println("B test");
+		super.test();
 	}
 
 }
@@ -65,6 +66,7 @@ public class Test {
 		System.out.println(b);
 		field.set(b, Lists.newArrayList(111,123));
 		System.out.println(b);
+		b.test();
 //		Integer first=b.getValues().iterator().next();
 //		System.out.println(first);
 //		System.out.println(ClassUtils.getAllFields(B.class).stream().collect(Collectors.toMap(Field::getName, Function.identity())));
@@ -76,6 +78,7 @@ public class Test {
 //		System.out.println(jsonObject);
 //		Class<?> type=null;
 //		System.out.println(getValue(type));
+		System.out.println(new CellRangeAddress(-1,-1,0,0));
 	}
 	
 	public static <T> T getValue(Class<T> type) {

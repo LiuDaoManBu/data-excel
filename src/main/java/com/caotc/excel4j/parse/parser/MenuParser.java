@@ -1,8 +1,8 @@
 package com.caotc.excel4j.parse.parser;
 
-import com.caotc.excel4j.matcher.usermodel.CellMatcher;
+import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 
 public class MenuParser {
 	private SheetParser sheetParser;
-	private CellMatcher menuMatcher;
+	private StandardCellMatcher menuMatcher;
 }

@@ -7,13 +7,13 @@ import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.data.value.StringValueMatcher.StringValueMatcherType;
-import com.caotc.excel4j.matcher.usermodel.CellMatcher;
+import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 
 public class MenuConfig{
 	private static final StringValueMatcherType DEFAULT_STRING_MATCH_TYPE=StringValueMatcherType.EQUALS;
 	private static final Boolean DEFAULT_MUST=Boolean.TRUE;
 	//菜单匹配器
-	private CellMatcher menuMatcher;
+	private StandardCellMatcher menuMatcher;
 	private DataMatcher dataMatcher;
 	//数据单元格相对于菜单的方向
 	private Direction direction;	
@@ -26,10 +26,10 @@ public class MenuConfig{
 	private String fieldName;
 	private MenuConfig parentMenuConfig;
 	private Collection<MenuConfig> childrenMenuConfigs;
-	public CellMatcher getMenuMatcher() {
+	public StandardCellMatcher getMenuMatcher() {
 		return menuMatcher;
 	}
-	public void setMenuMatcher(CellMatcher menuMatcher) {
+	public void setMenuMatcher(StandardCellMatcher menuMatcher) {
 		this.menuMatcher = menuMatcher;
 	}
 	public DataMatcher getDataMatcher() {
