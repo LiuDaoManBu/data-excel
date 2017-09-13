@@ -1,52 +1,66 @@
 package com.caotc.excel4j.parse.result;
 
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 
-import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellRangeAddressBase;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.util.LittleEndianOutput;
+import org.apache.poi.util.Removal;
 
 import com.caotc.excel4j.util.ExcelUtil;
 
-public class StandardCell{
+public class StandardCell extends CellRangeAddress implements Cell{
 	private static final int ONE=1;
 	
-	public static final StandardCell valueOf(Sheet sheet,CellRangeAddress cellRangeAddress){
+	public static StandardCell valueOf(Sheet sheet,CellRangeAddress cellRangeAddress){
+		if(sheet==null || cellRangeAddress==null){
+			return null;
+		}
 		return new StandardCell(sheet, cellRangeAddress);
 	}
 	
-	public static final StandardCell valueOf(Cell cell){
+	public static StandardCell valueOf(Cell cell){
+		if(cell==null){
+			return null;
+		}
+		
+		if(ExcelUtil.isMergedRegion(cell)){
+			return valueOf(cell.getSheet(),ExcelUtil.getMergedRegion(cell));
+		}
 		return new StandardCell(cell);
 	}
 	
 	private final Sheet sheet;
-	private final CellRangeAddress cellRangeAddress;
 	private final Cell valueCell;
 	private final Collection<Cell> cells;
 	
 	private StandardCell(Sheet sheet,CellRangeAddress cellRangeAddress) {
-		super();
+		super(cellRangeAddress.getFirstRow(),cellRangeAddress.getLastRow(),cellRangeAddress.getFirstColumn(),cellRangeAddress.getLastColumn());
+		if(sheet==null){
+			throw new IllegalArgumentException("sheet can not be null");
+		}
 		this.sheet=sheet;
-		this.cellRangeAddress = cellRangeAddress;
-		this.valueCell=ExcelUtil.getFirstCell(sheet, cellRangeAddress);
-		this.cells=ExcelUtil.getCells(sheet, cellRangeAddress);
+		//TODO 是否需要出于安全性考虑复写一份私有方法在本类?
+		this.valueCell=ExcelUtil.getFirstCell(sheet, this);
+		this.cells=ExcelUtil.getCells(sheet, this);
 	}
 	
 	private StandardCell(Cell cell) {
-		super();
+		super(cell.getRowIndex(), cell.getRowIndex(), cell.getColumnIndex(), cell.getColumnIndex());
 		this.sheet=cell.getSheet();
-		if(ExcelUtil.isMergedRegion(cell)){
-			this.cellRangeAddress=ExcelUtil.getMergedRegion(cell);
-			this.valueCell=ExcelUtil.getFirstCell(sheet, cellRangeAddress);
-		}else{
-			this.cellRangeAddress = new CellRangeAddress(cell.getRowIndex(), cell.getRowIndex(), cell.getColumnIndex(), cell.getColumnIndex());
-			this.valueCell=cell;
-		}
-		this.cells=ExcelUtil.getCells(sheet, cellRangeAddress);
+		this.valueCell=cell;
+		//TODO 是否需要出于安全性考虑复写一份私有方法在本类?
+		this.cells=ExcelUtil.getCells(sheet, this);
 	}
 	
 	public Object getValue(){
@@ -54,99 +68,172 @@ public class StandardCell{
 	}
 	
 	public boolean isMergedRegion(){
-		return cellRangeAddress.getNumberOfCells()>ONE;
+		return getNumberOfCells()>ONE;
 	}
+
+	//delegate Cell methods start
+	//TODO 是否需要为了防止误用而抛错?
+	public int getColumnIndex() {
+		return valueCell.getColumnIndex();
+	}
+
+	//TODO 是否需要为了防止误用而抛错?
+	public int getRowIndex() {
+		return valueCell.getRowIndex();
+	}
+
+	//TODO 是否需要为了防止误用而抛错?
+	public Row getRow() {
+		return valueCell.getRow();
+	}
+
+    @SuppressWarnings("deprecation")
+	@Deprecated
+    @Removal(version="1.0")
+	public void setCellType(int cellType) {
+    	cells.forEach(cell->cell.setCellType(cellType));
+	}
+
+	public void setCellType(CellType cellType) {
+		cells.forEach(cell->cell.setCellType(cellType));
+	}
+
+	@Deprecated
+    @Removal(version="1.0")
+	public int getCellType() {
+		return valueCell.getCellType();
+	}
+
+	public CellType getCellTypeEnum() {
+		return valueCell.getCellTypeEnum();
+	}
+
+	@Deprecated
+    @Removal(version="1.0")
+	public int getCachedFormulaResultType() {
+		return valueCell.getCachedFormulaResultType();
+	}
+
+	public CellType getCachedFormulaResultTypeEnum() {
+		return valueCell.getCachedFormulaResultTypeEnum();
+	}
+
+	public void setCellValue(double value) {
+		valueCell.setCellValue(value);
+	}
+
+	public void setCellValue(Date value) {
+		valueCell.setCellValue(value);
+	}
+
+	public void setCellValue(Calendar value) {
+		valueCell.setCellValue(value);
+	}
+
+	public void setCellValue(RichTextString value) {
+		valueCell.setCellValue(value);
+	}
+
+	public void setCellValue(String value) {
+		valueCell.setCellValue(value);
+	}
+
+	public void setCellFormula(String formula) throws FormulaParseException {
+		valueCell.setCellFormula(formula);
+	}
+
+	public String getCellFormula() {
+		return valueCell.getCellFormula();
+	}
+
+	public double getNumericCellValue() {
+		return valueCell.getNumericCellValue();
+	}
+
+	public Date getDateCellValue() {
+		return valueCell.getDateCellValue();
+	}
+
+	public RichTextString getRichStringCellValue() {
+		return valueCell.getRichStringCellValue();
+	}
+
+	public String getStringCellValue() {
+		return valueCell.getStringCellValue();
+	}
+
+	public void setCellValue(boolean value) {
+		valueCell.setCellValue(value);
+	}
+
+	public void setCellErrorValue(byte value) {
+		valueCell.setCellErrorValue(value);
+	}
+
+	public boolean getBooleanCellValue() {
+		return valueCell.getBooleanCellValue();
+	}
+
+	public byte getErrorCellValue() {
+		return valueCell.getErrorCellValue();
+	}
+
+	public void setCellStyle(CellStyle style) {
+		cells.forEach(cell->cell.setCellStyle(style));
+	}
+
+	public CellStyle getCellStyle() {
+		return valueCell.getCellStyle();
+	}
+
+	public void setAsActiveCell() {
+		//TODO 为合并单元格时是否会选中整个合并单元格?
+		valueCell.setAsActiveCell();
+	}
+
+	public CellAddress getAddress() {
+		return valueCell.getAddress();
+	}
+
+	public void setCellComment(Comment comment) {
+		//TODO 为合并单元格时是否需要为每个单元格都分配注释?
+		valueCell.setCellComment(comment);
+	}
+
+	public Comment getCellComment() {
+		return valueCell.getCellComment();
+	}
+
+	public void removeCellComment() {
+		//TODO 为合并单元格时是否需要为每个单元格都删除注释?
+		valueCell.removeCellComment();
+	}
+
+	public Hyperlink getHyperlink() {
+		return valueCell.getHyperlink();
+	}
+
+	public void setHyperlink(Hyperlink link) {
+		//TODO 为合并单元格时是否需要为每个单元格都分配超链接?
+		valueCell.setHyperlink(link);
+	}
+
+	public void removeHyperlink() {
+		//TODO 为合并单元格时是否需要为每个单元格都删除超链接?
+		valueCell.removeHyperlink();
+	}
+
+	public CellRangeAddress getArrayFormulaRange() {
+		return valueCell.getArrayFormulaRange();
+	}
+
+	public boolean isPartOfArrayFormulaGroup() {
+		return valueCell.isPartOfArrayFormulaGroup();
+	}
+	//delegate Cell methods end
 	
-	public boolean containsColumn(int colInd) {
-		return cellRangeAddress.containsColumn(colInd);
-	}
-
-	public boolean containsRow(int rowInd) {
-		return cellRangeAddress.containsRow(rowInd);
-	}
-
-	public String formatAsString() {
-		return cellRangeAddress.formatAsString();
-	}
-
-	public String formatAsString(String sheetName, boolean useAbsoluteAddress) {
-		return cellRangeAddress.formatAsString(sheetName, useAbsoluteAddress);
-	}
-
-	public final int getFirstColumn() {
-		return cellRangeAddress.getFirstColumn();
-	}
-
-	public final int getFirstRow() {
-		return cellRangeAddress.getFirstRow();
-	}
-
-	public final int getLastColumn() {
-		return cellRangeAddress.getLastColumn();
-	}
-
-	public final int getLastRow() {
-		return cellRangeAddress.getLastRow();
-	}
-
-	public int getNumberOfCells() {
-		return cellRangeAddress.getNumberOfCells();
-	}
-
-	public boolean intersects(CellRangeAddressBase other) {
-		return cellRangeAddress.intersects(other);
-	}
-
-	public final boolean isFullColumnRange() {
-		return cellRangeAddress.isFullColumnRange();
-	}
-
-	public final boolean isFullRowRange() {
-		return cellRangeAddress.isFullRowRange();
-	}
-
-	public boolean isInRange(Cell cell) {
-		return cellRangeAddress.isInRange(cell);
-	}
-
-	public boolean isInRange(CellReference ref) {
-		return cellRangeAddress.isInRange(ref);
-	}
-
-	public boolean isInRange(int rowInd, int colInd) {
-		return cellRangeAddress.isInRange(rowInd, colInd);
-	}
-
-	public void serialize(LittleEndianOutput out) {
-		cellRangeAddress.serialize(out);
-	}
-
-	public final void setFirstColumn(int firstCol) {
-		cellRangeAddress.setFirstColumn(firstCol);
-	}
-
-	public final void setFirstRow(int firstRow) {
-		cellRangeAddress.setFirstRow(firstRow);
-	}
-
-	public final void setLastColumn(int lastCol) {
-		cellRangeAddress.setLastColumn(lastCol);
-	}
-
-	public final void setLastRow(int lastRow) {
-		cellRangeAddress.setLastRow(lastRow);
-	}
-
-	public void validate(SpreadsheetVersion ssVersion) {
-		cellRangeAddress.validate(ssVersion);
-	}
-
 	public Sheet getSheet() {
 		return sheet;
-	}
-
-	public CellRangeAddress getCellRangeAddress() {
-		return cellRangeAddress;
 	}
 
 	public Cell getValueCell() {
@@ -160,8 +247,7 @@ public class StandardCell{
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((cellRangeAddress == null) ? 0 : cellRangeAddress.hashCode());
+		int result = super.hashCode();
 		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
 		result = prime * result + ((sheet == null) ? 0 : sheet.hashCode());
 		result = prime * result + ((valueCell == null) ? 0 : valueCell.hashCode());
@@ -172,16 +258,11 @@ public class StandardCell{
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		StandardCell other = (StandardCell) obj;
-		if (cellRangeAddress == null) {
-			if (other.cellRangeAddress != null)
-				return false;
-		} else if (!cellRangeAddress.equals(other.cellRangeAddress))
-			return false;
 		if (cells == null) {
 			if (other.cells != null)
 				return false;
@@ -199,5 +280,4 @@ public class StandardCell{
 			return false;
 		return true;
 	}
-	
 }

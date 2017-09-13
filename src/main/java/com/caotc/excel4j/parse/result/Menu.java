@@ -129,7 +129,7 @@ public class Menu{
 				}
 				for(int rowIndex=startRowIndex;rowIndex<=endRowIndex;rowIndex++){
 					for(int columnIndex=startColumnIndex;columnIndex<=endColumnIndex;columnIndex++){
-						StandardCell cell=ExcelUtil.getCellByIndex(menuCell.getSheet(), rowIndex, columnIndex);
+						Cell cell=ExcelUtil.getCellByIndex(menuCell.getSheet(), rowIndex, columnIndex);
 						if(!childrenMenus.contains(cell)){
 							CellRangeAddress mergedRegion=ExcelUtil.getMergedRegion(cell);
 							if(mergedRegion==null || (cell.getRowIndex()==mergedRegion.getFirstRow() && cell.getColumnIndex()

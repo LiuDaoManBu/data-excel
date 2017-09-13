@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
@@ -249,22 +250,21 @@ public class ExcelUtil {
 //		 return javaDatas;
 //	 }
 	
-	/**
-	 * 在传入的工作簿中根据行坐标和列坐标获得单元格
-	 * @author caotc
-	 * @date 2016.4.24
-	 * @param sheet 工作簿
-	 * @param rowIndex 行坐标
-	 * @param columnIndex 列坐标
-	 * @return 单元格，不存在则为null
-	 */
-	public static Cell getCellByIndex(Sheet sheet,int rowIndex,int columnIndex) {
+	public static Cell getCellByIndex(Sheet sheet,int rowIndex,int columnIndex,MissingCellPolicy policy) {
 		Row row=sheet.getRow(rowIndex);
 		if(row==null){
 			row=sheet.createRow(rowIndex);
 		}
-		Cell cell=row.getCell(columnIndex,MissingCellPolicy.CREATE_NULL_AS_BLANK);
-		return cell;
+		
+		return row.getCell(columnIndex,policy);
+	}
+	
+	public static Cell getCellByIndex(Sheet sheet,int rowIndex,int columnIndex) {
+		return getCellByIndex(sheet,rowIndex,columnIndex,MissingCellPolicy.CREATE_NULL_AS_BLANK);
+	}
+	
+	public static StandardCell getStandardCellByIndex(Sheet sheet,int rowIndex,int columnIndex,MissingCellPolicy policy) {
+		return StandardCell.valueOf(getCellByIndex(sheet,rowIndex,columnIndex,policy));
 	}
 	
 	public static StandardCell getStandardCellByIndex(Sheet sheet,int rowIndex,int columnIndex) {
@@ -703,19 +703,7 @@ public class ExcelUtil {
 	* @return 列索引
 	*/
 	public static int columnToIndex(String column) {
-		if (!column.matches("[A-Z]+")) {
-			try {
-				throw new Exception("Invalid parameter");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		int index = 0;
-		char[] chars = column.toUpperCase().toCharArray();
-		for (int i = 0; i < chars.length; i++) {
-			index += ((int) chars[i] - (int) 'A' + 1)* (int) Math.pow(26, chars.length - i - 1);
-		}
-		return index;
+		return CellReference.convertColStringToIndex(column);
 	}
 	
 	/**
@@ -726,22 +714,6 @@ public class ExcelUtil {
 	* @return 列号
 	*/
 	public static String indexToColumn(int index) {
-		if (index <= 0) {
-			try {
-				throw new Exception("Invalid parameter");
-			} catch (Exception e) {
-				e.printStackTrace();                
-			}         
-		}         
-		index--;         
-		String column = "";         
-		do {
-			if (column.length() > 0) {
-				index--;
-			}
-			column = ((char) (index % 26 + (int) 'A')) + column;
-			index = (int) ((index - index % 26) / 26);
-		} while (index > 0);
-		return column;
+		return CellReference.convertNumToColString(index);
 	}
 }
