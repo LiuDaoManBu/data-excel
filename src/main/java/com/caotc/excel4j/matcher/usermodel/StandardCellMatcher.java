@@ -9,17 +9,16 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.MatcherUtil;
 
 public class StandardCellMatcher {
-    private DataMatcher valueMatcher;
-    private Collection<ComparableValueMatcher<Integer>> rowNumberMatchers;
-    private Collection<ComparableValueMatcher<Integer>> columnNumberMatchers;
-    private Collection<StringMatcher> columnStringMatchers;
+  private DataMatcher valueMatcher;
+  private Collection<ComparableValueMatcher<Integer>> rowNumberMatchers;
+  private Collection<ComparableValueMatcher<Integer>> columnNumberMatchers;
+  private Collection<StringMatcher> columnStringMatchers;
 
-    public boolean matches(StandardCell cell) {
-        return valueMatcher.matches(cell.getValue())
-                && MatcherUtil.allMatches(rowNumberMatchers, cell.getValueCell().getRowIndex())
-                && MatcherUtil.allMatches(columnNumberMatchers,
-                        cell.getValueCell().getColumnIndex())
-                && MatcherUtil.allMatches(columnStringMatchers,
-                        CellReference.convertNumToColString(cell.getValueCell().getColumnIndex()));
-    }
+  public boolean matches(StandardCell cell) {
+    return valueMatcher.matches(cell.getValue())
+        && MatcherUtil.allMatches(rowNumberMatchers, cell.getValueCell().getRowIndex())
+        && MatcherUtil.allMatches(columnNumberMatchers, cell.getValueCell().getColumnIndex())
+        && MatcherUtil.allMatches(columnStringMatchers,
+            CellReference.convertNumToColString(cell.getValueCell().getColumnIndex()));
+  }
 }
