@@ -1,8 +1,6 @@
 package com.caotc.excel4j.expression;
 
-import java.io.OutputStream;
 import java.util.Map;
-import com.caotc.excel4j.expression.constant.CodeByteVersion;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Options;
 
@@ -14,22 +12,6 @@ public class ExpressionEngine {
 
   public static <T> T getOption(Options opt) {
     return AviatorEvaluator.getOption(opt);
-  }
-
-  public static OutputStream getTraceOutputStream() {
-    return AviatorEvaluator.getTraceOutputStream();
-  }
-
-  public static void setTraceOutputStream(OutputStream traceOutputStream) {
-    AviatorEvaluator.setTraceOutputStream(traceOutputStream);
-  }
-
-  public static CodeByteVersion getCodeByteVersion() {
-    return CodeByteVersion.valueOf(AviatorEvaluator.BYTECODE_VER);
-  }
-
-  public static void setCodeByteVersion(CodeByteVersion version) {
-    AviatorEvaluator.setBYTECODE_VER(version.getValue());
   }
 
   public static void clearExpressionCache() {
