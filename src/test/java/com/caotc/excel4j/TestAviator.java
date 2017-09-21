@@ -1,7 +1,7 @@
 package com.caotc.excel4j;
 
 import com.caotc.excel4j.script.constant.Option;
-import com.caotc.excel4j.script.constant.Type;
+import com.caotc.excel4j.script.constant.ScriptType;
 
 public class TestAviator {
 

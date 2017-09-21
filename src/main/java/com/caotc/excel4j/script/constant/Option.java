@@ -6,16 +6,16 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Options;
 
 public enum Option {
-  DEFAULT_DECIMAL_TYPE(Type.DOUBLE) {
+  DEFAULT_DECIMAL_TYPE(ScriptType.DOUBLE) {
     @Override
     public boolean isValidValue(Object val) {
-      return val instanceof Type && (Type.DOUBLE.equals(val) || Type.DECIMAL.equals(val));
+      return val instanceof ScriptType && (ScriptType.DOUBLE.equals(val) || ScriptType.DECIMAL.equals(val));
     }
 
     @Override
     void doSetValue(Object val) {
       AviatorEvaluator.setOption(Options.ALWAYS_USE_DOUBLE_AS_DECIMAL,
-          Type.DECIMAL.equals((Type) val));
+          ScriptType.DECIMAL.equals((ScriptType) val));
     }
   },
   MATH_CONTEXT(MathContext.DECIMAL128) {
