@@ -13,7 +13,7 @@ import com.googlecode.aviator.runtime.type.AviatorFunction;
 import com.googlecode.aviator.runtime.type.AviatorObject;
 import com.googlecode.aviator.runtime.type.AviatorType;
 
-public class AviatorTypeUtil {
+class AviatorTypeUtil {
   public static ScriptFunction to(AviatorFunction function) {
     return AviatorScriptFunction.to(function);
   }
@@ -25,7 +25,7 @@ public class AviatorTypeUtil {
   public static ScriptClassLoader to(AviatorClassLoader classLoader) {
     return AviatorScriptClassLoader.to(classLoader);
   }
-  
+
   public static ScriptExpression to(com.googlecode.aviator.Expression expression) {
     return AviatorScriptExpression.to(expression);
   }
@@ -926,8 +926,8 @@ public class AviatorTypeUtil {
       this.classLoader = classLoader;
     }
   }
-  
-  private static class AviatorScriptExpression implements Expression,ScriptExpression {
+
+  private static class AviatorScriptExpression implements Expression, ScriptExpression {
     public static AviatorScriptExpression to(Expression expression) {
       return new AviatorScriptExpression(expression);
     }
