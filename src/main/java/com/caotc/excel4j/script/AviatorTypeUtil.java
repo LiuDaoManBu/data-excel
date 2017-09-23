@@ -7,6 +7,8 @@ import com.caotc.excel4j.script.constant.ScriptType;
 import com.caotc.excel4j.script.expression.ScriptExpression;
 import com.caotc.excel4j.script.runtime.function.ScriptFunction;
 import com.caotc.excel4j.script.runtime.type.ScriptObject;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.googlecode.aviator.Expression;
 import com.googlecode.aviator.parser.AviatorClassLoader;
 import com.googlecode.aviator.runtime.type.AviatorFunction;
@@ -14,6 +16,24 @@ import com.googlecode.aviator.runtime.type.AviatorObject;
 import com.googlecode.aviator.runtime.type.AviatorType;
 
 class AviatorTypeUtil {
+  private static final BiMap<ScriptType, AviatorType> SCRIPT_TYPE_TO_AVIATOR_TYPES =
+      ImmutableBiMap.<ScriptType, AviatorType>builder().put(ScriptType.DOUBLE, AviatorType.Double)
+          .put(ScriptType.DECIMAL, AviatorType.Decimal).put(ScriptType.LONG, AviatorType.Long)
+          .put(ScriptType.STRING, AviatorType.String).put(ScriptType.JAVATYPE, AviatorType.JavaType)
+          .put(ScriptType.BOOLEAN, AviatorType.Boolean).put(ScriptType.PATTERN, AviatorType.Pattern)
+          .put(ScriptType.Nil, AviatorType.Nil).put(ScriptType.METHOD, AviatorType.Method)
+          .put(ScriptType.BIGINT, AviatorType.BigInt).build();
+  private static final Map<AviatorType, ScriptType> AVIATOR_TYPE_TO_SCRIPT_TYPES =
+      SCRIPT_TYPE_TO_AVIATOR_TYPES.inverse();
+
+  public static ScriptType to(AviatorType aviatorType) {
+    return AVIATOR_TYPE_TO_SCRIPT_TYPES.get(aviatorType);
+  }
+
+  public static AviatorType to(ScriptType scriptType) {
+    return SCRIPT_TYPE_TO_AVIATOR_TYPES.get(scriptType);
+  }
+
   public static ScriptFunction to(AviatorFunction function) {
     return AviatorScriptFunction.to(function);
   }
@@ -65,7 +85,7 @@ class AviatorTypeUtil {
 
     @Override
     public AviatorType getAviatorType() {
-      return scriptObject.getScriptType().to();
+      return AviatorTypeUtil.to(scriptObject.getScriptType());
     }
 
     @Override
@@ -199,7 +219,7 @@ class AviatorTypeUtil {
 
     @Override
     public ScriptType getScriptType() {
-      return ScriptType.from(aviatorObject.getAviatorType());
+      return AviatorTypeUtil.to(aviatorObject.getAviatorType());
     }
 
     @Override
