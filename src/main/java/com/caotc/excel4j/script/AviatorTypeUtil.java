@@ -67,12 +67,12 @@ class AviatorTypeUtil {
   }
 
   private static class ScriptAviatorObject extends AviatorObject {
-    private final ScriptObject scriptObject;
-
     private static ScriptAviatorObject to(ScriptObject scriptObject) {
       return new ScriptAviatorObject(scriptObject);
     }
 
+    private final ScriptObject scriptObject;
+    
     private ScriptAviatorObject(ScriptObject scriptObject) {
       super();
       this.scriptObject = scriptObject;
@@ -205,12 +205,12 @@ class AviatorTypeUtil {
       return new AviatorScriptObject(aviatorObject);
     }
 
+    private final AviatorObject aviatorObject;
+    
     private AviatorScriptObject(AviatorObject aviatorObject) {
       super();
       this.aviatorObject = aviatorObject;
     }
-
-    private final AviatorObject aviatorObject;
 
     @Override
     public int compare(ScriptObject other, Map<String, Object> env) {
@@ -334,12 +334,12 @@ class AviatorTypeUtil {
   }
 
   private static class ScriptAviatorFunction implements ScriptFunction, AviatorFunction {
-    private ScriptFunction scriptFunction;
-
     public static ScriptAviatorFunction to(ScriptFunction expressionFunction) {
       return new ScriptAviatorFunction(expressionFunction);
     }
 
+    private final ScriptFunction scriptFunction;
+    
     private ScriptAviatorFunction(ScriptFunction expressionFunction) {
       super();
       this.scriptFunction = expressionFunction;
@@ -608,7 +608,7 @@ class AviatorTypeUtil {
       return new AviatorScriptFunction(aviatorFunction);
     }
 
-    private AviatorFunction aviatorFunction;
+    private final AviatorFunction aviatorFunction;
 
     private AviatorScriptFunction(AviatorFunction aviatorFunction) {
       this.aviatorFunction = aviatorFunction;
@@ -939,7 +939,7 @@ class AviatorTypeUtil {
     }
 
     @SuppressWarnings("unused")
-    private AviatorClassLoader classLoader;
+    private final AviatorClassLoader classLoader;
 
     private AviatorScriptClassLoader(AviatorClassLoader classLoader) {
       super(classLoader.getParent());
@@ -952,7 +952,7 @@ class AviatorTypeUtil {
       return new AviatorScriptExpression(expression);
     }
 
-    private Expression expression;
+    private final Expression expression;
 
     private AviatorScriptExpression(Expression expression) {
       super();
