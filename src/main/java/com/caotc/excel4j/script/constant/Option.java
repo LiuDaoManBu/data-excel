@@ -9,7 +9,8 @@ public enum Option {
   DEFAULT_DECIMAL_TYPE(ScriptType.DOUBLE) {
     @Override
     public boolean isValidValue(Object val) {
-      return val instanceof ScriptType && (ScriptType.DOUBLE.equals(val) || ScriptType.DECIMAL.equals(val));
+      return val instanceof ScriptType
+          && (ScriptType.DOUBLE.equals(val) || ScriptType.DECIMAL.equals(val));
     }
 
     @Override
@@ -31,7 +32,7 @@ public enum Option {
   };
   private static final ConcurrentHashMap<Option, Object> OPTIONS =
       new ConcurrentHashMap<Option, Object>();
-  
+
   private Option(Object defaultValue) {
     this.defaultValue = defaultValue;
     doSetValue(defaultValue);
