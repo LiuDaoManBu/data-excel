@@ -1,10 +1,11 @@
 package com.caotc.excel4j;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
-import org.apache.poi.ss.util.CellRangeAddress;
-
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.matcher.data.type.NaturalDataType;
 import com.google.common.collect.Lists;
 
@@ -78,7 +79,8 @@ public class Test {
 //		System.out.println(jsonObject);
 //		Class<?> type=null;
 //		System.out.println(getValue(type));
-		System.out.println(new CellRangeAddress(-1,-1,0,0));
+		String jsonString=" {\"products\":[{\"id\":\"\",\"socialCreditCode\":\"133423509\",\"productCode\":\"40494\",\"reportDate\":\"2017-01-01\",\"reportType\":\"year\",\"productName\":\"打印机\",\"currentCapicityNum\":\"\",\"currentCapicityUnit\":\"\",\"currentOutputNum\":\"\",\"currentOutputUnit\":\"TCE/PC\",\"unitConsumptionNum\":\"\",\"unitConsumptionUnit\":\"\"}],\"issueId\":\"1\"}";
+		System.out.println(JSONObject.parse(jsonString));
 	}
 	
 	public static <T> T getValue(Class<T> type) {
