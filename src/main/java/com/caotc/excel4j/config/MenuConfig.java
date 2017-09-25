@@ -15,13 +15,11 @@ public class MenuConfig {
   // 菜单匹配器
   private StandardCellMatcher menuMatcher;
   private DataMatcher dataMatcher;
-  // 数据单元格相对于菜单的方向
-  private Direction direction;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private Integer firstDistance;
   private LoadType menuDataLoadType;
   private MenuNecessity menuNecessity;
-  private LoadType menuChildrenLoadType;
+  private LoadType childrenMenuLoadType;
   // 属性名字
   private String fieldName;
   private MenuConfig parentMenuConfig;
@@ -41,14 +39,6 @@ public class MenuConfig {
 
   public void setDataMatcher(DataMatcher dataMatcher) {
     this.dataMatcher = dataMatcher;
-  }
-
-  public Direction getDirection() {
-    return direction;
-  }
-
-  public void setDirection(Direction direction) {
-    this.direction = direction;
   }
 
   public Integer getFirstDistance() {
@@ -83,5 +73,28 @@ public class MenuConfig {
     this.childrenMenuConfigs = childrenMenuConfigs;
   }
 
+  public LoadType getMenuDataLoadType() {
+    return menuDataLoadType;
+  }
+
+  public void setMenuDataLoadType(LoadType menuDataLoadType) {
+    this.menuDataLoadType = menuDataLoadType;
+  }
+
+  public MenuNecessity getMenuNecessity() {
+    return menuNecessity;
+  }
+
+  public void setMenuNecessity(MenuNecessity menuNecessity) {
+    this.menuNecessity = menuNecessity;
+  }
+
+  public LoadType getChildrenMenuLoadType() {
+    return childrenMenuLoadType;
+  }
+
+  public void setChildrenMenuLoadType(LoadType childrenMenuLoadType) {
+    this.childrenMenuLoadType = childrenMenuLoadType;
+  }
 
 }

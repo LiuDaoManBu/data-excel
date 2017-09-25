@@ -106,24 +106,24 @@ public class SheetParseResult {
     return result;
   }
 
-  public Menu addMenu(Cell cell) {
+  public Menu addMenu(StandardCell cell) {
     Menu menu = new Menu(cell);
     addMenu(menu);
     return menu;
   }
 
-  public Menu addMenu(Cell cell, MenuConfig menuConfig) {
+  public Menu addMenu(StandardCell cell, MenuConfig menuConfig) {
     Menu menu = new Menu(cell, menuConfig);
     addMenu(menu);
     return menu;
   }
 
   public void findMenus() {
-    finParentMenus();
+    loadTopMenus();
     findChildrenMenus();
   }
 
-  public void finParentMenus() {
+  public void loadTopMenus() {
     for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
       Row row = sheet.getRow(rowIndex);
       for (int columnIndex = row.getFirstCellNum(); columnIndex < row

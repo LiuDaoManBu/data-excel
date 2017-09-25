@@ -2,17 +2,15 @@ package com.caotc.excel4j.parse.result;
 
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.util.CellRangeAddress;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
-import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.Lists;
 
 public class Menu {
   private StandardCell cell;
   private MenuConfig menuConfig;
   private MenuConfig checkMenuConfig;
+  private Table table;
   private Menu parentMenu;
   private List<Menu> childrenMenus = Lists.newArrayList();
 
@@ -35,6 +33,7 @@ public class Menu {
 
   public void checkDataCell(StandardCell dataCell) {
     if (hasCheckMenuConfig()) {
+      //TODO
       Object value = dataCell.getValue();
       // if(!checkMenuConfig.getDataMatcher().matches(value)){
       // StringBuffer errorMessage=new StringBuffer();
@@ -102,7 +101,7 @@ public class Menu {
   }
 
   public void loadChildrenMenus() {
-    
+    getCheckMenuConfig().getChildrenMenuLoadType().loadChildren(this);
   }
 
   public void addChildrenMenu(Menu childrenMenu) {
@@ -140,6 +139,14 @@ public class Menu {
 
   public Menu getParentMenu() {
     return parentMenu;
+  }
+
+  public Table getTable() {
+    return table;
+  }
+
+  public void setTable(Table table) {
+    this.table = table;
   }
 
   public void setParentMenu(Menu parentMenu) {
