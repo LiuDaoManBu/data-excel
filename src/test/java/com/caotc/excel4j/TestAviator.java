@@ -1,9 +1,7 @@
 package com.caotc.excel4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.googlecode.aviator.AviatorEvaluator;
-import com.googlecode.aviator.Expression;
+import com.caotc.excel4j.script.constant.Option;
+import com.caotc.excel4j.script.constant.ScriptType;
 
 public class TestAviator {
 
@@ -16,11 +14,5 @@ public class TestAviator {
 //    // 执行表达式
 //    Boolean result = (Boolean) compiledExp.execute(env);
 //    System.out.println(result);  // false  
-    
-    System.out.println(test(false));
-  }
-  
-  public static boolean test(Object val) {
-    return val instanceof Boolean;
   }
 }
