@@ -101,80 +101,26 @@ public class Menu {
     this.checkMenuConfig = checkMenuConfig;
   }
 
-  public List<Menu> findChildrenMenus() {
-    List<Menu> childrenMenus = Lists.newArrayList();
-    if (menuConfig != null) {
-      if (menuConfig.getDynamic()
-          || !CollectionUtils.isEmpty(menuConfig.getChildrenMenuConfigs())) {
-        StandardCell menuCell = this.cell;
-        CellRangeAddress menuMergedRegion = ExcelUtil.getMergedRegion(menuCell);
-        int startRowIndex, endRowIndex, startColumnIndex, endColumnIndex;
-        if (menuMergedRegion == null) {
-          startRowIndex = menuCell.getRowIndex();
-          endRowIndex = menuCell.getRowIndex();
-          startColumnIndex = menuCell.getColumnIndex();
-          endColumnIndex = menuCell.getColumnIndex();
-        } else {
-          startRowIndex = menuMergedRegion.getFirstRow();
-          endRowIndex = menuMergedRegion.getLastRow();
-          startColumnIndex = menuMergedRegion.getFirstColumn();
-          endColumnIndex = menuMergedRegion.getLastColumn();
-        }
-        switch (menuConfig.getDirection()) {
-          case TOP:
-            startRowIndex--;
-            endRowIndex--;
-            break;
-          case BOTTOM:
-            startRowIndex++;
-            endRowIndex++;
-            break;
-          case LEFT:
-            startColumnIndex--;
-            endColumnIndex--;
-            break;
-          default:
-            startColumnIndex++;
-            endColumnIndex++;
-            break;
-        }
-        for (int rowIndex = startRowIndex; rowIndex <= endRowIndex; rowIndex++) {
-          for (int columnIndex = startColumnIndex; columnIndex <= endColumnIndex; columnIndex++) {
-            Cell cell = ExcelUtil.getCellByIndex(menuCell.getSheet(), rowIndex, columnIndex);
-            if (!childrenMenus.contains(cell)) {
-              CellRangeAddress mergedRegion = ExcelUtil.getMergedRegion(cell);
-              if (mergedRegion == null || (cell.getRowIndex() == mergedRegion.getFirstRow()
-                  && cell.getColumnIndex() == mergedRegion.getFirstColumn())) {
-                Menu childrenMenu = null;
-                // for(MenuConfig childrenMenuConfig:menuConfig.getChildrenMenuConfigs()){
-                // if(childrenMenuConfig.getMenuNameMatcher().matches(ExcelUtil.getStringValue(cell))){
-                // childrenMenu=new Menu(cell,childrenMenuConfig);
-                // }
-                // }
-                if (childrenMenu == null && menuConfig.getDynamic()) {
-                  childrenMenu = new Menu(cell);
-                }
-                if (childrenMenu != null) {
-                  childrenMenu.setParentMenu(this);
-                  childrenMenus.add(childrenMenu);
-                  childrenMenus.addAll(childrenMenu.findChildrenMenus());
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return childrenMenus;
+  public void loadChildrenMenus() {
+    
   }
 
+  public void addChildrenMenu(Menu childrenMenu) {
+    childrenMenus.add(childrenMenu);
+  }
+  
+  public boolean hasChildrenMenu(Menu childrenMenu) {
+    return childrenMenus.contains(childrenMenu);
+  }
+  
+  public boolean hasChildrenMenu(StandardCell cell) {
+    return childrenMenus.stream().anyMatch(childrenMenu->childrenMenu.getCell().equals(cell));
+  }
+  
   public String getName() {
+    //TODO
     return cell.getValueCell().getStringCellValue();
   }
-
-  // public String getMatchName(){
-  // return menuConfig.getMenuNameMatcher().getMatchString();
-  // }
 
   public StandardCell getCell() {
     return cell;
