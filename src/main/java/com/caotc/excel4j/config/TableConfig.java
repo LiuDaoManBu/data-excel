@@ -1,5 +1,7 @@
 package com.caotc.excel4j.config;
 
-public class TableConfig {
+import com.caotc.excel4j.constant.Direction;
 
+public class TableConfig {
+  private Direction direction;
 }
