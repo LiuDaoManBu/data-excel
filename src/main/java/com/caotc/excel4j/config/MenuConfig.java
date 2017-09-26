@@ -17,9 +17,8 @@ public class MenuConfig {
   private DataMatcher dataMatcher;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private Integer firstDistance;
-  private LoadType menuDataLoadType;
+  private LoadType loadType;
   private MenuNecessity menuNecessity;
-  private LoadType childrenMenuLoadType;
   // 属性名字
   private String fieldName;
   private MenuConfig parentMenuConfig;
@@ -73,12 +72,14 @@ public class MenuConfig {
     this.childrenMenuConfigs = childrenMenuConfigs;
   }
 
-  public LoadType getMenuDataLoadType() {
-    return menuDataLoadType;
+
+
+  public LoadType getLoadType() {
+    return loadType;
   }
 
-  public void setMenuDataLoadType(LoadType menuDataLoadType) {
-    this.menuDataLoadType = menuDataLoadType;
+  public void setLoadType(LoadType loadType) {
+    this.loadType = loadType;
   }
 
   public MenuNecessity getMenuNecessity() {
@@ -87,14 +88,6 @@ public class MenuConfig {
 
   public void setMenuNecessity(MenuNecessity menuNecessity) {
     this.menuNecessity = menuNecessity;
-  }
-
-  public LoadType getChildrenMenuLoadType() {
-    return childrenMenuLoadType;
-  }
-
-  public void setChildrenMenuLoadType(LoadType childrenMenuLoadType) {
-    this.childrenMenuLoadType = childrenMenuLoadType;
   }
 
 }

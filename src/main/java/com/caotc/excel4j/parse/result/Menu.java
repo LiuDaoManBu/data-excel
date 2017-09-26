@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.constant.MenuType;
 import com.google.common.collect.Lists;
 
 public class Menu {
@@ -13,6 +14,7 @@ public class Menu {
   private Table table;
   private Menu parentMenu;
   private List<Menu> childrenMenus = Lists.newArrayList();
+  private MenuType menuType;
 
   public Menu(StandardCell cell) {
     super();
@@ -100,10 +102,10 @@ public class Menu {
     this.checkMenuConfig = checkMenuConfig;
   }
 
-  public void loadChildrenMenus() {
-    getCheckMenuConfig().getChildrenMenuLoadType().loadChildren(this);
+  public void load() {
+    menuType.load(this);
   }
-
+  
   public void addChildrenMenu(Menu childrenMenu) {
     childrenMenus.add(childrenMenu);
   }

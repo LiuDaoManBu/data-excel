@@ -50,4 +50,5 @@ public enum LoadType {
     }
   };
   public abstract void loadChildren(Menu menu);
+  public abstract void loadData(Menu menu);
 }
