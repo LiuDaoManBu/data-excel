@@ -46,7 +46,7 @@ public enum LoadType {
 
     @Override
     public void loadData(Table table) {
-      MenuConfig config = menu.getCheckMenuConfig();
+      table.getTableConfig().getFixedMenuDirection().nextCells(cell)
       
     }
   },MIXED {

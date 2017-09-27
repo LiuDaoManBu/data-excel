@@ -4,13 +4,12 @@ import java.util.List;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.parse.error.SheetError;
+import com.caotc.excel4j.parse.error.TableError;
 
 public class Table {
   private TableConfig tableConfig;
-  private List<SheetError> sheetErrors;
+  private List<TableError> errors;
   private SheetParseResult sheetParseResult;
-  private Direction fixedMenuDirection;
-  private Direction unFixedMenuDirection;
   
   public TableConfig getTableConfig() {
     return tableConfig;
@@ -18,29 +17,18 @@ public class Table {
   public void setTableConfig(TableConfig tableConfig) {
     this.tableConfig = tableConfig;
   }
-  public List<SheetError> getSheetErrors() {
-    return sheetErrors;
+
+  public List<TableError> getErrors() {
+    return errors;
   }
-  public void setSheetErrors(List<SheetError> sheetErrors) {
-    this.sheetErrors = sheetErrors;
+  public void setErrors(List<TableError> errors) {
+    this.errors = errors;
   }
   public SheetParseResult getSheetParseResult() {
     return sheetParseResult;
   }
   public void setSheetParseResult(SheetParseResult sheetParseResult) {
     this.sheetParseResult = sheetParseResult;
-  }
-  public Direction getFixedMenuDirection() {
-    return fixedMenuDirection;
-  }
-  public void setFixedMenuDirection(Direction fixedMenuDirection) {
-    this.fixedMenuDirection = fixedMenuDirection;
-  }
-  public Direction getUnFixedMenuDirection() {
-    return unFixedMenuDirection;
-  }
-  public void setUnFixedMenuDirection(Direction unFixedMenuDirection) {
-    this.unFixedMenuDirection = unFixedMenuDirection;
   }
   
 }
