@@ -7,6 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
+import com.caotc.excel4j.parse.result.Table;
 
 public enum LoadType {
   UNFIXED {
@@ -42,6 +43,12 @@ public enum LoadType {
         }
       }
     }
+
+    @Override
+    public void loadData(Table table) {
+      MenuConfig config = menu.getCheckMenuConfig();
+      
+    }
   },MIXED {
     @Override
     public void loadChildren(Menu menu) {
@@ -50,5 +57,5 @@ public enum LoadType {
     }
   };
   public abstract void loadChildren(Menu menu);
-  public abstract void loadData(Menu menu);
+  public abstract void loadData(Table table);
 }

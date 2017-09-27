@@ -103,7 +103,9 @@ public class Menu {
   }
 
   public void load() {
-    menuType.load(this);
+    if(MenuType.NO_DATA_MENU.equals(menuType)) {
+      getCheckMenuConfig().getLoadType().loadChildren(this);
+    }
   }
   
   public void addChildrenMenu(Menu childrenMenu) {
@@ -141,6 +143,14 @@ public class Menu {
 
   public Menu getParentMenu() {
     return parentMenu;
+  }
+
+  public MenuType getMenuType() {
+    return menuType;
+  }
+
+  public void setMenuType(MenuType menuType) {
+    this.menuType = menuType;
   }
 
   public Table getTable() {

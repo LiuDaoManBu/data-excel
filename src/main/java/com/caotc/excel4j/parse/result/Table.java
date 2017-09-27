@@ -11,6 +11,7 @@ public class Table {
   private SheetParseResult sheetParseResult;
   private Direction fixedMenuDirection;
   private Direction unFixedMenuDirection;
+  
   public TableConfig getTableConfig() {
     return tableConfig;
   }

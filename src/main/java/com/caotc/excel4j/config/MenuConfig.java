@@ -19,6 +19,7 @@ public class MenuConfig {
   private Integer firstDistance;
   private LoadType loadType;
   private MenuNecessity menuNecessity;
+  private Direction direction;
   // 属性名字
   private String fieldName;
   private MenuConfig parentMenuConfig;
@@ -73,6 +74,14 @@ public class MenuConfig {
   }
 
 
+
+  public Direction getDirection() {
+    return direction;
+  }
+
+  public void setDirection(Direction direction) {
+    this.direction = direction;
+  }
 
   public LoadType getLoadType() {
     return loadType;
