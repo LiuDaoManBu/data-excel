@@ -13,7 +13,7 @@ import com.caotc.excel4j.util.ClassUtils;
 import com.caotc.excel4j.util.ExcelUtil;
 
 public class Data {
-  private SheetParseResult sheetParseResult;
+  private Table table;
   private final Collection<CellData> cellDatas;
   private final JSONObject jsonData = new JSONObject();
 
