@@ -24,10 +24,7 @@ public class SheetParseResult {
   private Sheet sheet;
   private SheetConfig sheetConfig;
   private List<SheetError> sheetErrors;
-  private Collection<Menu> menus = Lists.newArrayList();
   private Map<String, Menu> fieldNameToMenus = Maps.newHashMap();
-  private Collection<Menu> fixedMenus = Lists.newArrayList();
-  private Collection<Menu> noFixedMenus = Lists.newArrayList();
   private Collection<Menu> dynamicMenus = Lists.newArrayList();
   private Data fiexdData;
   private Collection<Data> noFiexdDatas = Lists.newArrayList();
@@ -228,30 +225,6 @@ public class SheetParseResult {
       cellDatas.addAll(fiexdData.getMenuToCells());
       datas.add(new Data(cellDatas));
     }
-  }
-
-  public Collection<Menu> getMenus() {
-    return menus;
-  }
-
-  public void setMenus(List<Menu> menus) {
-    this.menus = menus;
-  }
-
-  public Collection<Menu> getFixedMenus() {
-    return fixedMenus;
-  }
-
-  public void setFixedMenus(List<Menu> fixedMenus) {
-    this.fixedMenus = fixedMenus;
-  }
-
-  public Collection<Menu> getNoFixedMenus() {
-    return noFixedMenus;
-  }
-
-  public void setNoFixedMenus(List<Menu> noFixedMenus) {
-    this.noFixedMenus = noFixedMenus;
   }
 
   public List<SheetError> getErrors() {

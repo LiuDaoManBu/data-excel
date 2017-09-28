@@ -15,7 +15,7 @@ import com.google.common.collect.Sets;
 
 public class TestGuava {
   public static void main(String[] args) {
-    viewTest();
+    whenFilterWithCollections2_thenFiltered();
   }
 
   public static void viewTest() {
@@ -26,18 +26,14 @@ public class TestGuava {
     TestGuavaA b2 = new TestGuavaA(5L, "B", "caotc");
 
     Set<TestGuavaA> list = Sets.newHashSet(a1, a2, a3, b1, b2);
-    Map<Long, TestGuavaA> map = Maps.asMap(list,new Function<TestGuavaA,Long>(){
-
-      
-    });
     System.out.println(list);
-    System.out.println(map);
+//    System.out.println(map);
 
     System.out.println();
     // list.add(new TestGuavaA(6L, "B", "xies"));
 //    map.put(6L, new TestGuavaA(6L, "B", "xies"));
     System.out.println(list);
-    System.out.println(map);
+//    System.out.println(map);
   }
 
   public static void viewTest2() {
@@ -51,8 +47,8 @@ public class TestGuava {
     System.out.println(result);
 
     System.out.println();
-    // result.add("anna");
-    names.add("anna");
+     result.add("anna");
+//    names.add("anna");
     System.out.println(names);
     System.out.println(result);
   }
