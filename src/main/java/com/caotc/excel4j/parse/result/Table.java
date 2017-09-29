@@ -13,29 +13,110 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
-import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.constant.MenuNecessity;
-import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.parse.error.TableError;
 import com.caotc.excel4j.util.ExcelUtil;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class Table {
-  private TableConfig tableConfig;
-  private List<TableError> errors;
-  private SheetParseResult sheetParseResult;
-  private Collection<Menu> menus;
-  private final Collection<Menu> dataMenus = Collections2.filter(menus,Menu::isDataMenu);
-  private final Collection<Menu> fixedDataMenus = Collections2.filter(dataMenus,Menu::isFixedDataMenu);
-  private final Collection<Menu> unFixedDataMenus = Collections2.filter(dataMenus,Menu::isUnFixedDataMenu);
-  private final Collection<Menu> mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
-  private final Collection<Menu> mustMenus = Collections2.filter(menus,Menu::isMustMenu);
-  private final Collection<Menu> noMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
-  private Data fiexdData;
-  private Collection<Data> noFiexdDatas = Lists.newArrayList();
+  private static class Builder {
+    private TableConfig tableConfig;
+    private List<TableError> errors = Lists.newArrayList();;
+    private SheetParseResult sheetParseResult;
+    private Collection<Menu> menus;
+    private Data fiexdData;
+    private Collection<Data> noFiexdDatas = Lists.newArrayList();
+
+    public Builder tableConfig(TableConfig tableConfig) {
+      this.tableConfig = tableConfig;
+      return this;
+    }
+
+    public Builder errors(List<TableError> errors) {
+      this.errors = errors;
+      return this;
+    }
+
+    public Builder sheetParseResult(SheetParseResult sheetParseResult) {
+      this.sheetParseResult = sheetParseResult;
+      return this;
+    }
+
+    public Builder menus(Collection<Menu> menus) {
+      this.menus = menus;
+      return this;
+    }
+
+    public Builder fiexdData(Data fiexdData) {
+      this.fiexdData = fiexdData;
+      return this;
+    }
+
+    public Builder noFiexdDatas(Collection<Data> noFiexdDatas) {
+      this.noFiexdDatas = noFiexdDatas;
+      return this;
+    }
+
+    public Table build() {
+      return new Table(this);
+    }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  private final TableConfig tableConfig;
+  private final List<TableError> errors;
+  private final SheetParseResult sheetParseResult;
+  private final Collection<Menu> menus;
+  private final Collection<Menu> dataMenus;
+  private final Collection<Menu> fixedDataMenus;
+  private final Collection<Menu> unFixedDataMenus;
+  private final Collection<Menu> mixedDataMenus;
+  private final Collection<Menu> mustMenus;
+  private final Collection<Menu> noMustMenus;
+  private final Data fiexdData;
+  private final Collection<Data> noFiexdDatas;
+
+  public Table(Builder builder) {
+    this.tableConfig = builder.tableConfig;
+    this.errors = builder.errors;
+    this.sheetParseResult = builder.sheetParseResult;
+    this.menus = builder.menus;
+    this.fiexdData = builder.fiexdData;
+    this.noFiexdDatas = builder.noFiexdDatas;
+
+    dataMenus = Collections2.filter(menus, Menu::isDataMenu);
+    fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
+    unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
+    mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
+    mustMenus = Collections2.filter(menus, Menu::isMustMenu);
+    noMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
+  }
+
+  public void loadTopMenus() {
+    for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+      Row row = sheet.getRow(rowIndex);
+      for (int columnIndex = row.getFirstCellNum(); columnIndex < row
+          .getLastCellNum(); columnIndex++) {
+        Cell cell = row.getCell(columnIndex);
+        CellRangeAddress mergedRegion = ExcelUtil.getMergedRegion(cell);
+        if (mergedRegion == null || (cell.getRowIndex() == mergedRegion.getFirstRow()
+            && cell.getColumnIndex() == mergedRegion.getFirstColumn())) {
+          String value = ExcelUtil.getStringValue(cell);
+          // for(MenuConfig menuConfig:sheetConfig.menuConfigs){
+          // if(menuConfig.getParentMenuConfig()==null &&
+          // menuConfig.getMenuNameMatcher().matches(value)){
+          // addMenu(cell, menuConfig);
+          // break;
+          // }
+          // }
+        }
+      }
+    }
+  }
   
   public JSONArray getJsonDatas() {
     JSONArray array = new JSONArray();
@@ -44,14 +125,14 @@ public class Table {
     }
     return array;
   }
-  
+
   public <T> Collection<T> getClassDatas(Collection<T> collection, Class<T> clazz) {
     for (Data data : datas) {
       collection.add(JSONObject.toJavaObject(data.getJsonData(), clazz));
     }
     return collection;
   }
-  
+
   public boolean addMenu(Menu menu) {
     boolean result = Boolean.FALSE;
     if (!menus.contains(menu)) {
@@ -89,28 +170,6 @@ public class Table {
   public void findMenus() {
     loadTopMenus();
     findChildrenMenus();
-  }
-
-  public void loadTopMenus() {
-    for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-      Row row = sheet.getRow(rowIndex);
-      for (int columnIndex = row.getFirstCellNum(); columnIndex < row
-          .getLastCellNum(); columnIndex++) {
-        Cell cell = row.getCell(columnIndex);
-        CellRangeAddress mergedRegion = ExcelUtil.getMergedRegion(cell);
-        if (mergedRegion == null || (cell.getRowIndex() == mergedRegion.getFirstRow()
-            && cell.getColumnIndex() == mergedRegion.getFirstColumn())) {
-          String value = ExcelUtil.getStringValue(cell);
-          // for(MenuConfig menuConfig:sheetConfig.menuConfigs){
-          // if(menuConfig.getParentMenuConfig()==null &&
-          // menuConfig.getMenuNameMatcher().matches(value)){
-          // addMenu(cell, menuConfig);
-          // break;
-          // }
-          // }
-        }
-      }
-    }
   }
 
   public void findChildrenMenus() {
@@ -197,29 +256,17 @@ public class Table {
       datas.add(new Data(cellDatas));
     }
   }
-  
+
   public TableConfig getTableConfig() {
     return tableConfig;
-  }
-
-  public void setTableConfig(TableConfig tableConfig) {
-    this.tableConfig = tableConfig;
   }
 
   public List<TableError> getErrors() {
     return errors;
   }
 
-  public void setErrors(List<TableError> errors) {
-    this.errors = errors;
-  }
-
   public SheetParseResult getSheetParseResult() {
     return sheetParseResult;
-  }
-
-  public void setSheetParseResult(SheetParseResult sheetParseResult) {
-    this.sheetParseResult = sheetParseResult;
   }
 
 }

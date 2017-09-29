@@ -1,7 +1,6 @@
 package com.caotc.excel4j.parse.result;
 
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
@@ -10,34 +9,80 @@ import com.caotc.excel4j.constant.MenuType;
 import com.google.common.collect.Lists;
 
 public class Menu {
-  private StandardCell cell;
-  private MenuConfig menuConfig;
-  private MenuConfig checkMenuConfig;
-  private Table table;
-  private Menu parentMenu;
-  private List<Menu> childrenMenus = Lists.newArrayList();
-  private MenuType menuType;
+  private static class Builder {
+    private StandardCell cell;
+    private MenuConfig menuConfig;
+    private MenuConfig checkMenuConfig;
+    private Table table;
+    private Menu parentMenu;
+    private List<Menu> childrenMenus = Lists.newArrayList();
+    private MenuType menuType;
 
-  public Menu(StandardCell cell) {
-    super();
-    this.cell = cell;
+    public Builder cell(StandardCell cell) {
+      this.cell = cell;
+      return this;
+    }
+
+    public Builder menuConfig(MenuConfig menuConfig) {
+      this.menuConfig = menuConfig;
+      return this;
+    }
+
+    public Builder checkMenuConfig(MenuConfig checkMenuConfig) {
+      this.checkMenuConfig = checkMenuConfig;
+      return this;
+    }
+
+    public Builder table(Table table) {
+      this.table = table;
+      return this;
+    }
+
+    public Builder parentMenu(Menu parentMenu) {
+      this.parentMenu = parentMenu;
+      return this;
+    }
+
+    public Builder childrenMenus(List<Menu> childrenMenus) {
+      this.childrenMenus = childrenMenus;
+      return this;
+    }
+
+    public Builder menuType(MenuType menuType) {
+      this.menuType = menuType;
+      return this;
+    }
+
+    public Menu build() {
+      return new Menu(this);
+    }
   }
 
-  public Menu(StandardCell cell, MenuConfig menuConfig) {
-    super();
-    this.cell = cell;
-    this.menuConfig = menuConfig;
-    checkMenuConfig = menuConfig;
-    Menu lastMenu = parentMenu;
-    while (checkMenuConfig == null && lastMenu != null) {
-      checkMenuConfig = lastMenu.menuConfig;
-      lastMenu = parentMenu.getParentMenu();
-    }
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  private final StandardCell cell;
+  private final MenuConfig menuConfig;
+  private final MenuConfig checkMenuConfig;
+  private final Table table;
+  private final Menu parentMenu;
+  private final List<Menu> childrenMenus;
+  private final MenuType menuType;
+
+  public Menu(Builder builder) {
+    cell = builder.cell;
+    menuConfig = builder.menuConfig;
+    checkMenuConfig = builder.checkMenuConfig;
+    table = builder.table;
+    parentMenu = builder.parentMenu;
+    childrenMenus = builder.childrenMenus;
+    menuType = builder.menuType;
   }
 
   public void checkDataCell(StandardCell dataCell) {
     if (hasCheckMenuConfig()) {
-      //TODO
+      // TODO
       Object value = dataCell.getValue();
       // if(!checkMenuConfig.getDataMatcher().matches(value)){
       // StringBuffer errorMessage=new StringBuffer();
@@ -100,30 +145,26 @@ public class Menu {
     return checkMenuConfig;
   }
 
-  public void setCheckMenuConfig(MenuConfig checkMenuConfig) {
-    this.checkMenuConfig = checkMenuConfig;
-  }
-
   public void load() {
-    if(MenuType.NO_DATA_MENU.equals(menuType)) {
+    if (MenuType.NO_DATA_MENU.equals(menuType)) {
       getCheckMenuConfig().getLoadType().loadChildren(this);
     }
   }
-  
+
   public void addChildrenMenu(Menu childrenMenu) {
     childrenMenus.add(childrenMenu);
   }
-  
+
   public boolean hasChildrenMenu(Menu childrenMenu) {
     return childrenMenus.contains(childrenMenu);
   }
-  
+
   public boolean hasChildrenMenu(StandardCell cell) {
-    return childrenMenus.stream().anyMatch(childrenMenu->childrenMenu.getCell().equals(cell));
+    return childrenMenus.stream().anyMatch(childrenMenu -> childrenMenu.getCell().equals(cell));
   }
-  
+
   public String getName() {
-    //TODO
+    // TODO
     return cell.getValueCell().getStringCellValue();
   }
 
@@ -131,16 +172,8 @@ public class Menu {
     return cell;
   }
 
-  public void setCell(StandardCell cell) {
-    this.cell = cell;
-  }
-
   public MenuConfig getMenuConfig() {
     return menuConfig;
-  }
-
-  public void setMenuConfig(MenuConfig menuConfig) {
-    this.menuConfig = menuConfig;
   }
 
   public Menu getParentMenu() {
@@ -151,58 +184,34 @@ public class Menu {
     return menuType;
   }
 
-  public void setMenuType(MenuType menuType) {
-    this.menuType = menuType;
-  }
-
   public Table getTable() {
     return table;
-  }
-
-  public void setTable(Table table) {
-    this.table = table;
-  }
-
-  public void setParentMenu(Menu parentMenu) {
-    this.parentMenu = parentMenu;
-    if (!parentMenu.getChildrenMenus().contains(this)) {
-      parentMenu.getChildrenMenus().add(this);
-    }
   }
 
   public List<Menu> getChildrenMenus() {
     return childrenMenus;
   }
 
-  public void setChildrenMenus(List<Menu> childrenMenus) {
-    this.childrenMenus = childrenMenus;
-    if (!CollectionUtils.isEmpty(childrenMenus)) {
-      for (Menu childrenMenu : childrenMenus) {
-        childrenMenu.setParentMenu(this);
-      }
-    }
-  }
-  
   public boolean isDataMenu() {
     return MenuType.DATA_MENU.equals(getMenuType());
   }
-  
+
   public boolean isFixedDataMenu() {
     return isDataMenu() && LoadType.FIXED.equals(getCheckMenuConfig().getLoadType());
   }
-  
+
   public boolean isUnFixedDataMenu() {
     return isDataMenu() && LoadType.UNFIXED.equals(getCheckMenuConfig().getLoadType());
   }
-  
+
   public boolean isMixedDataMenu() {
     return isDataMenu() && LoadType.MIXED.equals(getCheckMenuConfig().getLoadType());
   }
-  
+
   public boolean isMustMenu() {
     return MenuNecessity.MUST.equals(getCheckMenuConfig().getMenuNecessity());
   }
-  
+
   public boolean isNotMustMenu() {
     return MenuNecessity.NOT_MUST.equals(getCheckMenuConfig().getMenuNecessity());
   }

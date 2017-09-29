@@ -28,8 +28,6 @@ public class SheetParseResult {
   public SheetParseResult(Sheet sheet, SheetConfig sheetConfig) {
     this.sheet = sheet;
     this.sheetConfig = sheetConfig;
-    findMenus();
-    checkMenus();
   }
 
   public boolean hasError() {
