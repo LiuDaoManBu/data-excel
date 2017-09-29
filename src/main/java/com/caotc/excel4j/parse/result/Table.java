@@ -28,42 +28,12 @@ public class Table {
   private List<TableError> errors;
   private SheetParseResult sheetParseResult;
   private Collection<Menu> menus;
-  private final Collection<Menu> dataMenus = Collections2.filter(menus, new Predicate<Menu>() {
-    @Override
-    public boolean apply(Menu input) {
-      return MenuType.DATA_MENU.equals(input.getMenuType());
-    }
-  });
-  private final Collection<Menu> fixedDataMenus = Collections2.filter(dataMenus, new Predicate<Menu>() {
-    @Override
-    public boolean apply(Menu input) {
-      return LoadType.FIXED.equals(input.getCheckMenuConfig().getLoadType());
-    }
-  });
-  private final Collection<Menu> unFixedDataMenus = Collections2.filter(dataMenus, new Predicate<Menu>() {
-    @Override
-    public boolean apply(Menu input) {
-      return LoadType.UNFIXED.equals(input.getCheckMenuConfig().getLoadType());
-    }
-  });
-  private final Collection<Menu> mixedDataMenus = Collections2.filter(dataMenus, new Predicate<Menu>() {
-    @Override
-    public boolean apply(Menu input) {
-      return LoadType.MIXED.equals(input.getCheckMenuConfig().getLoadType());
-    }
-  });
-  private final Collection<Menu> mustMenus = Collections2.filter(menus, new Predicate<Menu>() {
-    @Override
-    public boolean apply(Menu input) {
-      return MenuNecessity.MUST.equals(input.getCheckMenuConfig().getMenuNecessity());
-    }
-  });
-  private final Collection<Menu> noMustMenus = Collections2.filter(menus, new Predicate<Menu>() {
-    @Override
-    public boolean apply(Menu input) {
-      return MenuNecessity.NOT_MUST.equals(input.getCheckMenuConfig().getMenuNecessity());
-    }
-  });
+  private final Collection<Menu> dataMenus = Collections2.filter(menus,Menu::isDataMenu);
+  private final Collection<Menu> fixedDataMenus = Collections2.filter(dataMenus,Menu::isFixedDataMenu);
+  private final Collection<Menu> unFixedDataMenus = Collections2.filter(dataMenus,Menu::isUnFixedDataMenu);
+  private final Collection<Menu> mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
+  private final Collection<Menu> mustMenus = Collections2.filter(menus,Menu::isMustMenu);
+  private final Collection<Menu> noMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
   private Data fiexdData;
   private Collection<Data> noFiexdDatas = Lists.newArrayList();
   

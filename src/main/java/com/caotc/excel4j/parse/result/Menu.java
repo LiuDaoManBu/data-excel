@@ -4,6 +4,8 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.constant.LoadType;
+import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.constant.MenuType;
 import com.google.common.collect.Lists;
 
@@ -179,5 +181,29 @@ public class Menu {
         childrenMenu.setParentMenu(this);
       }
     }
+  }
+  
+  public boolean isDataMenu() {
+    return MenuType.DATA_MENU.equals(getMenuType());
+  }
+  
+  public boolean isFixedDataMenu() {
+    return isDataMenu() && LoadType.FIXED.equals(getCheckMenuConfig().getLoadType());
+  }
+  
+  public boolean isUnFixedDataMenu() {
+    return isDataMenu() && LoadType.UNFIXED.equals(getCheckMenuConfig().getLoadType());
+  }
+  
+  public boolean isMixedDataMenu() {
+    return isDataMenu() && LoadType.MIXED.equals(getCheckMenuConfig().getLoadType());
+  }
+  
+  public boolean isMustMenu() {
+    return MenuNecessity.MUST.equals(getCheckMenuConfig().getMenuNecessity());
+  }
+  
+  public boolean isNotMustMenu() {
+    return MenuNecessity.NOT_MUST.equals(getCheckMenuConfig().getMenuNecessity());
   }
 }
