@@ -1,14 +1,17 @@
 package com.caotc.excel4j.constant;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressBase;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.ExcelUtil;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public enum Direction {
@@ -19,12 +22,11 @@ public enum Direction {
     }
 
     @Override
-    protected CellRangeAddress nextCellRangeAddress(StandardCell cell) {
-      if (cell == null) {
-        return null;
-      }
-      return new CellRangeAddress(cell.getFirstRow() - DEFAULT_DISTANCE,
-          cell.getFirstRow() - DEFAULT_DISTANCE, cell.getFirstColumn(), cell.getLastColumn());
+    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+      Preconditions.checkNotNull(address);
+      return new CellRangeAddress(address.getFirstRow() - DEFAULT_DISTANCE,
+          address.getFirstRow() - DEFAULT_DISTANCE, address.getFirstColumn(),
+          address.getLastColumn());
     }
   },
   BOTTOM {
@@ -34,12 +36,11 @@ public enum Direction {
     }
 
     @Override
-    protected CellRangeAddress nextCellRangeAddress(StandardCell cell) {
-      if (cell == null) {
-        return null;
-      }
-      return new CellRangeAddress(cell.getLastRow() + DEFAULT_DISTANCE,
-          cell.getLastRow() + DEFAULT_DISTANCE, cell.getFirstColumn(), cell.getLastColumn());
+    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+      Preconditions.checkNotNull(address);
+      return new CellRangeAddress(address.getLastRow() + DEFAULT_DISTANCE,
+          address.getLastRow() + DEFAULT_DISTANCE, address.getFirstColumn(),
+          address.getLastColumn());
     }
   },
   LEFT {
@@ -49,12 +50,10 @@ public enum Direction {
     }
 
     @Override
-    protected CellRangeAddress nextCellRangeAddress(StandardCell cell) {
-      if (cell == null) {
-        return null;
-      }
-      return new CellRangeAddress(cell.getFirstRow(), cell.getLastRow(),
-          cell.getFirstColumn() - DEFAULT_DISTANCE, cell.getFirstColumn() - DEFAULT_DISTANCE);
+    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+      Preconditions.checkNotNull(address);
+      return new CellRangeAddress(address.getFirstRow(), address.getLastRow(),
+          address.getFirstColumn() - DEFAULT_DISTANCE, address.getFirstColumn() - DEFAULT_DISTANCE);
     }
   },
   RIGHT {
@@ -64,78 +63,62 @@ public enum Direction {
     }
 
     @Override
-    protected CellRangeAddress nextCellRangeAddress(StandardCell cell) {
-      if (cell == null) {
-        return null;
-      }
-      return new CellRangeAddress(cell.getFirstRow(), cell.getLastRow(),
-          cell.getLastColumn() + DEFAULT_DISTANCE, cell.getLastColumn() + DEFAULT_DISTANCE);
+    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+      Preconditions.checkNotNull(address);
+      return new CellRangeAddress(address.getFirstRow(), address.getLastRow(),
+          address.getLastColumn() + DEFAULT_DISTANCE, address.getLastColumn() + DEFAULT_DISTANCE);
     }
   };
   private static final int DEFAULT_DISTANCE = 1;
 
   public abstract Direction getNegativeDirection();
 
-  public List<StandardCell> nextCells(StandardCell cell) {
-    CellRangeAddress nextCellRangeAddress = null;
-    if (cell == null || (nextCellRangeAddress = nextCellRangeAddress(cell)) == null) {
-      return Collections.emptyList();
-    }
+  public abstract CellRangeAddress nextAddress(CellRangeAddressBase address);
 
-    List<StandardCell> nextCells = Lists.newLinkedList();
-    for (int rowIndex = nextCellRangeAddress.getFirstRow(); rowIndex <= nextCellRangeAddress
-        .getLastRow(); rowIndex++) {
-      for (int columnIndex =
-          nextCellRangeAddress.getFirstColumn(); columnIndex <= nextCellRangeAddress
-              .getLastColumn(); columnIndex++) {
-        StandardCell nextCell =
-            StandardCell.valueOf(ExcelUtil.getCellByIndex(cell.getSheet(), rowIndex, columnIndex));
-        if (!nextCells.contains(nextCell)) {
-          nextCells.add(nextCell);
+  public List<StandardCell> next(StandardCell original) {
+    Preconditions.checkNotNull(original);
+    CellRangeAddress address = nextAddress(original);
+
+    List<StandardCell> cells = Lists.newLinkedList();
+    for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
+      for (int columnIndex = address.getFirstColumn(); columnIndex <= address
+          .getLastColumn(); columnIndex++) {
+        StandardCell cell = StandardCell
+            .valueOf(ExcelUtil.getCellByIndex(original.getSheet(), rowIndex, columnIndex));
+        if (!cells.contains(cell)) {
+          cells.add(cell);
         }
       }
     }
-    return nextCells;
+    return cells;
   }
 
-  public List<StandardCell> getCells(StandardCell cell, int distance) {
-    if (cell == null || distance <= 0) {
-      return Collections.emptyList();
-    }
+  public List<StandardCell> get(StandardCell cell, int distance) {
+    Preconditions.checkNotNull(cell);
+    Preconditions.checkArgument(distance > 0);
+
     List<StandardCell> cells = Lists.newArrayList(cell);
     for (int i = 0; i < distance; i++) {
-      cells = cells.stream().map(this::nextCells).flatMap(Collection::stream)
+      cells = cells.stream().map(this::next).flatMap(Collection::stream)
           .collect(Collectors.toCollection(LinkedList::new));
     }
     return cells;
   }
 
   public StandardCell nextCell(StandardCell cell) {
-    if (cell == null) {
-      return null;
-    }
+    Preconditions.checkNotNull(cell);
 
-    List<StandardCell> nextCells = nextCells(cell);
-    if (CollectionUtils.isEmpty(nextCells)) {
-      return null;
-    }
-
-    if (nextCells.size() > 1) {
-      throw new IllegalArgumentException(
-          "the standardCell" + cell + " in direction" + this + " is more than a next standardCell");
-    }
-    return nextCells.get(0);
+    List<StandardCell> cells = next(cell);
+    Preconditions.checkState(CollectionUtils.isEmpty(cells));
+    return Iterables.getOnlyElement(cells);
   }
 
   public StandardCell getCell(StandardCell cell, int distance) {
-    if (cell == null || distance <= 0) {
-      return null;
-    }
-    for (int i = 0; i < distance; i++) {
-      cell = nextCell(cell);
-    }
-    return cell;
-  }
+    Preconditions.checkNotNull(cell);
+    Preconditions.checkArgument(distance > 0);
 
-  protected abstract CellRangeAddress nextCellRangeAddress(StandardCell cell);
+    List<StandardCell> cells = get(cell, distance);
+    Preconditions.checkState(CollectionUtils.isEmpty(cells));
+    return Iterables.getOnlyElement(cells);
+  }
 }

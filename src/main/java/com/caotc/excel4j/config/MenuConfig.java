@@ -25,6 +25,10 @@ public class MenuConfig {
   private MenuConfig parentMenuConfig;
   private Collection<MenuConfig> childrenMenuConfigs;
 
+  public boolean isTopMenu() {
+    return parentMenuConfig == null;
+  }
+
   public StandardCellMatcher getMenuMatcher() {
     return menuMatcher;
   }

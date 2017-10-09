@@ -9,10 +9,9 @@ import com.caotc.excel4j.constant.MenuType;
 import com.google.common.collect.Lists;
 
 public class Menu {
-  private static class Builder {
+  public static class Builder {
     private StandardCell cell;
     private MenuConfig menuConfig;
-    private MenuConfig checkMenuConfig;
     private Table table;
     private Menu parentMenu;
     private List<Menu> childrenMenus = Lists.newArrayList();
@@ -25,11 +24,6 @@ public class Menu {
 
     public Builder menuConfig(MenuConfig menuConfig) {
       this.menuConfig = menuConfig;
-      return this;
-    }
-
-    public Builder checkMenuConfig(MenuConfig checkMenuConfig) {
-      this.checkMenuConfig = checkMenuConfig;
       return this;
     }
 
@@ -64,7 +58,6 @@ public class Menu {
 
   private final StandardCell cell;
   private final MenuConfig menuConfig;
-  private final MenuConfig checkMenuConfig;
   private final Table table;
   private final Menu parentMenu;
   private final List<Menu> childrenMenus;
@@ -73,7 +66,6 @@ public class Menu {
   public Menu(Builder builder) {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
-    checkMenuConfig = builder.checkMenuConfig;
     table = builder.table;
     parentMenu = builder.parentMenu;
     childrenMenus = builder.childrenMenus;
@@ -130,19 +122,21 @@ public class Menu {
   }
 
   public StandardCell nextDataCell(StandardCell cell) {
-    Direction direction = checkMenuConfig.getDirection();
+    Direction direction = getCheckMenuConfig().getDirection();
     if (cell == null || this.cell.equals(cell)) {
-      return direction.getCell(this.cell, checkMenuConfig.getFirstDistance());
+      return direction.getCell(this.cell, getCheckMenuConfig().getFirstDistance());
     }
     return direction.nextCell(cell);
   }
 
   public boolean hasCheckMenuConfig() {
-    return checkMenuConfig != null;
+    return getCheckMenuConfig() != null;
   }
 
   public MenuConfig getCheckMenuConfig() {
-    return checkMenuConfig;
+    return getMenuConfig() == null
+        ? getParentMenu() == null ? null : getParentMenu().getCheckMenuConfig()
+        : getMenuConfig();
   }
 
   public void load() {

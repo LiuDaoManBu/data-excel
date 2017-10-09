@@ -8,14 +8,18 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
+import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.parse.error.TableError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -76,7 +80,7 @@ public class Table {
   private final Collection<Menu> unFixedDataMenus;
   private final Collection<Menu> mixedDataMenus;
   private final Collection<Menu> mustMenus;
-  private final Collection<Menu> noMustMenus;
+  private final Collection<Menu> notMustMenus;
   private final Data fiexdData;
   private final Collection<Data> noFiexdDatas;
 
@@ -93,31 +97,28 @@ public class Table {
     unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
     mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
     mustMenus = Collections2.filter(menus, Menu::isMustMenu);
-    noMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
+    notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
   }
 
   public void loadTopMenus() {
+    Collection<MenuConfig> menuConfigs = getTableConfig().getTopMenuConfigs();
+    Sheet sheet = sheetParseResult.getSheet();
     for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
       Row row = sheet.getRow(rowIndex);
       for (int columnIndex = row.getFirstCellNum(); columnIndex < row
           .getLastCellNum(); columnIndex++) {
-        Cell cell = row.getCell(columnIndex);
-        CellRangeAddress mergedRegion = ExcelUtil.getMergedRegion(cell);
-        if (mergedRegion == null || (cell.getRowIndex() == mergedRegion.getFirstRow()
-            && cell.getColumnIndex() == mergedRegion.getFirstColumn())) {
-          String value = ExcelUtil.getStringValue(cell);
-          // for(MenuConfig menuConfig:sheetConfig.menuConfigs){
-          // if(menuConfig.getParentMenuConfig()==null &&
-          // menuConfig.getMenuNameMatcher().matches(value)){
-          // addMenu(cell, menuConfig);
-          // break;
-          // }
-          // }
+        StandardCell cell =
+            StandardCell.valueOf(ExcelUtil.getCellByIndex(sheet, rowIndex, columnIndex));
+        Collection<MenuConfig> config = Collections2.filter(menuConfigs,
+            menuConfig -> menuConfig.getMenuMatcher().matches(cell));
+        if (!CollectionUtils.isEmpty(config)) {
+          menus.add(Menu.builder().cell(cell).menuConfig(Iterables.getOnlyElement(config))
+              .table(this).build());
         }
       }
     }
   }
-  
+
   public JSONArray getJsonDatas() {
     JSONArray array = new JSONArray();
     for (Data data : datas) {
@@ -131,40 +132,6 @@ public class Table {
       collection.add(JSONObject.toJavaObject(data.getJsonData(), clazz));
     }
     return collection;
-  }
-
-  public boolean addMenu(Menu menu) {
-    boolean result = Boolean.FALSE;
-    if (!menus.contains(menu)) {
-      result = menus.add(menu);
-      if (menu.getMenuConfig() != null && menu.getMenuConfig().getFieldName() != null) {
-        fieldNameToMenus.put(menu.getMenuConfig().getFieldName(), menu);
-      }
-      MenuConfig menuConfig = menu.getCheckMenuConfig();
-      if (menuConfig.getData() || menu.getMenuConfig() == null) {
-        if (menuConfig.getSingleData()) {
-          fixedMenus.add(menu);
-        } else {
-          noFixedMenus.add(menu);
-        }
-        if (menuConfig.getDynamic()) {
-          dynamicMenus.add(menu);
-        }
-      }
-    }
-    return result;
-  }
-
-  public Menu addMenu(StandardCell cell) {
-    Menu menu = new Menu(cell);
-    addMenu(menu);
-    return menu;
-  }
-
-  public Menu addMenu(StandardCell cell, MenuConfig menuConfig) {
-    Menu menu = new Menu(cell, menuConfig);
-    addMenu(menu);
-    return menu;
   }
 
   public void findMenus() {

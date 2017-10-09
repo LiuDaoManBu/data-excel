@@ -15,12 +15,18 @@ public enum LoadType {
     public void loadChildren(Menu menu) {
       MenuConfig config = menu.getCheckMenuConfig();
       List<StandardCell> menuCells =
-          config.getDirection().getCells(menu.getCell(), config.getFirstDistance());
+          config.getDirection().get(menu.getCell(), config.getFirstDistance());
       menuCells.forEach(menuCell->{
         if(!menu.hasChildrenMenu(menuCell)) {
           menu.addChildrenMenu(new Menu(menuCell));
         }
       });
+    }
+
+    @Override
+    public void loadData(Table table) {
+      // TODO Auto-generated method stub
+      
     }
   },
   FIXED {
@@ -30,7 +36,7 @@ public enum LoadType {
       Collection<MenuConfig> childrenConfigs = config.getChildrenMenuConfigs();
       if (!CollectionUtils.isEmpty(childrenConfigs)) {
         List<StandardCell> menuCells =
-            config.getDirection().getCells(menu.getCell(), config.getFirstDistance());
+            config.getDirection().get(menu.getCell(), config.getFirstDistance());
         if (!CollectionUtils.isEmpty(menuCells)) {
           childrenConfigs.forEach(childrenConfig -> {
             Optional<StandardCell> optional = menuCells.stream()
@@ -46,7 +52,6 @@ public enum LoadType {
 
     @Override
     public void loadData(Table table) {
-      table.getTableConfig().getFixedMenuDirection().nextCells(cell)
       
     }
   },MIXED {
@@ -54,6 +59,13 @@ public enum LoadType {
     public void loadChildren(Menu menu) {
       FIXED.loadChildren(menu);
       UNFIXED.loadChildren(menu);
+    }
+
+    @Override
+    public void loadData(Table table) {
+      // TODO Auto-generated method stub
+      FIXED.loadData(table);
+      UNFIXED.loadData(table);
     }
   };
   public abstract void loadChildren(Menu menu);
