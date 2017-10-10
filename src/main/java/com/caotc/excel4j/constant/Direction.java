@@ -76,7 +76,7 @@ public enum Direction {
   public abstract CellRangeAddress nextAddress(CellRangeAddressBase address);
 
   public List<StandardCell> next(StandardCell original) {
-    Preconditions.checkNotNull(original);
+    Preconditions.checkNotNull(original); 
     CellRangeAddress address = nextAddress(original);
 
     List<StandardCell> cells = Lists.newLinkedList();
