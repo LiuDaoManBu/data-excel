@@ -22,12 +22,6 @@ public enum LoadType {
         }
       });
     }
-
-    @Override
-    public void loadData(Table table) {
-      // TODO Auto-generated method stub
-      
-    }
   },
   FIXED {
     @Override
@@ -49,25 +43,12 @@ public enum LoadType {
         }
       }
     }
-
-    @Override
-    public void loadData(Table table) {
-      
-    }
   },MIXED {
     @Override
     public void loadChildren(Menu menu) {
       FIXED.loadChildren(menu);
       UNFIXED.loadChildren(menu);
     }
-
-    @Override
-    public void loadData(Table table) {
-      // TODO Auto-generated method stub
-      FIXED.loadData(table);
-      UNFIXED.loadData(table);
-    }
   };
   public abstract void loadChildren(Menu menu);
-  public abstract void loadData(Table table);
 }

@@ -62,6 +62,7 @@ public class Menu {
   private final Menu parentMenu;
   private final List<Menu> childrenMenus;
   private final MenuType menuType;
+  
 
   public Menu(Builder builder) {
     cell = builder.cell;
@@ -69,6 +70,7 @@ public class Menu {
     table = builder.table;
     parentMenu = builder.parentMenu;
     childrenMenus = builder.childrenMenus;
+    getCheckMenuConfig();
     menuType = builder.menuType;
   }
 
