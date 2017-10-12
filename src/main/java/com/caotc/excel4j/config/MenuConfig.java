@@ -1,9 +1,11 @@
 package com.caotc.excel4j.config;
 
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
+import com.caotc.excel4j.parse.result.Menu;
 
 public class MenuConfig {
   // 菜单匹配器
@@ -22,6 +24,20 @@ public class MenuConfig {
     return parentMenuConfig == null;
   }
 
+  public void load(Menu menu) {
+    menuLoadConfig.load(menu);
+  }
+  
+  public boolean isMustMenu() {
+    return MenuNecessity.MUST.equals(getMenuNecessity());
+  }
+  
+  public boolean isNotMustMenu() {
+    return MenuNecessity.NOT_MUST.equals(getMenuNecessity());
+  }
+  
+  
+  
   public StandardCellMatcher getMenuMatcher() {
     return menuMatcher;
   }

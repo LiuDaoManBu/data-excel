@@ -6,6 +6,7 @@ import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.constant.MenuType;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 public class Menu {
@@ -75,7 +76,8 @@ public class Menu {
   }
 
   public void checkDataCell(StandardCell dataCell) {
-    if (hasCheckMenuConfig()) {
+    MenuConfig config=getCheckMenuConfig();
+    if (config.getDataMatcher()!=null) {
       // TODO
       Object value = dataCell.getValue();
       // if(!checkMenuConfig.getDataMatcher().matches(value)){
@@ -124,15 +126,12 @@ public class Menu {
   }
 
   public StandardCell nextDataCell(StandardCell cell) {
-    Direction direction = getCheckMenuConfig().getDirection();
+    MenuConfig config=getCheckMenuConfig();
+    Direction direction = config.getDirection();
     if (cell == null || this.cell.equals(cell)) {
-      return direction.getCell(this.cell, getCheckMenuConfig().getFirstDistance());
+      return direction.getCell(this.cell, config.getFirstDistance());
     }
     return direction.nextCell(cell);
-  }
-
-  public boolean hasCheckMenuConfig() {
-    return getCheckMenuConfig() != null;
   }
 
   public MenuConfig getCheckMenuConfig() {
@@ -142,9 +141,7 @@ public class Menu {
   }
 
   public void load() {
-    if (MenuType.NO_DATA_MENU.equals(menuType)) {
-      getCheckMenuConfig().getLoadType().loadChildren(this);
-    }
+      getCheckMenuConfig().load(this);
   }
 
   public void addChildrenMenu(Menu childrenMenu) {
@@ -205,10 +202,10 @@ public class Menu {
   }
 
   public boolean isMustMenu() {
-    return MenuNecessity.MUST.equals(getCheckMenuConfig().getMenuNecessity());
+    return getCheckMenuConfig().isMustMenu();
   }
 
   public boolean isNotMustMenu() {
-    return MenuNecessity.NOT_MUST.equals(getCheckMenuConfig().getMenuNecessity());
+    return getCheckMenuConfig().isNotMustMenu();
   }
 }

@@ -1,6 +1,7 @@
 package com.caotc.excel4j.config;
 
 import com.caotc.excel4j.constant.LoadType;
+import com.caotc.excel4j.parse.result.Menu;
 import com.google.common.collect.ImmutableCollection;
 
 public class MenuLoadConfig {
@@ -13,7 +14,9 @@ public class MenuLoadConfig {
     this.childrenMenuConfigs = childrenMenuConfigs;
   }
 
-  
+  public void load(Menu menu) {
+    loadType.loadChildren(menu);
+  }
   
   public LoadType getLoadType() {
     return loadType;
