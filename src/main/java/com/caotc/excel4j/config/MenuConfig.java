@@ -3,6 +3,7 @@ package com.caotc.excel4j.config;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
+import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 import com.caotc.excel4j.parse.result.Menu;
@@ -17,6 +18,7 @@ public class MenuConfig {
   private Direction direction;
   // 属性名字
   private String fieldName;
+  private MenuType menuType;
   private MenuConfig parentMenuConfig;
   private MenuLoadConfig menuLoadConfig;
 
@@ -36,8 +38,27 @@ public class MenuConfig {
     return MenuNecessity.NOT_MUST.equals(getMenuNecessity());
   }
   
+  public boolean isDataMenu() {
+    return MenuType.DATA_MENU.equals(getMenuType());
+  }
+  
+  public boolean isFixedDataMenu() {
+    return isDataMenu() && LoadType.FIXED.equals(menuLoadConfig.getLoadType());
+  }
+  
+  public boolean isUnFixedDataMenu() {
+    return isDataMenu() && LoadType.UNFIXED.equals(menuLoadConfig.getLoadType());
+  }
+  
+  public boolean isMixedDataMenu() {
+    return isDataMenu() && LoadType.MIXED.equals(menuLoadConfig.getLoadType());
+  }
   
   
+  public MenuType getMenuType() {
+    return menuType;
+  }
+
   public StandardCellMatcher getMenuMatcher() {
     return menuMatcher;
   }

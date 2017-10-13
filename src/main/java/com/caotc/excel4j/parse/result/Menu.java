@@ -3,10 +3,6 @@ package com.caotc.excel4j.parse.result;
 import java.util.List;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
-import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.constant.MenuNecessity;
-import com.caotc.excel4j.constant.MenuType;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 public class Menu {
@@ -16,7 +12,6 @@ public class Menu {
     private Table table;
     private Menu parentMenu;
     private List<Menu> childrenMenus = Lists.newArrayList();
-    private MenuType menuType;
 
     public Builder cell(StandardCell cell) {
       this.cell = cell;
@@ -43,11 +38,6 @@ public class Menu {
       return this;
     }
 
-    public Builder menuType(MenuType menuType) {
-      this.menuType = menuType;
-      return this;
-    }
-
     public Menu build() {
       return new Menu(this);
     }
@@ -62,7 +52,6 @@ public class Menu {
   private final Table table;
   private final Menu parentMenu;
   private final List<Menu> childrenMenus;
-  private final MenuType menuType;
   
 
   public Menu(Builder builder) {
@@ -72,7 +61,6 @@ public class Menu {
     parentMenu = builder.parentMenu;
     childrenMenus = builder.childrenMenus;
     getCheckMenuConfig();
-    menuType = builder.menuType;
   }
 
   public void checkDataCell(StandardCell dataCell) {
@@ -135,9 +123,9 @@ public class Menu {
   }
 
   public MenuConfig getCheckMenuConfig() {
-    return getMenuConfig() == null
+    return menuConfig == null
         ? getParentMenu() == null ? null : getParentMenu().getCheckMenuConfig()
-        : getMenuConfig();
+        : menuConfig;
   }
 
   public void load() {
@@ -161,6 +149,30 @@ public class Menu {
     return cell.getValueCell().getStringCellValue();
   }
 
+  public boolean isDataMenu() {
+    return getCheckMenuConfig().isDataMenu();
+  }
+
+  public boolean isFixedDataMenu() {
+    return getCheckMenuConfig().isFixedDataMenu();
+  }
+
+  public boolean isUnFixedDataMenu() {
+    return getCheckMenuConfig().isUnFixedDataMenu();
+  }
+
+  public boolean isMixedDataMenu() {
+    return getCheckMenuConfig().isMixedDataMenu();
+  }
+
+  public boolean isMustMenu() {
+    return getCheckMenuConfig().isMustMenu();
+  }
+
+  public boolean isNotMustMenu() {
+    return getCheckMenuConfig().isNotMustMenu();
+  }
+  
   public StandardCell getCell() {
     return cell;
   }
@@ -173,39 +185,11 @@ public class Menu {
     return parentMenu;
   }
 
-  public MenuType getMenuType() {
-    return menuType;
-  }
-
   public Table getTable() {
     return table;
   }
 
   public List<Menu> getChildrenMenus() {
     return childrenMenus;
-  }
-
-  public boolean isDataMenu() {
-    return MenuType.DATA_MENU.equals(getMenuType());
-  }
-
-  public boolean isFixedDataMenu() {
-    return isDataMenu() && LoadType.FIXED.equals(getCheckMenuConfig().getLoadType());
-  }
-
-  public boolean isUnFixedDataMenu() {
-    return isDataMenu() && LoadType.UNFIXED.equals(getCheckMenuConfig().getLoadType());
-  }
-
-  public boolean isMixedDataMenu() {
-    return isDataMenu() && LoadType.MIXED.equals(getCheckMenuConfig().getLoadType());
-  }
-
-  public boolean isMustMenu() {
-    return getCheckMenuConfig().isMustMenu();
-  }
-
-  public boolean isNotMustMenu() {
-    return getCheckMenuConfig().isNotMustMenu();
   }
 }
