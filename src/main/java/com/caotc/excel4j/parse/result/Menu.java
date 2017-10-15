@@ -3,6 +3,7 @@ package com.caotc.excel4j.parse.result;
 import java.util.List;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class Menu {
@@ -30,7 +31,7 @@ public class Menu {
 
     public Builder parentMenu(Menu parentMenu) {
       this.parentMenu = parentMenu;
-      return this;
+      return table(parentMenu.table);
     }
 
     public Builder childrenMenus(List<Menu> childrenMenus) {
@@ -39,6 +40,13 @@ public class Menu {
     }
 
     public Menu build() {
+      Preconditions.checkNotNull(cell);
+      Preconditions.checkArgument(table != null || parentMenu != null);
+      Preconditions.checkArgument(menuConfig != null || parentMenu != null);
+
+      if (parentMenu != null && table == null) {
+        table = parentMenu.table;
+      }
       return new Menu(this);
     }
   }
@@ -52,7 +60,7 @@ public class Menu {
   private final Table table;
   private final Menu parentMenu;
   private final List<Menu> childrenMenus;
-  
+
 
   public Menu(Builder builder) {
     cell = builder.cell;
@@ -60,12 +68,11 @@ public class Menu {
     table = builder.table;
     parentMenu = builder.parentMenu;
     childrenMenus = builder.childrenMenus;
-    getCheckMenuConfig();
   }
 
   public void checkDataCell(StandardCell dataCell) {
-    MenuConfig config=getCheckMenuConfig();
-    if (config.getDataMatcher()!=null) {
+    MenuConfig config = getCheckMenuConfig();
+    if (config.getDataMatcher() != null) {
       // TODO
       Object value = dataCell.getValue();
       // if(!checkMenuConfig.getDataMatcher().matches(value)){
@@ -114,10 +121,10 @@ public class Menu {
   }
 
   public StandardCell nextDataCell(StandardCell cell) {
-    MenuConfig config=getCheckMenuConfig();
+    MenuConfig config = getCheckMenuConfig();
     Direction direction = config.getDirection();
     if (cell == null || this.cell.equals(cell)) {
-      return direction.getCell(this.cell, config.getFirstDistance());
+      return direction.getCell(this.cell, config.getDistance());
     }
     return direction.nextCell(cell);
   }
@@ -129,7 +136,7 @@ public class Menu {
   }
 
   public void load() {
-      getCheckMenuConfig().load(this);
+    getCheckMenuConfig().load(this);
   }
 
   public void addChildrenMenu(Menu childrenMenu) {
@@ -145,7 +152,6 @@ public class Menu {
   }
 
   public String getName() {
-    // TODO
     return cell.getValueCell().getStringCellValue();
   }
 
@@ -172,7 +178,7 @@ public class Menu {
   public boolean isNotMustMenu() {
     return getCheckMenuConfig().isNotMustMenu();
   }
-  
+
   public StandardCell getCell() {
     return cell;
   }

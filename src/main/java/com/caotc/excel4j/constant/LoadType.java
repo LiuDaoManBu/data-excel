@@ -2,12 +2,12 @@ package com.caotc.excel4j.constant;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
-import com.caotc.excel4j.parse.result.Table;
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 
 public enum LoadType {
   UNFIXED {
@@ -15,10 +15,10 @@ public enum LoadType {
     public void loadChildren(Menu menu) {
       MenuConfig config = menu.getCheckMenuConfig();
       List<StandardCell> menuCells =
-          config.getDirection().get(menu.getCell(), config.getFirstDistance());
-      menuCells.forEach(menuCell->{
-        if(!menu.hasChildrenMenu(menuCell)) {
-          menu.addChildrenMenu(new Menu(menuCell));
+          config.getDirection().get(menu.getCell(), config.getDistance());
+      menuCells.forEach(menuCell -> {
+        if (!menu.hasChildrenMenu(menuCell)) {
+          menu.addChildrenMenu(Menu.builder().cell(menuCell).parentMenu(menu).build());
         }
       });
     }
@@ -27,23 +27,23 @@ public enum LoadType {
     @Override
     public void loadChildren(Menu menu) {
       MenuConfig config = menu.getCheckMenuConfig();
-      Collection<MenuConfig> childrenConfigs = config.getChildrenMenuConfigs();
+      Collection<MenuConfig> childrenConfigs = config.getMenuLoadConfig().getChildrenMenuConfigs();
       if (!CollectionUtils.isEmpty(childrenConfigs)) {
         List<StandardCell> menuCells =
-            config.getDirection().get(menu.getCell(), config.getFirstDistance());
+            config.getDirection().get(menu.getCell(), config.getDistance());
         if (!CollectionUtils.isEmpty(menuCells)) {
           childrenConfigs.forEach(childrenConfig -> {
-            Optional<StandardCell> optional = menuCells.stream()
-                .filter(menuCell -> childrenConfig.getMenuMatcher().matches(menuCell)).findAny();
+            Optional<StandardCell> optional = Iterables.tryFind(menuCells, childrenConfig::matches);
             if (optional.isPresent()) {
-              Menu childrenMenu = new Menu(optional.get(), childrenConfig);
-              menu.addChildrenMenu(childrenMenu);
+              menu.addChildrenMenu(Menu.builder().cell(optional.get()).menuConfig(childrenConfig)
+                  .parentMenu(menu).build());
             }
           });
         }
       }
     }
-  },MIXED {
+  },
+  MIXED {
     @Override
     public void loadChildren(Menu menu) {
       FIXED.loadChildren(menu);

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressBase;
 import com.caotc.excel4j.parse.result.StandardCell;
@@ -22,10 +21,10 @@ public enum Direction {
     }
 
     @Override
-    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
       Preconditions.checkNotNull(address);
-      return new CellRangeAddress(address.getFirstRow() - DEFAULT_DISTANCE,
-          address.getFirstRow() - DEFAULT_DISTANCE, address.getFirstColumn(),
+      return new CellRangeAddress(address.getFirstRow() - distance,
+          address.getFirstRow() - distance, address.getFirstColumn(),
           address.getLastColumn());
     }
   },
@@ -36,10 +35,10 @@ public enum Direction {
     }
 
     @Override
-    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
       Preconditions.checkNotNull(address);
-      return new CellRangeAddress(address.getLastRow() + DEFAULT_DISTANCE,
-          address.getLastRow() + DEFAULT_DISTANCE, address.getFirstColumn(),
+      return new CellRangeAddress(address.getLastRow() + distance,
+          address.getLastRow() + distance, address.getFirstColumn(),
           address.getLastColumn());
     }
   },
@@ -50,10 +49,10 @@ public enum Direction {
     }
 
     @Override
-    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
       Preconditions.checkNotNull(address);
       return new CellRangeAddress(address.getFirstRow(), address.getLastRow(),
-          address.getFirstColumn() - DEFAULT_DISTANCE, address.getFirstColumn() - DEFAULT_DISTANCE);
+          address.getFirstColumn() - distance, address.getFirstColumn() - distance);
     }
   },
   RIGHT {
@@ -63,18 +62,22 @@ public enum Direction {
     }
 
     @Override
-    public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
       Preconditions.checkNotNull(address);
       return new CellRangeAddress(address.getFirstRow(), address.getLastRow(),
-          address.getLastColumn() + DEFAULT_DISTANCE, address.getLastColumn() + DEFAULT_DISTANCE);
+          address.getLastColumn() + distance, address.getLastColumn() + distance);
     }
   };
   private static final int DEFAULT_DISTANCE = 1;
 
   public abstract Direction getNegativeDirection();
 
-  public abstract CellRangeAddress nextAddress(CellRangeAddressBase address);
+  public abstract CellRangeAddress getAddress(CellRangeAddressBase address,int distance);
 
+  public CellRangeAddress nextAddress(CellRangeAddressBase address) {
+    return getAddress(address,DEFAULT_DISTANCE);
+  }
+  
   public List<StandardCell> next(StandardCell original) {
     Preconditions.checkNotNull(original); 
     CellRangeAddress address = nextAddress(original);
@@ -109,7 +112,7 @@ public enum Direction {
     Preconditions.checkNotNull(cell);
 
     List<StandardCell> cells = next(cell);
-    Preconditions.checkState(CollectionUtils.isEmpty(cells));
+    Preconditions.checkState(!CollectionUtils.isEmpty(cells));
     return Iterables.getOnlyElement(cells);
   }
 
@@ -118,7 +121,7 @@ public enum Direction {
     Preconditions.checkArgument(distance > 0);
 
     List<StandardCell> cells = get(cell, distance);
-    Preconditions.checkState(CollectionUtils.isEmpty(cells));
+    Preconditions.checkState(!CollectionUtils.isEmpty(cells));
     return Iterables.getOnlyElement(cells);
   }
 }
