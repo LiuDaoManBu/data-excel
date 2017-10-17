@@ -25,57 +25,7 @@ public class MenuConfig {
     private MenuType menuType;
     private MenuConfig parentMenuConfig;
     private MenuLoadConfig menuLoadConfig;
-
-    public Builder tableConfig(TableConfig tableConfig) {
-      this.tableConfig = tableConfig;
-      return this;
-    }
-
-    public Builder menuMatcher(StandardCellMatcher menuMatcher) {
-      this.menuMatcher = menuMatcher;
-      return this;
-    }
-
-    public Builder dataMatcher(DataMatcher dataMatcher) {
-      this.dataMatcher = dataMatcher;
-      return this;
-    }
-
-    public Builder distance(int distance) {
-      this.distance = distance;
-      return this;
-    }
-
-    public Builder menuNecessity(MenuNecessity menuNecessity) {
-      this.menuNecessity = menuNecessity;
-      return this;
-    }
-
-    public Builder direction(Direction direction) {
-      this.direction = direction;
-      return this;
-    }
-
-    public Builder fieldName(String fieldName) {
-      this.fieldName = fieldName;
-      return this;
-    }
-
-    public Builder menuType(MenuType menuType) {
-      this.menuType = menuType;
-      return this;
-    }
-
-    public Builder parentMenuConfig(MenuConfig parentMenuConfig) {
-      this.parentMenuConfig = parentMenuConfig;
-      return this;
-    }
-
-    public Builder menuLoadConfig(MenuLoadConfig menuLoadConfig) {
-      this.menuLoadConfig = menuLoadConfig;
-      return this;
-    }
-
+    
     public MenuConfig build() {
       Preconditions.checkArgument(tableConfig != null || parentMenuConfig != null);
       Preconditions.checkNotNull(menuMatcher);
@@ -96,13 +46,104 @@ public class MenuConfig {
       }
       return new MenuConfig(this);
     }
+
+    public TableConfig getTableConfig() {
+      return tableConfig;
+    }
+
+    public Builder setTableConfig(TableConfig tableConfig) {
+      this.tableConfig = tableConfig;
+      return this;
+    }
+
+    public StandardCellMatcher getMenuMatcher() {
+      return menuMatcher;
+    }
+
+    public Builder setMenuMatcher(StandardCellMatcher menuMatcher) {
+      this.menuMatcher = menuMatcher;
+      return this;
+    }
+
+    public DataMatcher getDataMatcher() {
+      return dataMatcher;
+    }
+
+    public Builder setDataMatcher(DataMatcher dataMatcher) {
+      this.dataMatcher = dataMatcher;
+      return this;
+    }
+
+    public int getDistance() {
+      return distance;
+    }
+
+    public Builder setDistance(int distance) {
+      this.distance = distance;
+      return this;
+    }
+
+    public MenuNecessity getMenuNecessity() {
+      return menuNecessity;
+    }
+
+    public Builder setMenuNecessity(MenuNecessity menuNecessity) {
+      this.menuNecessity = menuNecessity;
+      return this;
+    }
+
+    public Direction getDirection() {
+      return direction;
+    }
+
+    public Builder setDirection(Direction direction) {
+      this.direction = direction;
+      return this;
+    }
+
+    public String getFieldName() {
+      return fieldName;
+    }
+
+    public Builder setFieldName(String fieldName) {
+      this.fieldName = fieldName;
+      return this;
+    }
+
+    public MenuType getMenuType() {
+      return menuType;
+    }
+
+    public Builder setMenuType(MenuType menuType) {
+      this.menuType = menuType;
+      return this;
+    }
+
+    public MenuConfig getParentMenuConfig() {
+      return parentMenuConfig;
+    }
+
+    public Builder setParentMenuConfig(MenuConfig parentMenuConfig) {
+      this.parentMenuConfig = parentMenuConfig;
+      return this;
+    }
+
+    public MenuLoadConfig getMenuLoadConfig() {
+      return menuLoadConfig;
+    }
+
+    public Builder setMenuLoadConfig(MenuLoadConfig menuLoadConfig) {
+      this.menuLoadConfig = menuLoadConfig;
+      return this;
+    }
+    
   }
 
   private static final int DEFAULT_DISTANCE = 1;
   private static final MenuNecessity DEFAULT_MENUNECESSITY = MenuNecessity.MUST;
 
   public static Builder builder() {
-    return new Builder().distance(DEFAULT_DISTANCE).menuNecessity(DEFAULT_MENUNECESSITY);
+    return new Builder().setDistance(DEFAULT_DISTANCE).setMenuNecessity(DEFAULT_MENUNECESSITY);
   }
 
   private final TableConfig tableConfig;

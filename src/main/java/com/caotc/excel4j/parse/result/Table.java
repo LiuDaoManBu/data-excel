@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class Table {
-  private static class Builder {
+  public static class Builder {
     private TableConfig tableConfig;
     private List<TableError> errors = Lists.newArrayList();;
     private SheetParseResult sheetParseResult;
@@ -32,39 +32,64 @@ public class Table {
     private Data fiexdData;
     private Collection<Data> noFiexdDatas = Lists.newArrayList();
 
-    public Builder tableConfig(TableConfig tableConfig) {
+    public Table build() {
+      return new Table(this);
+    }
+
+    public TableConfig getTableConfig() {
+      return tableConfig;
+    }
+
+    public Builder setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
 
-    public Builder errors(List<TableError> errors) {
+    public List<TableError> getErrors() {
+      return errors;
+    }
+
+    public Builder setErrors(List<TableError> errors) {
       this.errors = errors;
       return this;
     }
 
-    public Builder sheetParseResult(SheetParseResult sheetParseResult) {
+    public SheetParseResult getSheetParseResult() {
+      return sheetParseResult;
+    }
+
+    public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
       return this;
     }
 
-    public Builder menus(Collection<Menu> menus) {
+    public Collection<Menu> getMenus() {
+      return menus;
+    }
+
+    public Builder setMenus(Collection<Menu> menus) {
       this.menus = menus;
       return this;
     }
 
-    public Builder fiexdData(Data fiexdData) {
+    public Data getFiexdData() {
+      return fiexdData;
+    }
+
+    public Builder setFiexdData(Data fiexdData) {
       this.fiexdData = fiexdData;
       return this;
     }
 
-    public Builder noFiexdDatas(Collection<Data> noFiexdDatas) {
+    public Collection<Data> getNoFiexdDatas() {
+      return noFiexdDatas;
+    }
+
+    public Builder setNoFiexdDatas(Collection<Data> noFiexdDatas) {
       this.noFiexdDatas = noFiexdDatas;
       return this;
     }
-
-    public Table build() {
-      return new Table(this);
-    }
+    
   }
 
   public static Builder builder() {
@@ -112,8 +137,8 @@ public class Table {
         Collection<MenuConfig> config = Collections2.filter(menuConfigs,
             menuConfig -> menuConfig.getMenuMatcher().matches(cell));
         if (!CollectionUtils.isEmpty(config)) {
-          menus.add(Menu.builder().cell(cell).menuConfig(Iterables.getOnlyElement(config))
-              .table(this).build());
+          menus.add(Menu.builder().setCell(cell).setMenuConfig(Iterables.getOnlyElement(config))
+              .setTable(this).build());
         }
       }
     }

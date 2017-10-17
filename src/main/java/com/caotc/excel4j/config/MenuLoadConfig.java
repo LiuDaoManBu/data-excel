@@ -12,28 +12,45 @@ public class MenuLoadConfig {
     private com.google.common.collect.ImmutableSet.Builder<MenuConfig> childrenMenuConfigs=ImmutableSet.builder();
     private Integer dataNumber;
     
-    public Builder menuConfig(MenuConfig menuConfig) {
-      this.menuConfig=menuConfig;
-      return this;
-    }
-    
-    public Builder loadType(LoadType loadType) {
-      this.loadType=loadType;
-      return this;
-    }
-    
-    public Builder addChildrenMenuConfig(MenuConfig config) {
-      childrenMenuConfigs.add(config);
-      return this;
-    }
-    
-    public Builder dataNumber(Integer dataNumber) {
-      this.dataNumber=dataNumber;
-      return this;
-    }
-    
     public MenuLoadConfig build() {
       return new MenuLoadConfig(this);
+    }
+
+    public MenuConfig getMenuConfig() {
+      return menuConfig;
+    }
+
+    public Builder setMenuConfig(MenuConfig menuConfig) {
+      this.menuConfig = menuConfig;
+      return this;
+    }
+
+    public LoadType getLoadType() {
+      return loadType;
+    }
+
+    public Builder setLoadType(LoadType loadType) {
+      this.loadType = loadType;
+      return this;
+    }
+
+    public com.google.common.collect.ImmutableSet.Builder<MenuConfig> getChildrenMenuConfigs() {
+      return childrenMenuConfigs;
+    }
+
+    public Builder setChildrenMenuConfigs(
+        com.google.common.collect.ImmutableSet.Builder<MenuConfig> childrenMenuConfigs) {
+      this.childrenMenuConfigs = childrenMenuConfigs;
+      return this;
+    }
+
+    public Integer getDataNumber() {
+      return dataNumber;
+    }
+
+    public Builder setDataNumber(Integer dataNumber) {
+      this.dataNumber = dataNumber;
+      return this;
     }
     
   }

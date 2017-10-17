@@ -13,32 +13,7 @@ public class Menu {
     private Table table;
     private Menu parentMenu;
     private List<Menu> childrenMenus = Lists.newArrayList();
-
-    public Builder cell(StandardCell cell) {
-      this.cell = cell;
-      return this;
-    }
-
-    public Builder menuConfig(MenuConfig menuConfig) {
-      this.menuConfig = menuConfig;
-      return this;
-    }
-
-    public Builder table(Table table) {
-      this.table = table;
-      return this;
-    }
-
-    public Builder parentMenu(Menu parentMenu) {
-      this.parentMenu = parentMenu;
-      return table(parentMenu.table);
-    }
-
-    public Builder childrenMenus(List<Menu> childrenMenus) {
-      this.childrenMenus = childrenMenus;
-      return this;
-    }
-
+    
     public Menu build() {
       Preconditions.checkNotNull(cell);
       Preconditions.checkArgument(table != null || parentMenu != null);
@@ -49,6 +24,52 @@ public class Menu {
       }
       return new Menu(this);
     }
+
+    public StandardCell getCell() {
+      return cell;
+    }
+
+    public Builder setCell(StandardCell cell) {
+      this.cell = cell;
+      return this;
+    }
+
+    public MenuConfig getMenuConfig() {
+      return menuConfig;
+    }
+
+    public Builder setMenuConfig(MenuConfig menuConfig) {
+      this.menuConfig = menuConfig;
+      return this;
+    }
+
+    public Table getTable() {
+      return table;
+    }
+
+    public Builder setTable(Table table) {
+      this.table = table;
+      return this;
+    }
+
+    public Menu getParentMenu() {
+      return parentMenu;
+    }
+
+    public Builder setParentMenu(Menu parentMenu) {
+      this.parentMenu = parentMenu;
+      return this;
+    }
+
+    public List<Menu> getChildrenMenus() {
+      return childrenMenus;
+    }
+
+    public Builder setChildrenMenus(List<Menu> childrenMenus) {
+      this.childrenMenus = childrenMenus;
+      return this;
+    }
+    
   }
 
   public static Builder builder() {
