@@ -16,40 +16,53 @@ import com.google.common.collect.Lists;
 public enum Direction {
   TOP {
     @Override
+    public boolean isBoderCell(StandardCell cell) {
+      return cell.containsRow(cell.getSheet().getFirstRowNum());
+    }
+
+    @Override
     public Direction getNegativeDirection() {
       return BOTTOM;
     }
 
     @Override
-    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address, int distance) {
       Preconditions.checkNotNull(address);
       return new CellRangeAddress(address.getFirstRow() - distance,
-          address.getFirstRow() - distance, address.getFirstColumn(),
-          address.getLastColumn());
+          address.getFirstRow() - distance, address.getFirstColumn(), address.getLastColumn());
     }
   },
   BOTTOM {
+    @Override
+    public boolean isBoderCell(StandardCell cell) {
+      return cell.containsRow(cell.getSheet().getLastRowNum());
+    }
+
     @Override
     public Direction getNegativeDirection() {
       return TOP;
     }
 
     @Override
-    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address, int distance) {
       Preconditions.checkNotNull(address);
-      return new CellRangeAddress(address.getLastRow() + distance,
-          address.getLastRow() + distance, address.getFirstColumn(),
-          address.getLastColumn());
+      return new CellRangeAddress(address.getLastRow() + distance, address.getLastRow() + distance,
+          address.getFirstColumn(), address.getLastColumn());
     }
   },
   LEFT {
+    @Override
+    public boolean isBoderCell(StandardCell cell) {
+      return Iterables.any(cell.getRows(), row -> cell.containsColumn(row.getFirstCellNum()));
+    }
+
     @Override
     public Direction getNegativeDirection() {
       return RIGHT;
     }
 
     @Override
-    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address, int distance) {
       Preconditions.checkNotNull(address);
       return new CellRangeAddress(address.getFirstRow(), address.getLastRow(),
           address.getFirstColumn() - distance, address.getFirstColumn() - distance);
@@ -57,12 +70,17 @@ public enum Direction {
   },
   RIGHT {
     @Override
+    public boolean isBoderCell(StandardCell cell) {
+      return Iterables.any(cell.getRows(), row -> cell.containsColumn(row.getLastCellNum()));
+    }
+
+    @Override
     public Direction getNegativeDirection() {
       return LEFT;
     }
 
     @Override
-    public CellRangeAddress getAddress(CellRangeAddressBase address,int distance) {
+    public CellRangeAddress getAddress(CellRangeAddressBase address, int distance) {
       Preconditions.checkNotNull(address);
       return new CellRangeAddress(address.getFirstRow(), address.getLastRow(),
           address.getLastColumn() + distance, address.getLastColumn() + distance);
@@ -70,16 +88,18 @@ public enum Direction {
   };
   private static final int DEFAULT_DISTANCE = 1;
 
+  public abstract boolean isBoderCell(StandardCell cell);
+
   public abstract Direction getNegativeDirection();
 
-  public abstract CellRangeAddress getAddress(CellRangeAddressBase address,int distance);
+  public abstract CellRangeAddress getAddress(CellRangeAddressBase address, int distance);
 
   public CellRangeAddress nextAddress(CellRangeAddressBase address) {
-    return getAddress(address,DEFAULT_DISTANCE);
+    return getAddress(address, DEFAULT_DISTANCE);
   }
-  
+
   public List<StandardCell> next(StandardCell original) {
-    Preconditions.checkNotNull(original); 
+    Preconditions.checkNotNull(original);
     CellRangeAddress address = nextAddress(original);
 
     List<StandardCell> cells = Lists.newLinkedList();

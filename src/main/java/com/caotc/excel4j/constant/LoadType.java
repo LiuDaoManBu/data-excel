@@ -18,7 +18,7 @@ public enum LoadType {
           config.getDirection().get(menu.getCell(), config.getDistance());
       menuCells.forEach(menuCell -> {
         if (!menu.hasChildrenMenu(menuCell)) {
-          menu.addChildrenMenu(Menu.builder().cell(menuCell).parentMenu(menu).build());
+          menu.addChildrenMenu(Menu.builder().setCell(menuCell).setParentMenu(menu).build());
         }
       });
     }
@@ -35,8 +35,8 @@ public enum LoadType {
           childrenConfigs.forEach(childrenConfig -> {
             Optional<StandardCell> optional = Iterables.tryFind(menuCells, childrenConfig::matches);
             if (optional.isPresent()) {
-              menu.addChildrenMenu(Menu.builder().cell(optional.get()).menuConfig(childrenConfig)
-                  .parentMenu(menu).build());
+              menu.addChildrenMenu(Menu.builder().setCell(optional.get()).setMenuConfig(childrenConfig)
+                  .setParentMenu(menu).build());
             }
           });
         }

@@ -2,20 +2,22 @@ package com.caotc.excel4j;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 public class TestGuava {
   public static void main(String[] args) {
-    whenFilterWithCollections2_thenFiltered();
+//    whenFilterWithCollections2_thenFiltered();
+    ImmutableCollection<String> strings=ImmutableList.of("aaa","b");
+    Collection<String> filters=Collections2.filter(strings, String::isEmpty);
+    ImmutableCollection<String> list=(ImmutableCollection<String>) filters;
   }
 
   public static void viewTest() {
@@ -43,6 +45,7 @@ public class TestGuava {
   public static void whenFilterWithCollections2_thenFiltered() {
     List<String> names = Lists.newArrayList("John", "Jane", "Adam", "Tom");
     Collection<String> result = Collections2.filter(names, Predicates.containsPattern("a"));
+    System.out.println(Collections2.transform(names,string->string.length()));
     System.out.println(names);
     System.out.println(result);
 

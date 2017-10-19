@@ -1,11 +1,16 @@
 package com.caotc.excel4j.parse.result;
 
-import org.apache.poi.ss.usermodel.Cell;
 import com.caotc.excel4j.util.ExcelUtil;
 
 public class CellData {
-  private Menu menu;
-  private Cell valueCell;
+  private final Menu menu;
+  private final StandardCell valueCell;
+
+  public CellData(Menu menu, StandardCell valueCell) {
+    super();
+    this.menu = menu;
+    this.valueCell = valueCell;
+  }
 
   public Object getValue() {
     return ExcelUtil.getValue(valueCell);
@@ -24,15 +29,7 @@ public class CellData {
     return menu;
   }
 
-  public void setMenu(Menu menu) {
-    this.menu = menu;
-  }
-
-  public Cell getValueCell() {
+  public StandardCell getValueCell() {
     return valueCell;
-  }
-
-  public void setValueCell(Cell valueCell) {
-    this.valueCell = valueCell;
   }
 }

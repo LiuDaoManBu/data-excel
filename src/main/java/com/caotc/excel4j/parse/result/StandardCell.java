@@ -3,6 +3,7 @@ package com.caotc.excel4j.parse.result;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -15,7 +16,14 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.Removal;
+import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.util.ExcelUtil;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.collect.Iterables;
 
 public class StandardCell extends CellRangeAddress implements Cell {
   private static final int ONE = 1;
@@ -45,9 +53,7 @@ public class StandardCell extends CellRangeAddress implements Cell {
   private StandardCell(Sheet sheet, CellRangeAddress cellRangeAddress) {
     super(cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow(),
         cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
-    if (sheet == null) {
-      throw new IllegalArgumentException("sheet can not be null");
-    }
+    Preconditions.checkNotNull(sheet);
     this.sheet = sheet;
     // TODO 是否需要出于安全性考虑复写一份私有方法在本类?
     this.valueCell = ExcelUtil.getFirstCell(sheet, this);
@@ -68,6 +74,38 @@ public class StandardCell extends CellRangeAddress implements Cell {
 
   public boolean isMergedRegion() {
     return getNumberOfCells() > ONE;
+  }
+
+  public ImmutableCollection<Row> getRows(){
+    Builder<Row> builder=ImmutableSet.builder();
+    for(int rowIndex=getFirstRow();rowIndex<=getLastRow();rowIndex++) {
+      builder.add(sheet.getRow(rowIndex));
+    }
+    return builder.build();
+  }
+  
+  public boolean isTopBorderCell() {
+    return isBorderCell(Direction.TOP);
+  }
+  
+  public boolean isBottomBorderCell() {
+    return isBorderCell(Direction.BOTTOM);
+  }
+  
+  public boolean isLeftBorderCell() {
+    return isBorderCell(Direction.LEFT);
+  }
+  
+  public boolean isRightBorderCell() {
+    return isBorderCell(Direction.RIGHT);
+  }
+  
+  public boolean isBorderCell(Direction direction) {
+    return direction.isBoderCell(this);
+  }
+  
+  public boolean isBorderCell() {
+    return Iterables.any(EnumSet.allOf(Direction.class), this::isBorderCell);
   }
 
   // delegate Cell methods start

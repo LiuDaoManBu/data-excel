@@ -3,6 +3,7 @@ package com.caotc.excel4j.parse.result;
 import java.util.List;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -13,7 +14,7 @@ public class Menu {
     private Table table;
     private Menu parentMenu;
     private List<Menu> childrenMenus = Lists.newArrayList();
-    
+
     public Menu build() {
       Preconditions.checkNotNull(cell);
       Preconditions.checkArgument(table != null || parentMenu != null);
@@ -69,7 +70,7 @@ public class Menu {
       this.childrenMenus = childrenMenus;
       return this;
     }
-    
+
   }
 
   public static Builder builder() {
@@ -133,21 +134,28 @@ public class Menu {
     }
   }
 
-  public StandardCell getDataCell(int serialNumber) {
-    StandardCell dataCell = cell;
-    for (int i = 1; i <= serialNumber; i++) {
-      dataCell = nextDataCell(dataCell);
+  public Optional<StandardCell> getDataCell(int serialNumber) {
+    Optional<StandardCell> cell = Optional.of(this.cell);
+    for (int i = 1; i <= serialNumber && cell.isPresent(); i++) {
+      cell = nextDataCell(cell.get());
     }
-    return dataCell;
+    return cell;
   }
 
-  public StandardCell nextDataCell(StandardCell cell) {
+  public Optional<StandardCell> nextDataCell(StandardCell cell) {
+    if (cell == null) {
+      cell = this.cell;
+    }
+
     MenuConfig config = getCheckMenuConfig();
     Direction direction = config.getDirection();
-    if (cell == null || this.cell.equals(cell)) {
-      return direction.getCell(this.cell, config.getDistance());
+
+    if (config.isUnFixedDataMenu() && cell.isBorderCell(direction)) {
+      return Optional.absent();
     }
-    return direction.nextCell(cell);
+
+    return Optional.of(this.cell.equals(cell) ? direction.getCell(this.cell, config.getDistance())
+        : direction.nextCell(cell));
   }
 
   public MenuConfig getCheckMenuConfig() {
@@ -158,6 +166,7 @@ public class Menu {
 
   public void load() {
     getCheckMenuConfig().load(this);
+    childrenMenus.forEach(Menu::load);
   }
 
   public void addChildrenMenu(Menu childrenMenu) {

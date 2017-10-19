@@ -140,10 +140,10 @@ public class MenuConfig {
   }
 
   private static final int DEFAULT_DISTANCE = 1;
-  private static final MenuNecessity DEFAULT_MENUNECESSITY = MenuNecessity.MUST;
+  private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
 
   public static Builder builder() {
-    return new Builder().setDistance(DEFAULT_DISTANCE).setMenuNecessity(DEFAULT_MENUNECESSITY);
+    return new Builder().setDistance(DEFAULT_DISTANCE).setMenuNecessity(DEFAULT_MENU_NECESSITY);
   }
 
   private final TableConfig tableConfig;
