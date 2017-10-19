@@ -1,7 +1,5 @@
 package com.caotc.excel4j.parse.result;
 
-import com.caotc.excel4j.util.ExcelUtil;
-
 public class CellData {
   private final Menu menu;
   private final StandardCell valueCell;
@@ -13,7 +11,7 @@ public class CellData {
   }
 
   public Object getValue() {
-    return ExcelUtil.getValue(valueCell);
+    return valueCell.getValue();
   }
 
   @SuppressWarnings("unchecked")
