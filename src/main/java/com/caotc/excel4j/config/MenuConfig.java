@@ -1,5 +1,6 @@
 package com.caotc.excel4j.config;
 
+import java.util.Collection;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
@@ -177,14 +178,6 @@ public class MenuConfig {
     return parentMenuConfig == null;
   }
 
-  public void load(Menu menu) {
-    menuLoadConfig.load(menu);
-  }
-
-  public boolean matches(StandardCell cell) {
-    return menuMatcher.matches(cell);
-  }
-
   public boolean isMustMenu() {
     return MenuNecessity.MUST.equals(getMenuNecessity());
   }
@@ -209,6 +202,35 @@ public class MenuConfig {
     return isDataMenu() && LoadType.MIXED.equals(menuLoadConfig.getLoadType());
   }
 
+  //delegate methods start
+  public void load(Menu menu) {
+    menuLoadConfig.load(menu);
+  }
+
+  public boolean matches(StandardCell cell) {
+    return menuMatcher.matches(cell);
+  }
+  
+  public boolean matches(Object value) {
+    return dataMatcher.matches(value);
+  }
+
+  public boolean support(Object value) {
+    return dataMatcher.support(value);
+  }
+
+  public Collection<Class<?>> canCastClasses() {
+    return dataMatcher.canCastClasses();
+  }
+
+  public <T> boolean canCast(Class<T> clazz) {
+    return dataMatcher.canCast(clazz);
+  }
+
+  public <T> T cast(Object value, Class<T> clazz) {
+    return dataMatcher.cast(value, clazz);
+  }
+  //delegate methods end
 
   public MenuLoadConfig getMenuLoadConfig() {
     return menuLoadConfig;

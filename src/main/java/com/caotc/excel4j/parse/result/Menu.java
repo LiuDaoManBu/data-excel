@@ -1,10 +1,15 @@
 package com.caotc.excel4j.parse.result;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class Menu {
@@ -13,7 +18,8 @@ public class Menu {
     private MenuConfig menuConfig;
     private Table table;
     private Menu parentMenu;
-    private List<Menu> childrenMenus = Lists.newArrayList();
+    private List<Menu> childrenMenus;
+    private ImmutableList<StandardCell> dataCells;
 
     public Menu build() {
       Preconditions.checkNotNull(cell);
@@ -71,6 +77,15 @@ public class Menu {
       return this;
     }
 
+    public ImmutableList<StandardCell> getDataCells() {
+      return dataCells;
+    }
+
+    public Builder setDataCells(ImmutableList<StandardCell> dataCells) {
+      this.dataCells = dataCells;
+      return this;
+    }
+    
   }
 
   public static Builder builder() {
@@ -82,6 +97,7 @@ public class Menu {
   private final Table table;
   private final Menu parentMenu;
   private final List<Menu> childrenMenus;
+  private final ImmutableList<StandardCell> dataCells;
 
 
   public Menu(Builder builder) {
@@ -90,6 +106,8 @@ public class Menu {
     table = builder.table;
     parentMenu = builder.parentMenu;
     childrenMenus = builder.childrenMenus;
+    //TODO
+    dataCells=builder.dataCells;
   }
 
   public void checkDataCell(StandardCell dataCell) {
@@ -149,8 +167,9 @@ public class Menu {
 
     MenuConfig config = getCheckMenuConfig();
     Direction direction = config.getDirection();
-
-    if (config.isUnFixedDataMenu() && cell.isBorderCell(direction)) {
+    if (cell.isBorderCell(direction)) {
+      //TODO
+//      Preconditions.checkState(!config.isDataMenu() || config.isFixedDataMenu());
       return Optional.absent();
     }
 
@@ -178,7 +197,7 @@ public class Menu {
   }
 
   public boolean hasChildrenMenu(StandardCell cell) {
-    return childrenMenus.stream().anyMatch(childrenMenu -> childrenMenu.getCell().equals(cell));
+    return Iterables.any(childrenMenus, childrenMenu -> childrenMenu.getCell().equals(cell));
   }
 
   public String getName() {
@@ -209,6 +228,28 @@ public class Menu {
     return getCheckMenuConfig().isNotMustMenu();
   }
 
+  // delegate methods start
+  public boolean matches(Object value) {
+    return getCheckMenuConfig().matches(value);
+  }
+
+  public boolean support(Object value) {
+    return getCheckMenuConfig().support(value);
+  }
+
+  public Collection<Class<?>> canCastClasses() {
+    return getCheckMenuConfig().canCastClasses();
+  }
+
+  public <T> boolean canCast(Class<T> clazz) {
+    return getCheckMenuConfig().canCast(clazz);
+  }
+
+  public <T> T cast(Object value, Class<T> clazz) {
+    return getCheckMenuConfig().cast(value, clazz);
+  }
+  // delegate methods end
+  
   public StandardCell getCell() {
     return cell;
   }
@@ -227,5 +268,9 @@ public class Menu {
 
   public List<Menu> getChildrenMenus() {
     return childrenMenus;
+  }
+  
+  public ImmutableList<StandardCell> getDataCells(){
+    return dataCells;
   }
 }

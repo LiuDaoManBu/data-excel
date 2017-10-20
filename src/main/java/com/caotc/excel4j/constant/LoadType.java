@@ -5,8 +5,10 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.parse.result.Menu;
+import com.caotc.excel4j.parse.result.Menu.Builder;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 public enum LoadType {
@@ -22,6 +24,7 @@ public enum LoadType {
         }
       });
     }
+    
   },
   FIXED {
     @Override
@@ -42,6 +45,12 @@ public enum LoadType {
         }
       }
     }
+
+    @Override
+    public void loadDataCells(Builder builder) {
+      
+    }
+    
   },
   MIXED {
     @Override
@@ -51,4 +60,5 @@ public enum LoadType {
     }
   };
   public abstract void loadChildren(Menu menu);
+  public abstract void loadDataCells(Builder builder);
 }

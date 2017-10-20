@@ -18,7 +18,7 @@ public class CellData {
   public <T> T getValue(Class<T> type) {
     Object value = getValue();
     if (value != null && !value.getClass().equals(type)) {
-      value = menu.getCheckMenuConfig().getDataMatcher().getDataType().cast(value, type);
+      value = menu.cast(value, type);
     }
     return (T) value;
   }

@@ -27,12 +27,21 @@ import com.google.common.collect.Maps;
 public class Table {
   public static class Builder {
     private TableConfig tableConfig;
-    private List<TableError> errors = Lists.newArrayList();
+    private List<TableError> errors;
     private SheetParseResult sheetParseResult;
     private Collection<Menu> menus;
-    private Data fiexdData;
-    private List<Data> noFiexdDatas = Lists.newArrayList();
+    private Data data;
 
+    public void parseFixedDatas() {
+      Collections2.filter(menus, Menu::isDataMenu).forEach(menu->{
+        
+      });
+      for (Menu menu : Collections2.filter(menus, Menu::isDataMenu)) {
+        StandardCell dataCell = menu.nextDataCell(null).get();
+      }
+      
+    }
+    
     public Table build() {
       return new Table(this);
     }
@@ -73,21 +82,12 @@ public class Table {
       return this;
     }
 
-    public Data getFiexdData() {
-      return fiexdData;
+    public Data getData() {
+      return data;
     }
 
-    public Builder setFiexdData(Data fiexdData) {
-      this.fiexdData = fiexdData;
-      return this;
-    }
-
-    public List<Data> getNoFiexdDatas() {
-      return noFiexdDatas;
-    }
-
-    public Builder setNoFiexdDatas(List<Data> noFiexdDatas) {
-      this.noFiexdDatas = noFiexdDatas;
+    public Builder setData(Data data) {
+      this.data = data;
       return this;
     }
 
@@ -107,14 +107,13 @@ public class Table {
   private final Collection<Menu> mixedDataMenus;
   private final Collection<Menu> mustMenus;
   private final Collection<Menu> notMustMenus;
-  private final Data fiexdData;
-  private final Collection<Data> unFiexdDatas;
+  private final Data data;
 
   public Table(Builder builder) {
-    this.tableConfig = builder.tableConfig;
-    this.errors = builder.errors;
-    this.sheetParseResult = builder.sheetParseResult;
-    this.menus = builder.menus;
+    tableConfig = builder.tableConfig;
+    errors = builder.errors;
+    sheetParseResult = builder.sheetParseResult;
+    menus = builder.menus;
 
     dataMenus = Collections2.filter(menus, Menu::isDataMenu);
     fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
@@ -125,8 +124,7 @@ public class Table {
     
     parseDatas(builder);
     
-    this.fiexdData = builder.fiexdData;
-    this.unFiexdDatas = builder.noFiexdDatas;
+    data = builder.data;
   }
 
   public void loadMenus() {
@@ -165,6 +163,7 @@ public class Table {
   }
 
   public void checkMenus() {
+    //TODO
     Map<MenuConfig, Menu> menuConfigToMenus = Maps.newHashMap();
     for (Menu menu : menus) {
       if (menu.getMenuConfig() != null) {
@@ -176,16 +175,6 @@ public class Table {
     // addError("请检查模板是否有误,工作簿"+sheet.getSheetName()+"未找到菜单:"+menuConfig.getMenuNameMatcher().getMatchString());
     // }
     // }
-  }
-
-  public void parseFixedDatas(Builder builder) {
-    Collection<CellData> cellDatas = Lists.newArrayList();
-    for (Menu fixedDataMenu : fixedDataMenus) {
-      StandardCell dataCell = fixedDataMenu.nextDataCell(null).get();
-      fixedDataMenu.checkDataCell(dataCell);
-      cellDatas.add(new CellData(fixedDataMenu,dataCell));
-    }
-    builder.fiexdData = new Data(cellDatas);
   }
 
   public void parseUnFixedDatas() {
@@ -265,12 +254,9 @@ public class Table {
     return notMustMenus;
   }
 
-  public Data getFiexdData() {
-    return fiexdData;
+  public Data getData() {
+    return data;
   }
 
-  public Collection<Data> getNoFiexdDatas() {
-    return unFiexdDatas;
-  }
 
 }
