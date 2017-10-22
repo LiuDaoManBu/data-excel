@@ -1,8 +1,12 @@
 package com.caotc.excel4j.collect;
 
+import java.util.Collections;
+import java.util.Iterator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.TreeTraverser;
 
 public class ImmutableTree<T> extends TreeTraverser<T> {
@@ -22,6 +26,17 @@ public class ImmutableTree<T> extends TreeTraverser<T> {
     this.nodeToChildrenFunction = nodeToChildrenFunction;
   }
 
+  public Iterable<? extends Iterable<T>> breadth() {
+    FluentIterable<? extends Iterable<T>> fluentIterable =
+        FluentIterable.from(Collections.singleton(Collections.singleton(root)));
+    for (Iterable<T> last = Iterables.getLast(fluentIterable); Iterables
+        .isEmpty(Iterables.transform(last, this::children)); FluentIterable
+            .concat(Iterables.transform(last, this::children))) {
+
+    }
+    return FluentIterable.from(Collections.singleton(Collections.singleton(root)));
+  }
+
   public FluentIterable<T> breadthFirstTraversal() {
     return breadthFirstTraversal(root);
   }
@@ -32,10 +47,6 @@ public class ImmutableTree<T> extends TreeTraverser<T> {
 
   public FluentIterable<T> preOrderTraversal() {
     return preOrderTraversal(root);
-  }
-
-  public Iterable<T> children() {
-    return children(root);
   }
 
   @Override

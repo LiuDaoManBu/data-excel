@@ -144,7 +144,7 @@ public class Table {
   }
   
   public FluentIterable<Menu> getMenus() {
-    return FluentIterable.from(menuTrees).transformAndConcat(ImmutableTree::children);
+    return FluentIterable.from(menuTrees).transformAndConcat(ImmutableTree::breadthFirstTraversal);
   }
 
   public FluentIterable<Menu> getDataMenus() {
