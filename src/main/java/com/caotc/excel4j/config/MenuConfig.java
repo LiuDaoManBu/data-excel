@@ -203,9 +203,6 @@ public class MenuConfig {
   }
 
   //delegate methods start
-  public void load(Menu menu) {
-    menuLoadConfig.load(menu);
-  }
 
   public boolean matches(StandardCell cell) {
     return menuMatcher.matches(cell);

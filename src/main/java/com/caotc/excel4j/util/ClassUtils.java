@@ -2,48 +2,36 @@ package com.caotc.excel4j.util;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimaps;
+import com.google.common.reflect.TypeToken;
 
 public class ClassUtils extends org.apache.commons.lang3.ClassUtils {
   private ClassUtils() {
     throw new AssertionError();
   }
 
-  public static Stream<Field> getAllFieldStream(Class<?> type) {
-    List<Class<?>> classes = getAllSuperclasses(type);
-    classes.add(type);
-    return classes.stream().map(Class::getDeclaredFields).map(Arrays::asList)
-        .flatMap(Collection::stream);
-  }
-
   /**
-   * get all fields of the Class
+   * get all fields of the Class.
    * 
    * @param type Class Object
    * @return all fields of the Class
    */
-  public static Collection<Field> getAllFields(Class<?> type) {
-    return getAllFieldStream(type).collect(Collectors.toList());
+  public static ImmutableCollection<Field> getAllFields(Class<?> type) {
+    return FluentIterable.from(TypeToken.of(type).getTypes().classes().rawTypes())
+        .transform(Class::getDeclaredFields).transformAndConcat(Arrays::asList).toSet();
   }
 
-  public static Map<String, Field> getNameToFields(Class<?> type) {
-    return getAllFieldStream(type).collect(Collectors.toMap(Field::getName, Function.identity(),
-        (field1, field2) -> field1.getDeclaringClass().isAssignableFrom(field2.getDeclaringClass())
-            ? field2
-            : field1));
+  public static ImmutableMultimap<String, Field> getNameToFields(Class<?> type) {
+    return Multimaps.index(getAllFields(type), Field::getName);
   }
 
-  public static Field getField(Class<?> type, String fieldName) {
-    Field field = null;
-    if (type != null && fieldName != null) {
-      Map<String, Field> nameToFields = getNameToFields(type);
-      field = nameToFields.get(fieldName);
-    }
-    return field;
+  public static Optional<Field> getField(Class<?> type, String fieldName) {
+    return Optional
+        .fromNullable(Iterables.getOnlyElement(getNameToFields(type).get(fieldName), null));
   }
 }

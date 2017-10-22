@@ -1,47 +1,27 @@
 package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.collect.ImmutableTree;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
-import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.parse.error.TableError;
-import com.caotc.excel4j.util.ExcelUtil;
-import com.google.common.collect.Collections2;
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 public class Table {
   public static class Builder {
     private TableConfig tableConfig;
-    private List<TableError> errors;
     private SheetParseResult sheetParseResult;
-    private Collection<Menu> menus;
-    private Data data;
 
-    public void parseFixedDatas() {
-      Collections2.filter(menus, Menu::isDataMenu).forEach(menu->{
-        
-      });
-      for (Menu menu : Collections2.filter(menus, Menu::isDataMenu)) {
-        StandardCell dataCell = menu.nextDataCell(null).get();
-      }
-      
-    }
-    
     public Table build() {
       return new Table(this);
     }
@@ -55,39 +35,12 @@ public class Table {
       return this;
     }
 
-    public List<TableError> getErrors() {
-      return errors;
-    }
-
-    public Builder setErrors(List<TableError> errors) {
-      this.errors = errors;
-      return this;
-    }
-
     public SheetParseResult getSheetParseResult() {
       return sheetParseResult;
     }
 
     public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
-      return this;
-    }
-
-    public Collection<Menu> getMenus() {
-      return menus;
-    }
-
-    public Builder setMenus(Collection<Menu> menus) {
-      this.menus = menus;
-      return this;
-    }
-
-    public Data getData() {
-      return data;
-    }
-
-    public Builder setData(Data data) {
-      this.data = data;
       return this;
     }
 
@@ -100,39 +53,41 @@ public class Table {
   private final TableConfig tableConfig;
   private final List<TableError> errors;
   private final SheetParseResult sheetParseResult;
-  private final Collection<Menu> menus;
-  private final Collection<Menu> dataMenus;
-  private final Collection<Menu> fixedDataMenus;
-  private final Collection<Menu> unFixedDataMenus;
-  private final Collection<Menu> mixedDataMenus;
-  private final Collection<Menu> mustMenus;
-  private final Collection<Menu> notMustMenus;
+  private final ImmutableCollection<ImmutableTree<Menu>> menuTrees;
+  // private final ImmutableCollection<Menu> menus;
+  // private final ImmutableCollection<Menu> dataMenus;
+  // private final ImmutableCollection<Menu> fixedDataMenus;
+  // private final ImmutableCollection<Menu> unFixedDataMenus;
+  // private final ImmutableCollection<Menu> mixedDataMenus;
+  // private final ImmutableCollection<Menu> mustMenus;
+  // private final ImmutableCollection<Menu> notMustMenus;
   private final Data data;
 
   public Table(Builder builder) {
     tableConfig = builder.tableConfig;
-    errors = builder.errors;
+    // TODO
+    errors = null;
     sheetParseResult = builder.sheetParseResult;
-    menus = builder.menus;
+    menuTrees = FluentIterable.from(loadTopMenus())
+        .transform(menu -> ImmutableTree.using(menu, Menu::getChildrenMenus)).toSet();
 
-    dataMenus = Collections2.filter(menus, Menu::isDataMenu);
-    fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
-    unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
-    mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
-    mustMenus = Collections2.filter(menus, Menu::isMustMenu);
-    notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
-    
-    parseDatas(builder);
-    
-    data = builder.data;
+    // dataMenus = Collections2.filter(menus, Menu::isDataMenu);
+    // fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
+    // unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
+    // mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
+    // mustMenus = Collections2.filter(menus, Menu::isMustMenu);
+    // notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
+
+    com.google.common.collect.ImmutableListMultimap.Builder<Menu, StandardCell> dataBuilder =
+        ImmutableListMultimap.builder();
+    getDataMenus().forEach(menu -> dataBuilder.putAll(menu,
+        menu.getCheckMenuConfig().getMenuLoadConfig().getLoadType().getDataCells(menu)));
+    data = new Data(this, dataBuilder.build());
   }
 
-  public void loadMenus() {
-    loadTopMenus();
-    menus.forEach(Menu::load);
-  }
+  private ImmutableCollection<Menu> loadTopMenus() {
+    com.google.common.collect.ImmutableSet.Builder<Menu> builder = ImmutableSet.builder();
 
-  public void loadTopMenus() {
     Collection<MenuConfig> menuConfigs = getTableConfig().getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
     for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
@@ -140,21 +95,24 @@ public class Table {
       for (int columnIndex = row.getFirstCellNum(); columnIndex < row
           .getLastCellNum(); columnIndex++) {
         StandardCell cell =
-            StandardCell.valueOf(ExcelUtil.getCellByIndex(sheet, rowIndex, columnIndex));
-        Collection<MenuConfig> config = Collections2.filter(menuConfigs,
-            menuConfig -> menuConfig.getMenuMatcher().matches(cell));
-        if (!CollectionUtils.isEmpty(config)) {
-          menus.add(Menu.builder().setCell(cell).setMenuConfig(Iterables.getOnlyElement(config))
-              .setTable(this).build());
+            StandardCell.valueOf(row.getCell(columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK));
+        Optional<MenuConfig> optional =
+            Iterables.tryFind(menuConfigs, menuConfig -> menuConfig.getMenuMatcher().matches(cell));
+        if (optional.isPresent()) {
+          builder.add(
+              Menu.builder().setCell(cell).setMenuConfig(optional.get()).setTable(this).build());
         }
       }
     }
+    return builder.build();
   }
 
+  // TODO
   public JSONArray getDatas() {
     JSONArray datas = new JSONArray();
-    unFiexdDatas.stream().map(Data::getJsonData).peek(data -> data.putAll(fiexdData.getJsonData()))
-        .forEach(datas::add);
+    // unFiexdDatas.stream().map(Data::getJsonData).peek(data ->
+    // data.putAll(fiexdData.getJsonData()))
+    // .forEach(datas::add);
     return datas;
   }
 
@@ -163,13 +121,13 @@ public class Table {
   }
 
   public void checkMenus() {
-    //TODO
-    Map<MenuConfig, Menu> menuConfigToMenus = Maps.newHashMap();
-    for (Menu menu : menus) {
-      if (menu.getMenuConfig() != null) {
-        menuConfigToMenus.put(menu.getMenuConfig(), menu);
-      }
-    }
+    // TODO
+    // Map<MenuConfig, Menu> menuConfigToMenus = Maps.newHashMap();
+    // for (Menu menu : menus) {
+    // if (menu.getMenuConfig() != null) {
+    // menuConfigToMenus.put(menu.getMenuConfig(), menu);
+    // }
+    // }
     // for(MenuConfig menuConfig:menuConfigs){
     // if(!menuConfigToMenus.containsKey(menuConfig) && menuConfig.getMustFlag()){
     // addError("请检查模板是否有误,工作簿"+sheet.getSheetName()+"未找到菜单:"+menuConfig.getMenuNameMatcher().getMatchString());
@@ -177,41 +135,40 @@ public class Table {
     // }
   }
 
-  public void parseUnFixedDatas() {
-    if (!CollectionUtils.isEmpty(unFixedDataMenus)) {
-      Menu firstNoFixedMenu = Iterables.getFirst(unFixedDataMenus,null);
-      Cell currentFirstNoFixedMenuDataCell =
-          firstNoFixedMenu.nextDataCell(firstNoFixedMenu.getCell());
-       for(int
-       i=1;ExcelUtil.isDataCell(currentFirstNoFixedMenuDataCell,firstNoFixedMenu,menus);i++){
-       Map<Menu,Cell> menuToCells=Maps.newHashMap();
-       for(Menu noFixedMenu:unFixedDataMenus){
-       Cell dataCell=noFixedMenu.getDataCell(i);
-       menuToCells.put(noFixedMenu,dataCell);
-       }
-       if(!CollectionUtils.isEmpty(menuToCells)){
-       unFiexdDatas.add(new Data(menuToCells));
-       }
-       currentFirstNoFixedMenuDataCell=firstNoFixedMenu.nextDataCell(currentFirstNoFixedMenuDataCell);
-       }
-      for (Iterator<Data> iter = unFiexdDatas.iterator(); iter.hasNext();) {
-        Data data = iter.next();
-        if (data.getJsonData().isEmpty()) {
-          iter.remove();
-        } else {
-          for (CellData cellData : data.getMenuToCells()) {
-            Menu menu = cellData.getMenu();
-            StandardCell dataCell = cellData.getValueCell();
-            menu.checkDataCell(dataCell);
-          }
-        }
-      }
-    }
+  public Optional<Menu> getMenu(String menuName) {
+    return Iterables.tryFind(getMenus(), menu -> menu.getName().equals(menuName));
   }
 
-  public void parseDatas(Builder builder) {
-    parseFixedDatas(builder);
-    parseUnFixedDatas();
+  public Iterable<Menu> getTopMenus() {
+    return Iterables.transform(menuTrees, ImmutableTree::getRoot);
+  }
+  
+  public FluentIterable<Menu> getMenus() {
+    return FluentIterable.from(menuTrees).transformAndConcat(ImmutableTree::children);
+  }
+
+  public FluentIterable<Menu> getDataMenus() {
+    return getMenus().filter(Menu::isDataMenu);
+  }
+
+  public FluentIterable<Menu> getFixedDataMenus() {
+    return getDataMenus().filter(Menu::isFixedDataMenu);
+  }
+
+  public FluentIterable<Menu> getUnFixedDataMenus() {
+    return getDataMenus().filter(Menu::isUnFixedDataMenu);
+  }
+
+  public FluentIterable<Menu> getMixedDataMenus() {
+    return getDataMenus().filter(Menu::isMixedDataMenu);
+  }
+
+  public FluentIterable<Menu> getMustMenus() {
+    return getMenus().filter(Menu::isMustMenu);
+  }
+
+  public FluentIterable<Menu> getNotMustMenus() {
+    return getMenus().filter(Menu::isNotMustMenu);
   }
 
   public TableConfig getTableConfig() {
@@ -226,37 +183,12 @@ public class Table {
     return sheetParseResult;
   }
 
-  public Collection<Menu> getMenus() {
-    return menus;
-  }
-
-  public Collection<Menu> getDataMenus() {
-    return dataMenus;
-  }
-
-  public Collection<Menu> getFixedDataMenus() {
-    return fixedDataMenus;
-  }
-
-  public Collection<Menu> getUnFixedDataMenus() {
-    return unFixedDataMenus;
-  }
-
-  public Collection<Menu> getMixedDataMenus() {
-    return mixedDataMenus;
-  }
-
-  public Collection<Menu> getMustMenus() {
-    return mustMenus;
-  }
-
-  public Collection<Menu> getNotMustMenus() {
-    return notMustMenus;
-  }
-
   public Data getData() {
     return data;
   }
 
+  public ImmutableCollection<ImmutableTree<Menu>> getMenuTrees() {
+    return menuTrees;
+  }
 
 }

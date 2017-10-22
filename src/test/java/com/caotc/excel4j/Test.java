@@ -8,12 +8,17 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.matcher.data.type.NaturalDataType;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 class A{
 	private String id=null;
 	private Set<Integer> values;
 	
 
+	public A() {
+	  values=Test.test1(this);
+	}
+	
 	public String getId() {
 		System.out.println("getId");
 		return id;
@@ -56,6 +61,7 @@ class B extends A{
 }
 public class Test {
 	public static void main(String[] args) throws Exception{
+	  new A();
 //		JSONObject jsonObject=new JSONObject();
 //		jsonObject.put("id", "1");
 //		System.out.println(JSONObject.toJavaObject(jsonObject, A.class));
@@ -81,6 +87,8 @@ public class Test {
 //		System.out.println(getValue(type));
 		String jsonString=" {\"products\":[{\"id\":\"\",\"socialCreditCode\":\"133423509\",\"productCode\":\"40494\",\"reportDate\":\"2017-01-01\",\"reportType\":\"year\",\"productName\":\"打印机\",\"currentCapicityNum\":\"\",\"currentCapicityUnit\":\"\",\"currentOutputNum\":\"\",\"currentOutputUnit\":\"TCE/PC\",\"unitConsumptionNum\":\"\",\"unitConsumptionUnit\":\"\"}],\"issueId\":\"1\"}";
 		System.out.println(JSONObject.parse(jsonString));
+		
+		
 	}
 	
 	public static <T> T getValue(Class<T> type) {
@@ -89,5 +97,10 @@ public class Test {
 			value=NaturalDataType.DECIMAL.cast(value, type);
 		}
 		return (T) value;
+	}
+	
+	public static Set<Integer> test1(A a) {
+	  System.out.println(a.getValues().contains(1));
+	  return Sets.newHashSet(1);
 	}
 }

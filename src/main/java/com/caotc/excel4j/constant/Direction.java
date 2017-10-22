@@ -1,6 +1,7 @@
 package com.caotc.excel4j.constant;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressBase;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.ExcelUtil;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -16,7 +18,7 @@ import com.google.common.collect.Lists;
 public enum Direction {
   TOP {
     @Override
-    public boolean isBoderCell(StandardCell cell) {
+    public boolean isBorderCell(StandardCell cell) {
       return cell.containsRow(cell.getSheet().getFirstRowNum());
     }
 
@@ -34,7 +36,7 @@ public enum Direction {
   },
   BOTTOM {
     @Override
-    public boolean isBoderCell(StandardCell cell) {
+    public boolean isBorderCell(StandardCell cell) {
       return cell.containsRow(cell.getSheet().getLastRowNum());
     }
 
@@ -52,7 +54,7 @@ public enum Direction {
   },
   LEFT {
     @Override
-    public boolean isBoderCell(StandardCell cell) {
+    public boolean isBorderCell(StandardCell cell) {
       return Iterables.any(cell.getRows(), row -> cell.containsColumn(row.getFirstCellNum()));
     }
 
@@ -70,7 +72,7 @@ public enum Direction {
   },
   RIGHT {
     @Override
-    public boolean isBoderCell(StandardCell cell) {
+    public boolean isBorderCell(StandardCell cell) {
       return Iterables.any(cell.getRows(), row -> cell.containsColumn(row.getLastCellNum()));
     }
 
@@ -88,7 +90,7 @@ public enum Direction {
   };
   private static final int DEFAULT_DISTANCE = 1;
 
-  public abstract boolean isBoderCell(StandardCell cell);
+  public abstract boolean isBorderCell(StandardCell cell);
 
   public abstract Direction getNegativeDirection();
 
@@ -100,6 +102,11 @@ public enum Direction {
 
   public List<StandardCell> next(StandardCell original) {
     Preconditions.checkNotNull(original);
+
+    if (isBorderCell(original)) {
+      return Collections.emptyList();
+    }
+
     CellRangeAddress address = nextAddress(original);
 
     List<StandardCell> cells = Lists.newLinkedList();
@@ -128,20 +135,19 @@ public enum Direction {
     return cells;
   }
 
-  public StandardCell nextCell(StandardCell cell) {
+  public Optional<StandardCell> nextCell(StandardCell cell) {
     Preconditions.checkNotNull(cell);
-
     List<StandardCell> cells = next(cell);
-    Preconditions.checkState(!CollectionUtils.isEmpty(cells));
-    return Iterables.getOnlyElement(cells);
+    return CollectionUtils.isEmpty(cells) ? Optional.absent()
+        : Optional.of(Iterables.getOnlyElement(cells));
   }
 
-  public StandardCell getCell(StandardCell cell, int distance) {
+  public Optional<StandardCell> getCell(StandardCell cell, int distance) {
     Preconditions.checkNotNull(cell);
     Preconditions.checkArgument(distance > 0);
 
     List<StandardCell> cells = get(cell, distance);
-    Preconditions.checkState(!CollectionUtils.isEmpty(cells));
-    return Iterables.getOnlyElement(cells);
+    return CollectionUtils.isEmpty(cells) ? Optional.absent()
+        : Optional.of(Iterables.getOnlyElement(cells));
   }
 }

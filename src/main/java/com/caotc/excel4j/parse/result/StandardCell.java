@@ -101,7 +101,7 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
   
   public boolean isBorderCell(Direction direction) {
-    return direction.isBoderCell(this);
+    return direction.isBorderCell(this);
   }
   
   public boolean isBorderCell() {
