@@ -1,10 +1,13 @@
 package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
+import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -81,14 +84,33 @@ public class Menu {
     table = builder.table;
     parentMenu = builder.parentMenu;
 
-    childrenMenus = getCheckMenuConfig().getMenuLoadConfig().getLoadType().getChildrenMenus(this);
+    childrenMenus = menuConfig.getDataConfig().getLoadType().getChildrenMenus(this);
   }
 
+  private ImmutableList<Menu> loadChildrenMenus(){
+    com.google.common.collect.ImmutableList.Builder<Menu> builder = ImmutableList.builder();
+
+    ImmutableCollection<MenuConfig> childrenConfigs = menuConfig.getChildrenMenuConfigs();
+    if (!CollectionUtils.isEmpty(childrenConfigs)) {
+      List<StandardCell> menuCells =
+          menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
+      if (!CollectionUtils.isEmpty(menuCells)) {
+        childrenConfigs.forEach(childrenConfig -> {
+          Optional<StandardCell> optional = Iterables.tryFind(menuCells, childrenConfig::matches);
+          if (optional.isPresent()) {
+            builder.add(Menu.builder().setCell(optional.get()).setMenuConfig(childrenConfig)
+                .setParentMenu(this).build());
+          }
+        });
+      }
+    }
+    return builder.build();
+  }
+  
   public void checkDataCell(StandardCell dataCell) {
-    MenuConfig config = getCheckMenuConfig();
-    if (config.getDataMatcher() != null) {
+//    if (menuConfig.getDataMatcher() != null) {
       // TODO
-      Object value = dataCell.getValue();
+//      Object value = dataCell.getValue();
       // if(!checkMenuConfig.getDataMatcher().matches(value)){
       // StringBuffer errorMessage=new StringBuffer();
       // errorMessage.append("工作簿").append(dataCell.getSheet().getSheetName()).append("第").append(dataCell
@@ -123,7 +145,7 @@ public class Menu {
       // }
       // }
       // }
-    }
+//    }
   }
 
   public Optional<StandardCell> nextDataCell(StandardCell cell) {
@@ -131,17 +153,10 @@ public class Menu {
       cell = this.cell;
     }
 
-    MenuConfig config = getCheckMenuConfig();
-    Direction direction = config.getDirection();
+    Direction direction = menuConfig.getDirection();
 
-    return this.cell.equals(cell) ? direction.getCell(cell, config.getDistance())
+    return this.cell.equals(cell) ? direction.getCell(cell, menuConfig.getDistance())
         : direction.nextCell(cell);
-  }
-
-  public MenuConfig getCheckMenuConfig() {
-    return menuConfig == null
-        ? getParentMenu() == null ? null : getParentMenu().getCheckMenuConfig()
-        : menuConfig;
   }
 
   public boolean hasChildrenMenu(Menu childrenMenu) {
@@ -156,49 +171,53 @@ public class Menu {
     return cell.getValueCell().getStringCellValue();
   }
 
-  // delegate methods start
-  public boolean isDataMenu() {
-    return getCheckMenuConfig().isDataMenu();
+  public Optional<String> getFieldName() {
+    return Optional.fromNullable(menuConfig == null?getName():menuConfig.getFieldName());
   }
 
+  public boolean isDataMenu() {
+    return menuConfig.isDataMenu();
+  }
+  
+  // delegate methods start
   public boolean isFixedDataMenu() {
-    return getCheckMenuConfig().isFixedDataMenu();
+    return menuConfig.isFixedDataMenu();
   }
 
   public boolean isUnFixedDataMenu() {
-    return getCheckMenuConfig().isUnFixedDataMenu();
+    return menuConfig.isUnFixedDataMenu();
   }
 
   public boolean isMixedDataMenu() {
-    return getCheckMenuConfig().isMixedDataMenu();
+    return menuConfig.isMixedDataMenu();
   }
 
   public boolean isMustMenu() {
-    return getCheckMenuConfig().isMustMenu();
+    return menuConfig.isMustMenu();
   }
 
   public boolean isNotMustMenu() {
-    return getCheckMenuConfig().isNotMustMenu();
+    return menuConfig.isNotMustMenu();
   }
 
   public boolean matches(Object value) {
-    return getCheckMenuConfig().matches(value);
+    return menuConfig.matches(value);
   }
 
   public boolean support(Object value) {
-    return getCheckMenuConfig().support(value);
+    return menuConfig.support(value);
   }
 
   public Collection<Class<?>> canCastClasses() {
-    return getCheckMenuConfig().canCastClasses();
+    return menuConfig.canCastClasses();
   }
 
   public <T> boolean canCast(Class<T> clazz) {
-    return getCheckMenuConfig().canCast(clazz);
+    return menuConfig.canCast(clazz);
   }
 
   public <T> T cast(Object value, Class<T> clazz) {
-    return getCheckMenuConfig().cast(value, clazz);
+    return menuConfig.cast(value, clazz);
   }
   // delegate methods end
 

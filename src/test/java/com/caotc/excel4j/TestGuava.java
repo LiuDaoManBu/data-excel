@@ -8,6 +8,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.caotc.excel4j.util.ClassUtils;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
@@ -15,7 +17,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.reflect.TypeToken.TypeSet;
 
 public class TestGuava {
-  public static void main(String[] args) {
+  public static <T> void main(String[] args) {
     // whenFilterWithCollections2_thenFiltered();
     TypeToken<Number> stringTok = TypeToken.of(Number.class);
     System.out.println(stringTok.getType());
@@ -34,8 +36,9 @@ public class TestGuava {
     System.out.println(tree.children(null));
 //    System.out.println(tree.breadthFirstTraversal("A").toSet());
      System.out.println(ClassUtils.getAllFields(String.class));
+     System.out.println(Iterables.isEmpty(null));
   }
-
+  
   public static void viewTest() {
     TestGuavaA a1 = new TestGuavaA(1L, "A", "caotc");
     TestGuavaA a2 = new TestGuavaA(2L, "A", "caotc");

@@ -1,6 +1,7 @@
 package com.caotc.excel4j.config;
 
 import java.util.Collection;
+import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
@@ -10,13 +11,14 @@ import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.Iterables;
 
 public class MenuConfig {
   public static class Builder {
     private TableConfig tableConfig;
     // 菜单匹配器
     private StandardCellMatcher menuMatcher;
-    private DataMatcher dataMatcher;
     // 第一个数据单元格相对于菜单单元格的单元格距离
     private int distance;
     private MenuNecessity menuNecessity;
@@ -25,17 +27,17 @@ public class MenuConfig {
     private String fieldName;
     private MenuType menuType;
     private MenuConfig parentMenuConfig;
-    private MenuLoadConfig menuLoadConfig;
+    private ImmutableCollection<MenuConfig> childrenMenuConfigs;
+    private DataConfig dataConfig;
     
     public MenuConfig build() {
-      Preconditions.checkArgument(tableConfig != null || parentMenuConfig != null);
+      Preconditions.checkState(tableConfig != null || parentMenuConfig != null);
       Preconditions.checkNotNull(menuMatcher);
-      Preconditions.checkNotNull(dataMatcher);
       Preconditions.checkNotNull(menuNecessity);
-      Preconditions.checkArgument(direction != null || parentMenuConfig != null);
-      Preconditions.checkNotNull(fieldName);
+      Preconditions.checkState(direction != null || parentMenuConfig != null);
       Preconditions.checkNotNull(menuType);
-      Preconditions.checkNotNull(menuLoadConfig);
+      Preconditions.checkState(CollectionUtils.isEmpty(childrenMenuConfigs) || dataConfig != null);
+      //TODO
 
       if (parentMenuConfig != null) {
         if (direction == null) {
@@ -63,15 +65,6 @@ public class MenuConfig {
 
     public Builder setMenuMatcher(StandardCellMatcher menuMatcher) {
       this.menuMatcher = menuMatcher;
-      return this;
-    }
-
-    public DataMatcher getDataMatcher() {
-      return dataMatcher;
-    }
-
-    public Builder setDataMatcher(DataMatcher dataMatcher) {
-      this.dataMatcher = dataMatcher;
       return this;
     }
 
@@ -129,15 +122,24 @@ public class MenuConfig {
       return this;
     }
 
-    public MenuLoadConfig getMenuLoadConfig() {
-      return menuLoadConfig;
+    public ImmutableCollection<MenuConfig> getChildrenMenuConfigs() {
+      return childrenMenuConfigs;
     }
 
-    public Builder setMenuLoadConfig(MenuLoadConfig menuLoadConfig) {
-      this.menuLoadConfig = menuLoadConfig;
+    public Builder setChildrenMenuConfigs(ImmutableCollection<MenuConfig> childrenMenuConfigs) {
+      this.childrenMenuConfigs = childrenMenuConfigs;
       return this;
     }
-    
+
+    public DataConfig getDataConfig() {
+      return dataConfig;
+    }
+
+    public Builder setDataConfig(DataConfig dataConfig) {
+      this.dataConfig = dataConfig;
+      return this;
+    }
+
   }
 
   private static final int DEFAULT_DISTANCE = 1;
@@ -150,7 +152,6 @@ public class MenuConfig {
   private final TableConfig tableConfig;
   // 菜单匹配器
   private final StandardCellMatcher menuMatcher;
-  private final DataMatcher dataMatcher;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private final int distance;
   private final MenuNecessity menuNecessity;
@@ -159,19 +160,20 @@ public class MenuConfig {
   private final String fieldName;
   private final MenuType menuType;
   private final MenuConfig parentMenuConfig;
-  private final MenuLoadConfig menuLoadConfig;
+  private final ImmutableCollection<MenuConfig> childrenMenuConfigs;
+  private final DataConfig dataConfig;
 
   public MenuConfig(Builder builder) {
     tableConfig = builder.tableConfig;
     menuMatcher = builder.menuMatcher;
-    dataMatcher = builder.dataMatcher;
     distance = builder.distance;
     menuNecessity = builder.menuNecessity;
     direction = builder.direction;
     fieldName = builder.fieldName;
     menuType = builder.menuType;
     parentMenuConfig = builder.parentMenuConfig;
-    menuLoadConfig = builder.menuLoadConfig;
+    childrenMenuConfigs=builder.childrenMenuConfigs;
+    dataConfig=builder.dataConfig;
   }
 
   public boolean isTopMenu() {
@@ -187,19 +189,19 @@ public class MenuConfig {
   }
 
   public boolean isDataMenu() {
-    return MenuType.DATA_MENU.equals(getMenuType());
+    return CollectionUtils.isEmpty(childrenMenuConfigs);
   }
 
   public boolean isFixedDataMenu() {
-    return isDataMenu() && LoadType.FIXED.equals(menuLoadConfig.getLoadType());
+    return isDataMenu() && LoadType.FIXED.equals(dataConfig.getLoadType());
   }
 
   public boolean isUnFixedDataMenu() {
-    return isDataMenu() && LoadType.UNFIXED.equals(menuLoadConfig.getLoadType());
+    return isDataMenu() && LoadType.UNFIXED.equals(dataConfig.getLoadType());
   }
 
   public boolean isMixedDataMenu() {
-    return isDataMenu() && LoadType.MIXED.equals(menuLoadConfig.getLoadType());
+    return isDataMenu() && LoadType.MIXED.equals(dataConfig.getLoadType());
   }
 
   //delegate methods start
@@ -209,29 +211,25 @@ public class MenuConfig {
   }
   
   public boolean matches(Object value) {
-    return dataMatcher.matches(value);
+    return dataConfig.matches(value);
   }
 
   public boolean support(Object value) {
-    return dataMatcher.support(value);
+    return dataConfig.support(value);
   }
 
   public Collection<Class<?>> canCastClasses() {
-    return dataMatcher.canCastClasses();
+    return dataConfig.canCastClasses();
   }
 
   public <T> boolean canCast(Class<T> clazz) {
-    return dataMatcher.canCast(clazz);
+    return dataConfig.canCast(clazz);
   }
 
   public <T> T cast(Object value, Class<T> clazz) {
-    return dataMatcher.cast(value, clazz);
+    return dataConfig.cast(value, clazz);
   }
   //delegate methods end
-
-  public MenuLoadConfig getMenuLoadConfig() {
-    return menuLoadConfig;
-  }
 
   public MenuType getMenuType() {
     return menuType;
@@ -239,10 +237,6 @@ public class MenuConfig {
 
   public StandardCellMatcher getMenuMatcher() {
     return menuMatcher;
-  }
-
-  public DataMatcher getDataMatcher() {
-    return dataMatcher;
   }
 
   public int getDistance() {
@@ -263,6 +257,18 @@ public class MenuConfig {
 
   public MenuNecessity getMenuNecessity() {
     return menuNecessity;
+  }
+
+  public DataConfig getDataConfig() {
+    return dataConfig;
+  }
+
+  public ImmutableCollection<MenuConfig> getChildrenMenuConfigs() {
+    return childrenMenuConfigs;
+  }
+
+  public TableConfig getTableConfig() {
+    return tableConfig;
   }
 
 }

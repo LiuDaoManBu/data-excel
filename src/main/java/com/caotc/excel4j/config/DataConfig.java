@@ -1,60 +1,50 @@
 package com.caotc.excel4j.config;
 
+import java.util.Collection;
+import com.caotc.excel4j.constant.LoadType;
+import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.data.DataMatcher;
+import com.caotc.excel4j.matcher.data.type.DataType;
+import com.caotc.excel4j.parse.result.Menu;
+import com.caotc.excel4j.parse.result.StandardCell;
+import com.google.common.collect.ImmutableList;
 
-public class DataConfig<T extends Comparable<T>> {
-  private Boolean nullAllow;
-  private T maxValue;
-  private T minValue;
-  private Integer maxLength;
-  private Integer minLength;
+public class DataConfig {
   private DataMatcher dataMatcher;
-
-  public Boolean getNullAllow() {
-    return nullAllow;
+  private LoadType loadType;
+  private Integer dataNumber;
+  
+  
+  
+  
+  public boolean support(Object value) {
+    return dataMatcher.support(value);
   }
-
-  public void setNullAllow(Boolean nullAllow) {
-    this.nullAllow = nullAllow;
+  public boolean matches(Object value) {
+    return dataMatcher.matches(value);
   }
-
-  public T getMaxValue() {
-    return maxValue;
+  public Collection<Class<?>> canCastClasses() {
+    return dataMatcher.canCastClasses();
   }
-
-  public void setMaxValue(T maxValue) {
-    this.maxValue = maxValue;
+  public <T> boolean canCast(Class<T> clazz) {
+    return dataMatcher.canCast(clazz);
   }
-
-  public T getMinValue() {
-    return minValue;
+  public <T> T cast(Object value, Class<T> clazz) {
+    return dataMatcher.cast(value, clazz);
   }
-
-  public void setMinValue(T minValue) {
-    this.minValue = minValue;
+  
+  public ImmutableList<StandardCell> getDataCells(Menu menu) {
+    return loadType.getDataCells(menu);
   }
-
-  public Integer getMaxLength() {
-    return maxLength;
-  }
-
-  public void setMaxLength(Integer maxLength) {
-    this.maxLength = maxLength;
-  }
-
-  public Integer getMinLength() {
-    return minLength;
-  }
-
-  public void setMinLength(Integer minLength) {
-    this.minLength = minLength;
-  }
-
+  
+  
   public DataMatcher getDataMatcher() {
     return dataMatcher;
   }
-
-  public void setDataMatcher(DataMatcher dataMatcher) {
-    this.dataMatcher = dataMatcher;
+  public LoadType getLoadType() {
+    return loadType;
+  }
+  public Integer getDataNumber() {
+    return dataNumber;
   }
 }

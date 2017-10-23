@@ -2,12 +2,13 @@ package com.caotc.excel4j.collect;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.TreeTraverser;
+import com.google.common.collect.UnmodifiableIterator;
 
 public class ImmutableTree<T> extends TreeTraverser<T> {
   public static <T> ImmutableTree<T> using(T root,
@@ -26,17 +27,37 @@ public class ImmutableTree<T> extends TreeTraverser<T> {
     this.nodeToChildrenFunction = nodeToChildrenFunction;
   }
 
-  public Iterable<? extends Iterable<T>> breadth() {
-    FluentIterable<? extends Iterable<T>> fluentIterable =
-        FluentIterable.from(Collections.singleton(Collections.singleton(root)));
-    for (Iterable<T> last = Iterables.getLast(fluentIterable); Iterables
-        .isEmpty(Iterables.transform(last, this::children)); FluentIterable
-            .concat(Iterables.transform(last, this::children))) {
+  public Iterable<? extends Iterable<T>> breadthIterable(T root) {
+    return Iterables.unmodifiableIterable(new Iterable<Iterable<T>>() {
+      @Override
+      public Iterator<Iterable<T>> iterator() {
+        return new UnmodifiableIterator<Iterable<T>>() {
+          private FluentIterable<T> iterable = FluentIterable.from(Collections.singleton(root));
 
-    }
-    return FluentIterable.from(Collections.singleton(Collections.singleton(root)));
+          @Override
+          public boolean hasNext() {
+            return !iterable.isEmpty();
+          }
+
+          @Override
+          public Iterable<T> next() {
+            if (!hasNext()) {
+              throw new NoSuchElementException();
+            }
+            FluentIterable<T> result = iterable;
+            iterable = iterable.transformAndConcat(nodeToChildrenFunction);
+            return result;
+          }
+
+        };
+      }
+    });
   }
-
+  
+  public Iterable<? extends Iterable<T>> breadthIterable() {
+    return breadthIterable(root);
+  }
+  
   public FluentIterable<T> breadthFirstTraversal() {
     return breadthFirstTraversal(root);
   }

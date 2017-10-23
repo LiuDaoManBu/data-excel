@@ -3,9 +3,11 @@ package com.caotc.excel4j.parse.result;
 import java.lang.reflect.Field;
 import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.collect.ImmutableTree;
 import com.caotc.excel4j.util.ClassUtils;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Iterables;
@@ -69,23 +71,35 @@ public class Data {
     Menu menu = table.getMenu(menuName).orNull();
     return getValue(menu).transform(value -> menu.cast(value, type));
   }
-  
+
   public JSONObject toJson() {
-    table.getTopMenus();
+    FluentIterable.from(table.getMenuTrees())
+        .transform(menuTree -> ImmutableTree.using(menuTree.getRoot(), menu -> {
+          FluentIterable<Menu> result = null;
+          for (Iterable<Menu> childrens = menu.getChildrenMenus(); !Iterables.isEmpty(childrens)
+              && (result = FluentIterable.from(childrens)
+                  .filter(children -> children.getMenuConfig().getFieldName() != null))
+                      .isEmpty(); childrens =
+                          FluentIterable.from(childrens)
+                              .transformAndConcat(Menu::getChildrenMenus)) {
+          }
+          return result;
+        }));
+
     return null;
   }
-  
+
   // TODO
-//   public <T> T toJavaObject(Class<T> type) {
-//   Map<String, Field> nameToFields = ClassUtils.getNameToFields(type);
-//   cellDatas.forEach((cellData) -> {
-//   String key = cellData.getMenu().getCheckMenuConfig().getFieldName();
-//   if (nameToFields.containsKey(key)) {
-//   jsonData.put(key, cellData.getValue(nameToFields.get(key).getType()));
-//   }
-//   });
-//   return jsonData.toJavaObject(type);
-//   }
+  // public <T> T toJavaObject(Class<T> type) {
+  // Map<String, Field> nameToFields = ClassUtils.getNameToFields(type);
+  // cellDatas.forEach((cellData) -> {
+  // String key = cellData.getMenu().getCheckMenuConfig().getFieldName();
+  // if (nameToFields.containsKey(key)) {
+  // jsonData.put(key, cellData.getValue(nameToFields.get(key).getType()));
+  // }
+  // });
+  // return jsonData.toJavaObject(type);
+  // }
 
   public Table getTable() {
     return table;

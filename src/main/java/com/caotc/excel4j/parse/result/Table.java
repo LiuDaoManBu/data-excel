@@ -81,7 +81,7 @@ public class Table {
     com.google.common.collect.ImmutableListMultimap.Builder<Menu, StandardCell> dataBuilder =
         ImmutableListMultimap.builder();
     getDataMenus().forEach(menu -> dataBuilder.putAll(menu,
-        menu.getCheckMenuConfig().getMenuLoadConfig().getLoadType().getDataCells(menu)));
+        menu.getMenuConfig().getDataConfig().getLoadType().getDataCells(menu)));
     data = new Data(this, dataBuilder.build());
   }
 
