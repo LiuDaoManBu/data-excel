@@ -70,20 +70,8 @@ public class Data {
   }
 
   public JSONObject toJson() {
-    FluentIterable.from(table.getMenuTrees())
-        .transform(menuTree -> ImmutableTree.using(menuTree.getRoot(), menu -> {
-          FluentIterable<Menu> result = null;
-          for (Iterable<Menu> childrens = menu.getChildrenMenus(); !Iterables.isEmpty(childrens)
-              && (result = FluentIterable.from(childrens)
-                  .filter(children -> children.getMenuConfig().getFieldName() != null))
-                      .isEmpty(); childrens =
-                          FluentIterable.from(childrens)
-                              .transformAndConcat(Menu::getChildrenMenus)) {
-          }
-          return result;
-        }));
     JSONObject object=new JSONObject();
-    return null;
+    return object;
   }
 
   // TODO
