@@ -29,7 +29,7 @@ public class MenuConfig {
     private MenuConfig parentMenuConfig;
     private ImmutableCollection<MenuConfig> childrenMenuConfigs;
     private DataConfig dataConfig;
-    
+
     public MenuConfig build() {
       Preconditions.checkState(tableConfig != null || parentMenuConfig != null);
       Preconditions.checkNotNull(menuMatcher);
@@ -37,7 +37,7 @@ public class MenuConfig {
       Preconditions.checkState(direction != null || parentMenuConfig != null);
       Preconditions.checkNotNull(menuType);
       Preconditions.checkState(CollectionUtils.isEmpty(childrenMenuConfigs) || dataConfig != null);
-      //TODO
+      // TODO
 
       if (parentMenuConfig != null) {
         if (direction == null) {
@@ -172,8 +172,8 @@ public class MenuConfig {
     fieldName = builder.fieldName;
     menuType = builder.menuType;
     parentMenuConfig = builder.parentMenuConfig;
-    childrenMenuConfigs=builder.childrenMenuConfigs;
-    dataConfig=builder.dataConfig;
+    childrenMenuConfigs = builder.childrenMenuConfigs;
+    dataConfig = builder.dataConfig;
   }
 
   public boolean isTopMenu() {
@@ -181,15 +181,15 @@ public class MenuConfig {
   }
 
   public boolean isMustMenu() {
-    return MenuNecessity.MUST.equals(getMenuNecessity());
+    return MenuNecessity.MUST.equals(menuNecessity);
   }
 
   public boolean isNotMustMenu() {
-    return MenuNecessity.NOT_MUST.equals(getMenuNecessity());
+    return MenuNecessity.NOT_MUST.equals(menuNecessity);
   }
 
   public boolean isDataMenu() {
-    return CollectionUtils.isEmpty(childrenMenuConfigs);
+    return Iterables.isEmpty(childrenMenuConfigs);
   }
 
   public boolean isFixedDataMenu() {
@@ -204,12 +204,12 @@ public class MenuConfig {
     return isDataMenu() && LoadType.MIXED.equals(dataConfig.getLoadType());
   }
 
-  //delegate methods start
+  // delegate methods start
 
   public boolean matches(StandardCell cell) {
     return menuMatcher.matches(cell);
   }
-  
+
   public boolean matches(Object value) {
     return dataConfig.matches(value);
   }
@@ -229,7 +229,7 @@ public class MenuConfig {
   public <T> T cast(Object value, Class<T> clazz) {
     return dataConfig.cast(value, clazz);
   }
-  //delegate methods end
+  // delegate methods end
 
   public MenuType getMenuType() {
     return menuType;

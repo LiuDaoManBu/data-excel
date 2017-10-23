@@ -2,11 +2,14 @@ package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -84,68 +87,94 @@ public class Menu {
     table = builder.table;
     parentMenu = builder.parentMenu;
 
-    childrenMenus = menuConfig.getDataConfig().getLoadType().getChildrenMenus(this);
+    childrenMenus = loadChildrenMenus();
   }
 
-  private ImmutableList<Menu> loadChildrenMenus(){
-    com.google.common.collect.ImmutableList.Builder<Menu> builder = ImmutableList.builder();
-
+  private ImmutableList<Menu> loadChildrenMenus() {
     ImmutableCollection<MenuConfig> childrenConfigs = menuConfig.getChildrenMenuConfigs();
-    if (!CollectionUtils.isEmpty(childrenConfigs)) {
-      List<StandardCell> menuCells =
-          menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
-      if (!CollectionUtils.isEmpty(menuCells)) {
-        childrenConfigs.forEach(childrenConfig -> {
-          Optional<StandardCell> optional = Iterables.tryFind(menuCells, childrenConfig::matches);
-          if (optional.isPresent()) {
-            builder.add(Menu.builder().setCell(optional.get()).setMenuConfig(childrenConfig)
-                .setParentMenu(this).build());
-          }
-        });
-      }
-    }
-    return builder.build();
-  }
-  
-  public void checkDataCell(StandardCell dataCell) {
-//    if (menuConfig.getDataMatcher() != null) {
-      // TODO
-//      Object value = dataCell.getValue();
-      // if(!checkMenuConfig.getDataMatcher().matches(value)){
-      // StringBuffer errorMessage=new StringBuffer();
-      // errorMessage.append("工作簿").append(dataCell.getSheet().getSheetName()).append("第").append(dataCell
-      // .getRowIndex()+1).append("行").append(ExcelUtil.indexToColumn(dataCell.getColumnIndex()+1))
-      // .append("列的").append(getName()).append("数据格式不正确");
-      // addError(errorMessage.toString());
-      // }
 
-      // if(StringUtils.isEmpty(cellString)){
-      // if(checkMenuConfig.isCheckEmpty()){
-      // errorMessage.append("不能为空");
-      // addError(errorMessage.toString());
-      // }
-      // }else{
-      // Integer maxLength=checkMenuConfig.getMaxLength();
-      // if(maxLength!=null && maxLength>=0 && cellString.length()>maxLength){
-      // errorMessage.append("长度超过").append(checkMenuConfig.getMaxLength());
-      // addError(errorMessage.toString());
-      // }
-      //
-      // String regex=checkMenuConfig.getRegex();
-      // if(regex!=null){
-      // regex+=checkMenuConfig.isCheckEmpty()?"+":"*";
-      // if(!cellString.matches(regex)){
-      // String regexTip=ExcelUtil.REGEX_AND_TIP_MAP.get(checkMenuConfig.getRegex());
-      // if(regexTip!=null){
-      // errorMessage.append("数据格式不正确，应为").append(regexTip);
-      // }else{
-      // errorMessage.append("数据格式不正确");
-      // }
-      // addError(errorMessage.toString());
-      // }
-      // }
-      // }
-//    }
+    List<StandardCell> menuCells =
+        menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
+    return FluentIterable.from(menuCells).transform(cell -> {
+      Iterable<MenuConfig> configs =
+          Iterables.filter(childrenConfigs, config -> config.matches(cell));
+      Preconditions.checkState(Iterables.size(configs) <= 1);
+      Menu menu = null;
+      if (!Iterables.isEmpty(configs)) {
+        menu = Menu.builder().setCell(cell).setMenuConfig(Iterables.getOnlyElement(configs))
+            .setParentMenu(this).build();
+      }
+
+      return Optional.fromNullable(menu);
+    }).filter(Optional::isPresent).transform(Optional::get).toList();
+  }
+
+  public void checkDataCell(StandardCell dataCell) {
+    // if (menuConfig.getDataMatcher() != null) {
+    // TODO
+    // Object value = dataCell.getValue();
+    // if(!checkMenuConfig.getDataMatcher().matches(value)){
+    // StringBuffer errorMessage=new StringBuffer();
+    // errorMessage.append("工作簿").append(dataCell.getSheet().getSheetName()).append("第").append(dataCell
+    // .getRowIndex()+1).append("行").append(ExcelUtil.indexToColumn(dataCell.getColumnIndex()+1))
+    // .append("列的").append(getName()).append("数据格式不正确");
+    // addError(errorMessage.toString());
+    // }
+
+    // if(StringUtils.isEmpty(cellString)){
+    // if(checkMenuConfig.isCheckEmpty()){
+    // errorMessage.append("不能为空");
+    // addError(errorMessage.toString());
+    // }
+    // }else{
+    // Integer maxLength=checkMenuConfig.getMaxLength();
+    // if(maxLength!=null && maxLength>=0 && cellString.length()>maxLength){
+    // errorMessage.append("长度超过").append(checkMenuConfig.getMaxLength());
+    // addError(errorMessage.toString());
+    // }
+    //
+    // String regex=checkMenuConfig.getRegex();
+    // if(regex!=null){
+    // regex+=checkMenuConfig.isCheckEmpty()?"+":"*";
+    // if(!cellString.matches(regex)){
+    // String regexTip=ExcelUtil.REGEX_AND_TIP_MAP.get(checkMenuConfig.getRegex());
+    // if(regexTip!=null){
+    // errorMessage.append("数据格式不正确，应为").append(regexTip);
+    // }else{
+    // errorMessage.append("数据格式不正确");
+    // }
+    // addError(errorMessage.toString());
+    // }
+    // }
+    // }
+    // }
+  }
+
+  public Optional<Menu> getSuper(Predicate<? super Menu> predicate) {
+    Preconditions.checkNotNull(predicate);
+    if (isTopMenu()) {
+      return Optional.absent();
+    }
+    return predicate.apply(parentMenu) ? Optional.of(parentMenu) : parentMenu.getSuper(predicate);
+  }
+
+  public Optional<Menu> getFieldParent() {
+    return getSuper(menu -> StringUtils.isNotBlank(menu.menuConfig.getFieldName()));
+  }
+
+  public FluentIterable<Menu> getSubs(Predicate<? super Menu> predicate) {
+    Preconditions.checkNotNull(predicate);
+    if (isDataMenu()) {
+      return FluentIterable.of();
+    }
+    FluentIterable<Menu> subs = FluentIterable.from(childrenMenus).filter(predicate);
+    return subs.isEmpty()
+        ? FluentIterable.from(childrenMenus).transformAndConcat(menu -> menu.getSubs(predicate))
+        : subs;
+  }
+
+  public FluentIterable<Menu> getFieldChildrens() {
+    return getSubs(menu -> StringUtils.isNotBlank(menu.menuConfig.getFieldName()));
   }
 
   public Optional<StandardCell> nextDataCell(StandardCell cell) {
@@ -172,13 +201,17 @@ public class Menu {
   }
 
   public Optional<String> getFieldName() {
-    return Optional.fromNullable(menuConfig == null?getName():menuConfig.getFieldName());
+    return Optional.fromNullable(menuConfig == null ? getName() : menuConfig.getFieldName());
+  }
+
+  public boolean isTopMenu() {
+    return menuConfig.isTopMenu();
   }
 
   public boolean isDataMenu() {
     return menuConfig.isDataMenu();
   }
-  
+
   // delegate methods start
   public boolean isFixedDataMenu() {
     return menuConfig.isFixedDataMenu();

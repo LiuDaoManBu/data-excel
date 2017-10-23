@@ -1,10 +1,7 @@
 package com.caotc.excel4j.parse.result;
 
-import java.lang.reflect.Field;
-import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.collect.ImmutableTree;
-import com.caotc.excel4j.util.ClassUtils;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
@@ -85,7 +82,7 @@ public class Data {
           }
           return result;
         }));
-
+    JSONObject object=new JSONObject();
     return null;
   }
 
