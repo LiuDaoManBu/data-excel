@@ -1,5 +1,6 @@
 package com.caotc.excel4j.parse.result;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -8,7 +9,6 @@ import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -79,7 +79,7 @@ public class Menu {
   private final Table table;
   private final Menu parentMenu;
   private final ImmutableList<Menu> childrenMenus;
-
+  private final Data data;
 
   public Menu(Builder builder) {
     cell = builder.cell;
@@ -88,6 +88,7 @@ public class Menu {
     parentMenu = builder.parentMenu;
 
     childrenMenus = loadChildrenMenus();
+    data = new Data(this,menuConfig.getDataConfig(), menuConfig.getDataConfig().getLoadType().getDataCells(this));
   }
 
   private ImmutableList<Menu> loadChildrenMenus() {
@@ -159,7 +160,7 @@ public class Menu {
   }
 
   public Optional<Menu> getFieldParent() {
-    return getSuper(menu -> StringUtils.isNotBlank(menu.menuConfig.getFieldName()));
+    return getSuper(menu -> menu.getField().isPresent());
   }
 
   public FluentIterable<Menu> getSubs(Predicate<? super Menu> predicate) {
@@ -174,7 +175,22 @@ public class Menu {
   }
 
   public FluentIterable<Menu> getFieldChildrens() {
-    return getSubs(menu -> StringUtils.isNotBlank(menu.menuConfig.getFieldName()));
+    return getSubs(menu -> menu.getField().isPresent());
+  }
+
+  public ImmutableList<Field> getFields() {
+    if (!getField().isPresent()) {
+      return ImmutableList.of();
+    }
+    com.google.common.collect.ImmutableList.Builder<Field> builder = ImmutableList.builder();
+    builder.add(getField().get());
+    Optional<Menu> optional = getFieldParent();
+    while (optional.isPresent()) {
+      Menu menu = optional.get();
+      builder.add(menu.getField().get());
+      optional = menu.getFieldParent();
+    }
+    return builder.build().reverse();
   }
 
   public Optional<StandardCell> nextDataCell(StandardCell cell) {
@@ -200,8 +216,8 @@ public class Menu {
     return cell.getValueCell().getStringCellValue();
   }
 
-  public Optional<String> getFieldName() {
-    return Optional.fromNullable(menuConfig == null ? getName() : menuConfig.getFieldName());
+  public Optional<Field> getField() {
+    return Optional.fromNullable(menuConfig.getField());
   }
 
   public boolean isTopMenu() {
@@ -273,4 +289,9 @@ public class Menu {
   public ImmutableList<Menu> getChildrenMenus() {
     return childrenMenus;
   }
+
+  public Data getData() {
+    return data;
+  }
+  
 }

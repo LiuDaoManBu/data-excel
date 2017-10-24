@@ -1,14 +1,13 @@
 package com.caotc.excel4j.config;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
 import com.caotc.excel4j.constant.MenuType;
-import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
-import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
@@ -23,8 +22,6 @@ public class MenuConfig {
     private int distance;
     private MenuNecessity menuNecessity;
     private Direction direction;
-    // 属性名字
-    private String fieldName;
     private MenuType menuType;
     private MenuConfig parentMenuConfig;
     private ImmutableCollection<MenuConfig> childrenMenuConfigs;
@@ -95,15 +92,6 @@ public class MenuConfig {
       return this;
     }
 
-    public String getFieldName() {
-      return fieldName;
-    }
-
-    public Builder setFieldName(String fieldName) {
-      this.fieldName = fieldName;
-      return this;
-    }
-
     public MenuType getMenuType() {
       return menuType;
     }
@@ -156,8 +144,6 @@ public class MenuConfig {
   private final int distance;
   private final MenuNecessity menuNecessity;
   private final Direction direction;
-  // 属性名字
-  private final String fieldName;
   private final MenuType menuType;
   private final MenuConfig parentMenuConfig;
   private final ImmutableCollection<MenuConfig> childrenMenuConfigs;
@@ -169,11 +155,14 @@ public class MenuConfig {
     distance = builder.distance;
     menuNecessity = builder.menuNecessity;
     direction = builder.direction;
-    fieldName = builder.fieldName;
     menuType = builder.menuType;
     parentMenuConfig = builder.parentMenuConfig;
     childrenMenuConfigs = builder.childrenMenuConfigs;
     dataConfig = builder.dataConfig;
+  }
+
+  public Field getField() {
+    return dataConfig == null ? null : dataConfig.getField();
   }
 
   public boolean isTopMenu() {
@@ -241,10 +230,6 @@ public class MenuConfig {
 
   public int getDistance() {
     return distance;
-  }
-
-  public String getFieldName() {
-    return fieldName;
   }
 
   public MenuConfig getParentMenuConfig() {

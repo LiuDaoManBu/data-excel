@@ -5,15 +5,15 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
-import com.alibaba.fastjson.JSONArray;
 import com.caotc.excel4j.collect.ImmutableTree;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -61,7 +61,6 @@ public class Table {
   // private final ImmutableCollection<Menu> mixedDataMenus;
   // private final ImmutableCollection<Menu> mustMenus;
   // private final ImmutableCollection<Menu> notMustMenus;
-  private final Data data;
 
   public Table(Builder builder) {
     tableConfig = builder.tableConfig;
@@ -77,12 +76,6 @@ public class Table {
     // mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
     // mustMenus = Collections2.filter(menus, Menu::isMustMenu);
     // notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
-
-    com.google.common.collect.ImmutableListMultimap.Builder<Menu, StandardCell> dataBuilder =
-        ImmutableListMultimap.builder();
-    getDataMenus().forEach(menu -> dataBuilder.putAll(menu,
-        menu.getMenuConfig().getDataConfig().getLoadType().getDataCells(menu)));
-    data = new Data(this, dataBuilder.build());
   }
 
   private ImmutableCollection<Menu> loadTopMenus() {
@@ -108,17 +101,56 @@ public class Table {
   }
 
   // TODO
-  public JSONArray getDatas() {
-    JSONArray datas = new JSONArray();
-    // unFiexdDatas.stream().map(Data::getJsonData).peek(data ->
-    // data.putAll(fiexdData.getJsonData()))
-    // .forEach(datas::add);
-    return datas;
+  public ImmutableList<StandardCell> getCells(Menu menu) {
+    return menu.getData().getValueCells();
   }
 
-  public <T> List<T> getDatas(Class<T> clazz) {
-    return getDatas().toJavaList(clazz);
+  public ImmutableList<StandardCell> getCells(String menuName) {
+    return getCells(getMenu(menuName).orNull());
   }
+
+  public Optional<StandardCell> getCell(Menu menu) {
+    return Optional.fromNullable(Iterables.getOnlyElement(getCells(menu), null));
+  }
+
+  public Optional<StandardCell> getCell(String menuName) {
+    return getCell(getMenu(menuName).orNull());
+  }
+
+  public ImmutableList<Object> getValues(Menu menu) {
+    return ImmutableList.copyOf(Collections2.transform(getCells(menu), StandardCell::getValue));
+  }
+
+  public ImmutableList<Object> getValues(String menuName) {
+    return getValues(getMenu(menuName).orNull());
+  }
+
+  public <T> ImmutableList<T> getValues(Menu menu, Class<T> type) {
+    return ImmutableList
+        .copyOf(Collections2.transform(getValues(menu), value -> menu.cast(value, type)));
+  }
+
+  public <T> ImmutableList<T> getValues(String menuName, Class<T> type) {
+    return getValues(getMenu(menuName).orNull(), type);
+  }
+
+  public Optional<Object> getValue(Menu menu) {
+    return getCell(menu).transform(StandardCell::getValue);
+  }
+
+  public Optional<Object> getValue(String menuName) {
+    return getValue(getMenu(menuName).orNull());
+  }
+
+  public <T> Optional<T> getValue(Menu menu, Class<T> type) {
+    return getValue(menu).transform(value -> menu.cast(value, type));
+  }
+
+  public <T> Optional<T> getValue(String menuName, Class<T> type) {
+    Menu menu = getMenu(menuName).orNull();
+    return getValue(menu).transform(value -> menu.cast(value, type));
+  }
+  //
 
   public void checkMenus() {
     // TODO
@@ -181,10 +213,6 @@ public class Table {
 
   public SheetParseResult getSheetParseResult() {
     return sheetParseResult;
-  }
-
-  public Data getData() {
-    return data;
   }
 
   public ImmutableCollection<ImmutableTree<Menu>> getMenuTrees() {
