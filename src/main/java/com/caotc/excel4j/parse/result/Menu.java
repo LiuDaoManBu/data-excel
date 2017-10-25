@@ -9,6 +9,7 @@ import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -79,6 +80,7 @@ public class Menu {
   private final Table table;
   private final Menu parentMenu;
   private final ImmutableList<Menu> childrenMenus;
+  private final ImmutableList<StandardCell> valueCells;
   private final Data data;
 
   public Menu(Builder builder) {
@@ -88,7 +90,8 @@ public class Menu {
     parentMenu = builder.parentMenu;
 
     childrenMenus = loadChildrenMenus();
-    data = new Data(this,menuConfig.getDataConfig(), menuConfig.getDataConfig().getLoadType().getDataCells(this));
+    valueCells=childrenMenus.isEmpty()?menuConfig.getDataConfig().getLoadType().getDataCells(this):ImmutableList.of();
+    data = new Data(this,menuConfig.getDataConfig(), getValues());
   }
 
   private ImmutableList<Menu> loadChildrenMenus() {
@@ -110,6 +113,11 @@ public class Menu {
     }).filter(Optional::isPresent).transform(Optional::get).toList();
   }
 
+  public ImmutableList<Object> getValues(){
+    //TODO
+    return ImmutableList.copyOf(Collections2.transform(valueCells, StandardCell::getValue));
+  }
+  
   public void checkDataCell(StandardCell dataCell) {
     // if (menuConfig.getDataMatcher() != null) {
     // TODO
@@ -220,6 +228,8 @@ public class Menu {
     return Optional.fromNullable(menuConfig.getField());
   }
 
+  
+  //delegate methods start
   public boolean isTopMenu() {
     return menuConfig.isTopMenu();
   }
@@ -227,8 +237,7 @@ public class Menu {
   public boolean isDataMenu() {
     return menuConfig.isDataMenu();
   }
-
-  // delegate methods start
+  
   public boolean isFixedDataMenu() {
     return menuConfig.isFixedDataMenu();
   }
@@ -288,6 +297,10 @@ public class Menu {
 
   public ImmutableList<Menu> getChildrenMenus() {
     return childrenMenus;
+  }
+
+  public ImmutableList<StandardCell> getValueCells() {
+    return valueCells;
   }
 
   public Data getData() {

@@ -1,23 +1,25 @@
 package com.caotc.excel4j;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.matcher.data.type.NaturalDataType;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
 
 class A{
+  public static String test="test";
 	private String id=null;
 	private Set<Integer> values;
-	
-
-	public A() {
-	  values=Test.test1(this);
-	}
 	
 	public String getId() {
 		System.out.println("getId");
@@ -85,10 +87,28 @@ public class Test {
 //		System.out.println(jsonObject);
 //		Class<?> type=null;
 //		System.out.println(getValue(type));
-		String jsonString=" {\"products\":[{\"id\":\"\",\"socialCreditCode\":\"133423509\",\"productCode\":\"40494\",\"reportDate\":\"2017-01-01\",\"reportType\":\"year\",\"productName\":\"打印机\",\"currentCapicityNum\":\"\",\"currentCapicityUnit\":\"\",\"currentOutputNum\":\"\",\"currentOutputUnit\":\"TCE/PC\",\"unitConsumptionNum\":\"\",\"unitConsumptionUnit\":\"\"}],\"issueId\":\"1\"}";
-		System.out.println(JSONObject.parse(jsonString));
 		
+		System.out.println();
+		JSONObject jsonObject=new JSONObject();
+		JSONArray jsonArray=new JSONArray();
+		System.out.println("JSONObject start");
+//		System.out.println(jsonObject.toJavaObject(Collection.class));
+//		System.out.println(jsonObject.toJavaObject(List.class));
+		System.out.println(jsonObject.toJavaObject(Set.class));
+		System.out.println(jsonObject.toJavaObject(Map.class));
+		System.out.println(jsonObject.toJavaObject(Multiset.class));
+		System.out.println(jsonObject.toJavaObject(Multimap.class));
+		System.out.println(jsonObject.toJavaObject(Table.class));
+		System.out.println("JSONObject end");
 		
+    System.out.println("JSONArray start");
+    System.out.println(jsonArray.toJavaObject(Collection.class));
+    System.out.println(jsonArray.toJavaObject(List.class));
+//    System.out.println(jsonArray.toJavaObject(Set.class));
+//    System.out.println(jsonArray.toJavaObject(Map.class));
+//    System.out.println(jsonArray.toJavaObject(Multimap.class));
+//    System.out.println(jsonArray.toJavaObject(Table.class));
+    System.out.println("JSONArray end");
 	}
 	
 	public static <T> T getValue(Class<T> type) {

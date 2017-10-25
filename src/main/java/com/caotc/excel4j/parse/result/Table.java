@@ -2,13 +2,18 @@ package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.collect.ImmutableTree;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
+import com.caotc.excel4j.util.ClassUtils;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
@@ -16,21 +21,22 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.reflect.TypeToken;
 
-public class Table {
-  public static class Builder {
-    private TableConfig tableConfig;
+public class Table<T> {
+  public static class Builder<T> {
+    private TableConfig<T> tableConfig;
     private SheetParseResult sheetParseResult;
 
-    public Table build() {
-      return new Table(this);
+    public Table<T> build() {
+      return new Table<T>(this);
     }
 
-    public TableConfig getTableConfig() {
+    public TableConfig<T> getTableConfig() {
       return tableConfig;
     }
 
-    public Builder setTableConfig(TableConfig tableConfig) {
+    public Builder<T> setTableConfig(TableConfig<T> tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -39,18 +45,18 @@ public class Table {
       return sheetParseResult;
     }
 
-    public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
+    public Builder<T> setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
       return this;
     }
 
   }
 
-  public static Builder builder() {
-    return new Builder();
+  public static <T> Builder<T> builder() {
+    return new Builder<T>();
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig<T> tableConfig;
   private final List<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<ImmutableTree<Menu>> menuTrees;
@@ -62,7 +68,7 @@ public class Table {
   // private final ImmutableCollection<Menu> mustMenus;
   // private final ImmutableCollection<Menu> notMustMenus;
 
-  public Table(Builder builder) {
+  public Table(Builder<T> builder) {
     tableConfig = builder.tableConfig;
     // TODO
     errors = null;
@@ -81,7 +87,7 @@ public class Table {
   private ImmutableCollection<Menu> loadTopMenus() {
     com.google.common.collect.ImmutableSet.Builder<Menu> builder = ImmutableSet.builder();
 
-    Collection<MenuConfig> menuConfigs = getTableConfig().getTopMenuConfigs();
+    Collection<MenuConfig> menuConfigs = tableConfig.getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
     for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
       Row row = sheet.getRow(rowIndex);
@@ -100,9 +106,20 @@ public class Table {
     return builder.build();
   }
 
+  public T get() {
+    T t;
+    if (ClassUtils.isSingle(tableConfig.getType())) {
+      t=new JSONArray().toJavaObject(type);
+    }else {
+      t= new JSONObject().toJavaObject(token.getType());
+    }
+    
+    return t;
+  }
+
   // TODO
   public ImmutableList<StandardCell> getCells(Menu menu) {
-    return menu.getData().getValueCells();
+    return menu.getValueCells();
   }
 
   public ImmutableList<StandardCell> getCells(String menuName) {
@@ -125,12 +142,12 @@ public class Table {
     return getValues(getMenu(menuName).orNull());
   }
 
-  public <T> ImmutableList<T> getValues(Menu menu, Class<T> type) {
+  public <K> ImmutableList<K> getValues(Menu menu, Class<K> type) {
     return ImmutableList
         .copyOf(Collections2.transform(getValues(menu), value -> menu.cast(value, type)));
   }
 
-  public <T> ImmutableList<T> getValues(String menuName, Class<T> type) {
+  public <K> ImmutableList<K> getValues(String menuName, Class<K> type) {
     return getValues(getMenu(menuName).orNull(), type);
   }
 
@@ -142,11 +159,11 @@ public class Table {
     return getValue(getMenu(menuName).orNull());
   }
 
-  public <T> Optional<T> getValue(Menu menu, Class<T> type) {
+  public <K> Optional<K> getValue(Menu menu, Class<K> type) {
     return getValue(menu).transform(value -> menu.cast(value, type));
   }
 
-  public <T> Optional<T> getValue(String menuName, Class<T> type) {
+  public <K> Optional<K> getValue(String menuName, Class<K> type) {
     Menu menu = getMenu(menuName).orNull();
     return getValue(menu).transform(value -> menu.cast(value, type));
   }
@@ -174,7 +191,7 @@ public class Table {
   public Iterable<Menu> getTopMenus() {
     return Iterables.transform(menuTrees, ImmutableTree::getRoot);
   }
-  
+
   public FluentIterable<Menu> getMenus() {
     return FluentIterable.from(menuTrees).transformAndConcat(ImmutableTree::breadthFirstTraversal);
   }
@@ -203,7 +220,7 @@ public class Table {
     return getMenus().filter(Menu::isNotMustMenu);
   }
 
-  public TableConfig getTableConfig() {
+  public TableConfig<T> getTableConfig() {
     return tableConfig;
   }
 

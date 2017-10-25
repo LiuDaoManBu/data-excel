@@ -9,6 +9,7 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.collect.ImmutableList;
 
 public class DataConfig {
+  private MenuConfig menuConfig;
   private Field field;
   private DataMatcher dataMatcher;
   private LoadType loadType;
@@ -39,6 +40,10 @@ public class DataConfig {
     return loadType.getDataCells(menu);
   }
 
+
+  public MenuConfig getMenuConfig() {
+    return menuConfig;
+  }
 
   public DataMatcher getDataMatcher() {
     return dataMatcher;

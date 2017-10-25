@@ -1,8 +1,10 @@
 package com.caotc.excel4j;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
+import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.parse.result.Data;
 import com.caotc.excel4j.util.ClassUtils;
 import com.google.common.base.Predicates;
@@ -25,7 +27,8 @@ class AAA<T> {
 public class TestGuava {
   public static void main(String[] args) throws Exception{
     // whenFilterWithCollections2_thenFiltered();
-    TypeToken<Number[]> stringTok = TypeToken.of(Number[].class);
+    TypeToken<Number> stringTok = TypeToken.of(Number.class);
+    System.out.println(stringTok.isSupertypeOf(Integer.class));
     System.out.println(stringTok.isArray());
     System.out.println(stringTok.getType());
     TypeSet typeSet = stringTok.getTypes();
@@ -45,8 +48,7 @@ public class TestGuava {
     System.out.println(ClassUtils.getAllFields(String.class));
     
     System.out.println();
-    Field field=TypeToken.of(Data.class).getRawType().getDeclaredField("menuToCells");
-    System.out.println(field.getType());
+    JSONObject.toJSON(null);
   }
 
   public static void viewTest2() {

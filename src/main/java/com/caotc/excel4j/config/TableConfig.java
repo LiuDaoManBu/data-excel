@@ -4,22 +4,22 @@ import java.util.Collection;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.collect.Collections2;
 
-public class TableConfig {
-  public static class Builder {
+public class TableConfig<T> {
+  public static class Builder<T> {
     private SheetConfig sheetConfig;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
     private Collection<MenuConfig> menuConfigs;
 
-    public TableConfig builder() {
-      return new TableConfig(this);
+    public TableConfig<T> builder() {
+      return new TableConfig<T>(this);
     }
 
     public SheetConfig getSheetConfig() {
       return sheetConfig;
     }
 
-    public Builder setSheetConfig(SheetConfig sheetConfig) {
+    public Builder<T> setSheetConfig(SheetConfig sheetConfig) {
       this.sheetConfig = sheetConfig;
       return this;
     }
@@ -28,7 +28,7 @@ public class TableConfig {
       return fixedMenuDirection;
     }
 
-    public Builder setFixedMenuDirection(Direction fixedMenuDirection) {
+    public Builder<T> setFixedMenuDirection(Direction fixedMenuDirection) {
       this.fixedMenuDirection = fixedMenuDirection;
       return this;
     }
@@ -37,7 +37,7 @@ public class TableConfig {
       return unFixedMenuDirection;
     }
 
-    public Builder setUnFixedMenuDirection(Direction unFixedMenuDirection) {
+    public Builder<T> setUnFixedMenuDirection(Direction unFixedMenuDirection) {
       this.unFixedMenuDirection = unFixedMenuDirection;
       return this;
     }
@@ -46,7 +46,7 @@ public class TableConfig {
       return menuConfigs;
     }
 
-    public Builder setMenuConfigs(Collection<MenuConfig> menuConfigs) {
+    public Builder<T> setMenuConfigs(Collection<MenuConfig> menuConfigs) {
       this.menuConfigs = menuConfigs;
       return this;
     }
@@ -54,13 +54,16 @@ public class TableConfig {
   }
 
   private final SheetConfig sheetConfig;
+  private final Class<T> type;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
   private final Collection<MenuConfig> menuConfigs;
   private final Collection<MenuConfig> topMenuConfigs;
 
-  public TableConfig(Builder builder) {
+  public TableConfig(Builder<T> builder) {
     sheetConfig=builder.sheetConfig;
+    //TODO
+    type=null;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
     menuConfigs = builder.menuConfigs;
@@ -87,4 +90,9 @@ public class TableConfig {
   public Collection<MenuConfig> getMenuConfigs() {
     return menuConfigs;
   }
+
+  public Class<T> getType() {
+    return type;
+  }
+  
 }
