@@ -13,7 +13,7 @@ import com.caotc.excel4j.collect.ImmutableTree;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
-import com.caotc.excel4j.util.ClassUtils;
+import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
@@ -23,20 +23,20 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
-public class Table<T> {
-  public static class Builder<T> {
-    private TableConfig<T> tableConfig;
+public class Table {
+  public static class Builder {
+    private TableConfig tableConfig;
     private SheetParseResult sheetParseResult;
 
-    public Table<T> build() {
-      return new Table<T>(this);
+    public Table build() {
+      return new Table(this);
     }
 
-    public TableConfig<T> getTableConfig() {
+    public TableConfig getTableConfig() {
       return tableConfig;
     }
 
-    public Builder<T> setTableConfig(TableConfig<T> tableConfig) {
+    public Builder setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -45,18 +45,18 @@ public class Table<T> {
       return sheetParseResult;
     }
 
-    public Builder<T> setSheetParseResult(SheetParseResult sheetParseResult) {
+    public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
       return this;
     }
 
   }
 
-  public static <T> Builder<T> builder() {
-    return new Builder<T>();
+  public static  Builder builder() {
+    return new Builder();
   }
 
-  private final TableConfig<T> tableConfig;
+  private final TableConfig tableConfig;
   private final List<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<ImmutableTree<Menu>> menuTrees;
@@ -68,7 +68,7 @@ public class Table<T> {
   // private final ImmutableCollection<Menu> mustMenus;
   // private final ImmutableCollection<Menu> notMustMenus;
 
-  public Table(Builder<T> builder) {
+  public Table(Builder builder) {
     tableConfig = builder.tableConfig;
     // TODO
     errors = null;
@@ -98,22 +98,18 @@ public class Table<T> {
         Optional<MenuConfig> optional =
             Iterables.tryFind(menuConfigs, menuConfig -> menuConfig.getMenuMatcher().matches(cell));
         if (optional.isPresent()) {
+          com.caotc.excel4j.parse.result.Menu.Builder topMenuBuilder=Menu.builder();
           builder.add(
-              Menu.builder().setCell(cell).setMenuConfig(optional.get()).setTable(this).build());
+              topMenuBuilder.setCell(cell).setMenuConfig(optional.get()).setTable(this).build());
         }
       }
     }
     return builder.build();
   }
 
-  public T get() {
-    T t;
-    if (ClassUtils.isSingle(tableConfig.getType())) {
-      t=new JSONArray().toJavaObject(type);
-    }else {
-      t= new JSONObject().toJavaObject(token.getType());
-    }
-    
+  public <T> T get(Class<T> type) {
+    T t=ClassUtil.newInstance(type);
+    FluentIterable.from(menuTrees).transform(ImmutableTree::getRoot).forEach(menu->menu.getData().setFieldValue(t));
     return t;
   }
 
@@ -220,7 +216,7 @@ public class Table<T> {
     return getMenus().filter(Menu::isNotMustMenu);
   }
 
-  public TableConfig<T> getTableConfig() {
+  public TableConfig getTableConfig() {
     return tableConfig;
   }
 

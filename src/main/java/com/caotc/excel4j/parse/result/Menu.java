@@ -3,7 +3,6 @@ package com.caotc.excel4j.parse.result;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Optional;
@@ -71,7 +70,7 @@ public class Menu {
 
   }
 
-  public static Builder builder() {
+  public static  Builder builder() {
     return new Builder();
   }
 
@@ -105,7 +104,8 @@ public class Menu {
       Preconditions.checkState(Iterables.size(configs) <= 1);
       Menu menu = null;
       if (!Iterables.isEmpty(configs)) {
-        menu = Menu.builder().setCell(cell).setMenuConfig(Iterables.getOnlyElement(configs))
+        Builder builder=Menu.builder();
+        menu = builder.setCell(cell).setMenuConfig(Iterables.getOnlyElement(configs))
             .setParentMenu(this).build();
       }
 
@@ -270,11 +270,11 @@ public class Menu {
     return menuConfig.canCastClasses();
   }
 
-  public <T> boolean canCast(Class<T> clazz) {
+  public  <T> boolean canCast(Class<T> clazz) {
     return menuConfig.canCast(clazz);
   }
 
-  public <T> T cast(Object value, Class<T> clazz) {
+  public  <T> T cast(Object value, Class<T> clazz) {
     return menuConfig.cast(value, clazz);
   }
   // delegate methods end

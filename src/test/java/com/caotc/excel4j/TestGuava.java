@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.parse.result.Data;
-import com.caotc.excel4j.util.ClassUtils;
+import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -16,7 +16,7 @@ import com.google.common.reflect.TypeToken.TypeSet;
 
 class AAA<T> {
   public void getType() {
-    TypeToken typeToken = new TypeToken<AAA<T>>() {};
+    TypeToken<AAA<T>> typeToken = new TypeToken<AAA<T>>() {};
     TypeToken<?> genericTypeToken = typeToken.resolveType(AAA.class.getTypeParameters()[0]);
     System.out.println(genericTypeToken.getType());
   }
@@ -27,7 +27,7 @@ class AAA<T> {
 public class TestGuava {
   public static void main(String[] args) throws Exception{
     // whenFilterWithCollections2_thenFiltered();
-    TypeToken<Number> stringTok = TypeToken.of(Number.class);
+    TypeToken<Number[]> stringTok = TypeToken.of(Number[].class);
     System.out.println(stringTok.isSupertypeOf(Integer.class));
     System.out.println(stringTok.isArray());
     System.out.println(stringTok.getType());
@@ -39,20 +39,16 @@ public class TestGuava {
     System.out.println(stringTok.getComponentType());
     System.out.println(stringTok.getRawType());
 
-    System.out.println(ClassUtils.getAllSuperclasses(Object.class));
-    TreeTraverser<String> tree =
-        TreeTraverser.using(string -> string == null ? Lists.newArrayList("A", "B", "C")
-            : Lists.newArrayList(string + "A", string + "B", string + "C"));
-    System.out.println(tree.children(null));
-    // System.out.println(tree.breadthFirstTraversal("A").toSet());
-    System.out.println(ClassUtils.getAllFields(String.class));
-    
     System.out.println();
-    JSONObject.toJSON(null);
+    AAA<String> a=new AAA<String>();
+    tokenTest(a);
   }
 
-  public static void viewTest2() {
-    // Multimaps.filterEntries(unfiltered, entryPredicate)
+  public static <T> void tokenTest(T object) {
+    TypeToken<T> token=new TypeToken<T>(object.getClass()) {};
+//    TypeToken<T> token=(TypeToken<T>) TypeToken.of(object.getClass());
+    System.out.println(token.getRawType());
+//    System.out.println(token.getRawType().get);
   }
 
   public static void whenFilterWithCollections2_thenFiltered() {

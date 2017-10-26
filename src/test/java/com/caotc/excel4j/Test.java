@@ -1,5 +1,6 @@
 package com.caotc.excel4j;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -15,8 +16,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.google.common.reflect.TypeToken;
 
-class A{
+class A implements Cloneable{
   public static String test="test";
 	private String id=null;
 	private Set<Integer> values;

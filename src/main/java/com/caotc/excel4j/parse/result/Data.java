@@ -9,7 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
-public class Data<T> {
+public class Data {
   private final Menu menu;
   private final DataConfig dataConfig;
   private final ImmutableList<Object> values;
@@ -35,7 +35,8 @@ public class Data<T> {
   // }
 
   // TODO
-  public void toJavaObject() {
+  public <T> void setFieldValue(T Object) {
+    TypeToken<T> token=new TypeToken<T>() {};
     Optional<Menu> optional = menu.getFieldParent();
     Class<?> parentType = optional.isPresent() ? optional.get().getField().get().getType()
         : dataConfig.getMenuConfig().getTableConfig().getType();
