@@ -14,40 +14,45 @@ import com.google.common.collect.TreeTraverser;
 import com.google.common.reflect.TypeToken;
 import com.google.common.reflect.TypeToken.TypeSet;
 
-class AAA<T> {
+class AAA<R> {
   public void getType() {
-    TypeToken<AAA<T>> typeToken = new TypeToken<AAA<T>>() {};
+    TypeToken<AAA<R>> typeToken = new TypeToken<AAA<R>>() {};
     TypeToken<?> genericTypeToken = typeToken.resolveType(AAA.class.getTypeParameters()[0]);
     System.out.println(genericTypeToken.getType());
   }
-
+  
+  public R get() {
+    return null;
+  }
 }
 
 
 public class TestGuava {
   public static void main(String[] args) throws Exception{
     // whenFilterWithCollections2_thenFiltered();
-    TypeToken<Number[]> stringTok = TypeToken.of(Number[].class);
-    System.out.println(stringTok.isSupertypeOf(Integer.class));
-    System.out.println(stringTok.isArray());
-    System.out.println(stringTok.getType());
-    TypeSet typeSet = stringTok.getTypes();
-    System.out.println(typeSet);
-    System.out.println(typeSet.classes());
-    System.out.println(typeSet.interfaces());
-    System.out.println(typeSet.classes().rawTypes());
-    System.out.println(stringTok.getComponentType());
-    System.out.println(stringTok.getRawType());
-
-    System.out.println();
+//    TypeToken<Number[]> stringTok = TypeToken.of(Number[].class);
+//    System.out.println(stringTok.isSupertypeOf(Integer.class));
+//    System.out.println(stringTok.isArray());
+//    System.out.println(stringTok.getType());
+//    TypeSet typeSet = stringTok.getTypes();
+//    System.out.println(typeSet);
+//    System.out.println(typeSet.classes());
+//    System.out.println(typeSet.interfaces());
+//    System.out.println(typeSet.classes().rawTypes());
+//    System.out.println(stringTok.getComponentType());
+//    System.out.println(stringTok.getRawType());
+//    System.out.println();
+    
     AAA<String> a=new AAA<String>();
     tokenTest(a);
   }
 
-  public static <T> void tokenTest(T object) {
-    TypeToken<T> token=new TypeToken<T>(object.getClass()) {};
-//    TypeToken<T> token=(TypeToken<T>) TypeToken.of(object.getClass());
+  public static <T> void tokenTest(T object) throws Exception{
+//    TypeToken<T> token=new TypeToken<T>() {};
+    TypeToken<T> token=(TypeToken<T>) TypeToken.of(object.getClass());
     System.out.println(token.getRawType());
+    System.out.println(token.resolveType(object.getClass().getMethod("get").getGenericReturnType()));
+    System.out.println(token.resolveType(object.getClass().getTypeParameters()[0]));
 //    System.out.println(token.getRawType().get);
   }
 
