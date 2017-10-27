@@ -1,31 +1,27 @@
 package com.caotc.excel4j;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
+import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.parse.result.Data;
-import com.caotc.excel4j.util.ClassUtil;
+import java.util.Map;
+import java.util.Queue;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import com.google.common.collect.TreeTraverser;
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
-import com.google.common.reflect.TypeToken.TypeSet;
 
-class AAA<R> {
-  public void getType() {
-    TypeToken<AAA<R>> typeToken = new TypeToken<AAA<R>>() {};
-    TypeToken<?> genericTypeToken = typeToken.resolveType(AAA.class.getTypeParameters()[0]);
-    System.out.println(genericTypeToken.getType());
-  }
-  
-  public R get() {
+class Table<T> {
+  public T get() {
+    TypeToken<T> typeToken = new TypeToken<T>(getClass()) {};
+    System.out.println(typeToken);
+    System.out.println(typeToken.getRawType());
+    TypeToken<?> token=typeToken.resolveType(typeToken.getRawType().getTypeParameters()[0]);
+    System.out.println(token);
     return null;
   }
 }
-
 
 public class TestGuava {
   public static void main(String[] args) throws Exception{
@@ -42,18 +38,8 @@ public class TestGuava {
 //    System.out.println(stringTok.getComponentType());
 //    System.out.println(stringTok.getRawType());
 //    System.out.println();
-    
-    AAA<String> a=new AAA<String>();
-    tokenTest(a);
-  }
-
-  public static <T> void tokenTest(T object) throws Exception{
-//    TypeToken<T> token=new TypeToken<T>() {};
-    TypeToken<T> token=(TypeToken<T>) TypeToken.of(object.getClass());
-    System.out.println(token.getRawType());
-    System.out.println(token.resolveType(object.getClass().getMethod("get").getGenericReturnType()));
-    System.out.println(token.resolveType(object.getClass().getTypeParameters()[0]));
-//    System.out.println(token.getRawType().get);
+    Table<List<String>> table=new Table<List<String>>() {};
+    List<String> n=table.get();
   }
 
   public static void whenFilterWithCollections2_thenFiltered() {
