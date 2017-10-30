@@ -13,6 +13,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 
 class Table<T> {
+  public static <T> Table<T> getInstance() {
+    return new Table<T>("");
+  }
+  public Table(String aaa) {
+    
+  }
   public T get() {
     TypeToken<T> typeToken = new TypeToken<T>(getClass()) {};
     System.out.println(typeToken);
@@ -53,11 +59,10 @@ public class TestGuava {
     System.out.println(jsonObject.toJavaObject(AAA.class));
     Collection<AAA> c=new JSONArray().fluentAdd(jsonObject).toJavaObject(Collection.class);
     System.out.println(c);
-    AAA aaa=c.iterator().next();
+//    AAA aaa=c.iterator().next();
     
     System.out.println(jsonObject.toJavaObject(Map.class).get("values"));
     Multimap<String,Object> mmap=jsonObject.toJavaObject(Multimap.class);
-    System.out.println(mmap.get("values"));
     // System.out.println(int[][][].class.equals(int[].class));
     // Class<?> type=void.class;
     // System.out.println(type.isInterface());
@@ -67,6 +72,7 @@ public class TestGuava {
     //
     // TypeToken token=TypeToken.of(void.class);
     // System.out.println(token.isPrimitive());
+    jsonObject.toJavaObject(Table.class);
   }
 
   public static void whenFilterWithCollections2_thenFiltered() {
