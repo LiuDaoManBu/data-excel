@@ -1,5 +1,7 @@
 package com.caotc.excel4j;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -10,16 +12,13 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.reflect.AbstractInvocationHandler;
+import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 
-class Table<T> {
-  public static <T> Table<T> getInstance() {
-    return new Table<T>("");
-  }
-  public Table(String aaa) {
-    
-  }
-  public T get() {
+interface Table<T> {
+  @SuppressWarnings("serial")
+  public default T get() {
     TypeToken<T> typeToken = new TypeToken<T>(getClass()) {};
     System.out.println(typeToken);
     System.out.println(typeToken.getRawType());
@@ -40,14 +39,35 @@ class AAA<T> {
 }
 
 
-class BBB {
+class BBB<T> implements Table<T>{
   public final String name="name";
   public String type;
 }
 
+class MyInvocationHandler<T> extends AbstractInvocationHandler{
+  private Table<T> table;
+  MyInvocationHandler(Table<T> table){
+    this.table=table;
+  }
+  @SuppressWarnings("serial")
+  public T get() {
+    TypeToken<T> typeToken = new TypeToken<T>(getClass()) {};
+    System.out.println(typeToken);
+    System.out.println(typeToken.getRawType());
+    // TypeToken<?> token=typeToken.resolveType(typeToken.getRawType().getTypeParameters()[0]);
+    // System.out.println(token);
+    return null;
+  }
+  @Override
+  protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
+    get();
+    return method.invoke(table, args);
+  }
+  
+}
 
 public class TestGuava {
-  public static void main(String[] args) throws Exception {
+  public static <T> void main(String[] args) throws Exception {
     // Table<List<String>> table=new Table<List<String>>();
     // List<String> n=table.get();
 
@@ -72,7 +92,9 @@ public class TestGuava {
     //
     // TypeToken token=TypeToken.of(void.class);
     // System.out.println(token.isPrimitive());
-    jsonObject.toJavaObject(Table.class);
+    Table<String> table=new BBB<String>();
+    Table<String> proxy=Reflection.newProxy(Table.class, new MyInvocationHandler<String>(table));
+    proxy.get();
   }
 
   public static void whenFilterWithCollections2_thenFiltered() {
