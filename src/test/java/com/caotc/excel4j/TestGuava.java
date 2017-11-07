@@ -2,6 +2,7 @@ package com.caotc.excel4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ class AAA<T> {
 }
 
 
-class BBB<T> implements Table<T>{
+class BBB<T> extends AAA<T> implements Table<T>{
   public final String name="name";
   public String type;
 }
@@ -65,6 +66,9 @@ class MyInvocationHandler<T> extends AbstractInvocationHandler{
   }
   
 }
+
+interface Ia{}
+interface Ib extends Ia{}
 
 public class TestGuava {
   public static <T> void main(String[] args) throws Exception {
@@ -95,6 +99,9 @@ public class TestGuava {
     Table<String> table=new BBB<String>();
     Table<String> proxy=Reflection.newProxy(Table.class, new MyInvocationHandler<String>(table));
     proxy.get();
+    
+    TypeToken<BBB> token=TypeToken.of(BBB.class);
+    System.out.println(Arrays.asList(TestGuava.class.getConstructors()));
   }
 
   public static void whenFilterWithCollections2_thenFiltered() {
