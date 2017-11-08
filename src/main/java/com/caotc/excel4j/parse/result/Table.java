@@ -2,26 +2,22 @@ package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.collect.ImmutableTree;
+import com.caotc.excel4j.base.collect.ImmutableTree;
+import com.caotc.excel4j.config.GlobalConfig;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
-import com.caotc.excel4j.util.ClassUtil;
-import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 
 public class Table {
   public static class Builder {
@@ -52,7 +48,7 @@ public class Table {
 
   }
 
-  public static  Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -95,10 +91,10 @@ public class Table {
           .getLastCellNum(); columnIndex++) {
         StandardCell cell =
             StandardCell.valueOf(row.getCell(columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK));
-        Optional<MenuConfig> optional =
+        com.google.common.base.Optional<MenuConfig> optional =
             Iterables.tryFind(menuConfigs, menuConfig -> menuConfig.getMenuMatcher().matches(cell));
         if (optional.isPresent()) {
-          com.caotc.excel4j.parse.result.Menu.Builder topMenuBuilder=Menu.builder();
+          com.caotc.excel4j.parse.result.Menu.Builder topMenuBuilder = Menu.builder();
           builder.add(
               topMenuBuilder.setCell(cell).setMenuConfig(optional.get()).setTable(this).build());
         }
@@ -108,8 +104,10 @@ public class Table {
   }
 
   public <T> T get(Class<T> type) {
-    T t=ClassUtil.newInstance(type);
-    FluentIterable.from(menuTrees).transform(ImmutableTree::getRoot).forEach(menu->menu.getData().setFieldValue(t));
+    Optional<T> optional = GlobalConfig.newInstance(type);
+    Preconditions.checkState(optional.isPresent());
+    FluentIterable.from(menuTrees).transform(ImmutableTree::getRoot)
+        .forEach(menu -> menu.getData().setValue(t));
     return t;
   }
 
@@ -119,15 +117,15 @@ public class Table {
   }
 
   public ImmutableList<StandardCell> getCells(String menuName) {
-    return getCells(getMenu(menuName).orNull());
+    return getCells(getMenu(menuName).orElse(null));
   }
 
   public Optional<StandardCell> getCell(Menu menu) {
-    return Optional.fromNullable(Iterables.getOnlyElement(getCells(menu), null));
+    return Optional.ofNullable(Iterables.getOnlyElement(getCells(menu), null));
   }
 
   public Optional<StandardCell> getCell(String menuName) {
-    return getCell(getMenu(menuName).orNull());
+    return getCell(getMenu(menuName).orElse(null));
   }
 
   public ImmutableList<Object> getValues(Menu menu) {
@@ -135,7 +133,7 @@ public class Table {
   }
 
   public ImmutableList<Object> getValues(String menuName) {
-    return getValues(getMenu(menuName).orNull());
+    return getValues(getMenu(menuName).orElse(null));
   }
 
   public <K> ImmutableList<K> getValues(Menu menu, Class<K> type) {
@@ -144,24 +142,24 @@ public class Table {
   }
 
   public <K> ImmutableList<K> getValues(String menuName, Class<K> type) {
-    return getValues(getMenu(menuName).orNull(), type);
+    return getValues(getMenu(menuName).orElse(null), type);
   }
 
   public Optional<Object> getValue(Menu menu) {
-    return getCell(menu).transform(StandardCell::getValue);
+    return getCell(menu).map(StandardCell::getValue);
   }
 
   public Optional<Object> getValue(String menuName) {
-    return getValue(getMenu(menuName).orNull());
+    return getValue(getMenu(menuName).orElse(null));
   }
 
   public <K> Optional<K> getValue(Menu menu, Class<K> type) {
-    return getValue(menu).transform(value -> menu.cast(value, type));
+    return getValue(menu).map(value -> menu.cast(value, type));
   }
 
   public <K> Optional<K> getValue(String menuName, Class<K> type) {
-    Menu menu = getMenu(menuName).orNull();
-    return getValue(menu).transform(value -> menu.cast(value, type));
+    Menu menu = getMenu(menuName).orElse(null);
+    return getValue(menu).map(value -> menu.cast(value, type));
   }
   //
 
@@ -181,7 +179,7 @@ public class Table {
   }
 
   public Optional<Menu> getMenu(String menuName) {
-    return Iterables.tryFind(getMenus(), menu -> menu.getName().equals(menuName));
+    return Iterables.tryFind(getMenus(), menu -> menu.getName().equals(menuName)).toJavaUtil();
   }
 
   public Iterable<Menu> getTopMenus() {

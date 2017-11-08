@@ -2,6 +2,7 @@ package com.caotc.excel4j.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,34 +45,13 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
         .ofNullable(Iterables.getOnlyElement(getNameToFields(type).get(fieldName), null));
   }
 
-  public static <T> boolean isSingle(Class<T> type) {
-    TypeToken<T> token = TypeToken.of(type);
-    return !(token.isArray() || token.isSubtypeOf(Collection.class) || token.isSubtypeOf(Map.class)
-        || token.isSubtypeOf(Multimap.class) || token.isSubtypeOf(Table.class));
-  }
+  // TODO
+  // public static <T> boolean isSingle(Class<T> type) {
+  // TypeToken<T> token = TypeToken.of(type);
+  // return !(token.isArray() || token.isSubtypeOf(Collection.class) || token.isSubtypeOf(Map.class)
+  // || token.isSubtypeOf(Multimap.class) || token.isSubtypeOf(Table.class));
+  // }
 
-  @SuppressWarnings("unchecked")
-  public static <T> T newInstance(Class<T> type) {
-    if (isSingle(type) || TypeToken.of(type).isSubtypeOf(Map.class)) {
-      return new JSONObject().toJavaObject(type);
-    }
-    return (T) INTERFACE_TO_SUPPLIERS.get(Iterables.getFirst(interfaces, null)).get();
-  }
-
-  public static <T> Optional<Supplier<T>> getSupplier(Class<T> type) {
-    Optional<Supplier<T>> optional = GlobalConfig.getSupplier(type);
-    if (optional.isPresent()) {
-      return optional;
-    }
-    return getDefaultConstructor(type).map(c -> new Supplier<T>() {
-      @Override
-      public T get() {
-        c.setAccessible(Boolean.TRUE);
-        return c.newInstance();
-      }
-
-    });
-  }
 
   @SuppressWarnings("unchecked")
   public static <T> Optional<Constructor<T>> getDefaultConstructor(Class<T> type) {

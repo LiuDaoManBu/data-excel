@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import com.caotc.excel4j.base.function.InvokableSupplier;
+import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
@@ -33,7 +35,15 @@ public class GlobalConfig {
   @SuppressWarnings("unchecked")
   public static <T> Optional<Supplier<T>> getSupplier(Class<T> type) {
     // TODO
-    return TypeToken.of(type).getTypes().rawTypes().stream().filter(CLASS_TO_SUPPLIERS::containsKey)
-        .findFirst().map(CLASS_TO_SUPPLIERS::get).map(supplier -> (Supplier<T>) supplier);
+    Optional<Supplier<T>> optional =
+        TypeToken.of(type).getTypes().rawTypes().stream().filter(CLASS_TO_SUPPLIERS::containsKey)
+            .findFirst().map(CLASS_TO_SUPPLIERS::get).map(supplier -> (Supplier<T>) supplier);
+
+    return optional.isPresent() ? optional
+        : ClassUtil.getDefaultConstructor(type).map(InvokableSupplier::of);
+  }
+  
+  public static <T> Optional<T> newInstance(Class<T> type) {
+    return getSupplier(type).map(Supplier::get);
   }
 }
