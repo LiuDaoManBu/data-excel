@@ -35,8 +35,7 @@ public class Data {
   // }
 
   // TODO
-  public <T> void setValue(T Object) {
-    TypeToken<T> token=new TypeToken<T>() {};
+  public <T> void setFieldValue(T Object) {
     Optional<Menu> optional = menu.getFieldParent();
     Class<?> parentType = optional.isPresent() ? optional.get().getField().get().getType()
         : dataConfig.getMenuConfig().getTableConfig().getType();

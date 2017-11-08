@@ -107,8 +107,8 @@ public class Table {
     Optional<T> optional = GlobalConfig.newInstance(type);
     Preconditions.checkState(optional.isPresent());
     FluentIterable.from(menuTrees).transform(ImmutableTree::getRoot)
-        .forEach(menu -> menu.getData().setValue(t));
-    return t;
+        .forEach(menu -> menu.getData().setFieldValue(optional.get()));
+    return optional.get();
   }
 
   // TODO

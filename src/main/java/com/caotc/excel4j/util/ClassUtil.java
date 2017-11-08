@@ -2,27 +2,24 @@ package com.caotc.excel4j.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.config.GlobalConfig;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Table;
-import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 
 public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
+  private static final ImmutableCollection<Class<?>> COLLECTORS =
+      ImmutableSet.of(Collection.class, Map.class, Multimap.class, Table.class);
+
   /**
    * get all fields of the Class.
    * 
@@ -45,13 +42,10 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
         .ofNullable(Iterables.getOnlyElement(getNameToFields(type).get(fieldName), null));
   }
 
-  // TODO
-  // public static <T> boolean isSingle(Class<T> type) {
-  // TypeToken<T> token = TypeToken.of(type);
-  // return !(token.isArray() || token.isSubtypeOf(Collection.class) || token.isSubtypeOf(Map.class)
-  // || token.isSubtypeOf(Multimap.class) || token.isSubtypeOf(Table.class));
-  // }
-
+  public static <T> boolean isCollector(Class<T> type) {
+    TypeToken<T> token = TypeToken.of(type);
+    return token.isArray() || Iterables.any(COLLECTORS, token::isSubtypeOf);
+  }
 
   @SuppressWarnings("unchecked")
   public static <T> Optional<Constructor<T>> getDefaultConstructor(Class<T> type) {

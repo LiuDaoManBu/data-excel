@@ -24,6 +24,7 @@ public class GlobalConfig {
     setSupplier(List.class, Lists::newArrayList);
     setSupplier(Set.class, Sets::newHashSet);
     setSupplier(Collection.class, Lists::newArrayList);
+    setSupplier(Iterable.class, Lists::newArrayList);
     setSupplier(Multimap.class, ArrayListMultimap::create);
     setSupplier(Table.class, HashBasedTable::create);
   }

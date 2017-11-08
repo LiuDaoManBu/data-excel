@@ -9,11 +9,13 @@ import java.util.Map;
 import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.config.GlobalConfig;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.AbstractInvocationHandler;
+import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Reflection;
 import com.google.common.reflect.TypeToken;
 
@@ -103,18 +105,16 @@ public class TestGuava {
     TypeToken<BBB> token=TypeToken.of(BBB.class);
     System.out.println(Arrays.asList(TestGuava.class.getConstructors()));
   }
-
-  public static void whenFilterWithCollections2_thenFiltered() {
-    List<String> names = Lists.newArrayList("John", "Jane", "Adam", "Tom");
-    Collection<String> result = Collections2.filter(names, Predicates.containsPattern("a"));
-    System.out.println(Collections2.transform(names, string -> string.length()));
-    System.out.println(names);
-    System.out.println(result);
-
-    System.out.println();
-    result.add("anna");
-    // names.add("anna");
-    System.out.println(names);
-    System.out.println(result);
+  
+  public static <T> void testInvokableCast() throws Exception{
+    Invokable<?,Object> invokable=Invokable.from(TestGuava.class.getMethod("get"));
+    System.out.println(invokable.invoke(null));
+    Invokable<?,T> invokable2= (Invokable<?,T>)invokable;
+    System.out.println(invokable2);
+    System.out.println(invokable2.invoke(null));
+  }
+  
+  public static <T> T get() {
+    return null;
   }
 }
