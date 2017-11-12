@@ -33,17 +33,20 @@ public class GlobalConfig {
     CLASS_TO_SUPPLIERS.put(type, supplier);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> Optional<Supplier<T>> getSupplier(Class<T> type) {
+    return getSupplier(TypeToken.of(type));
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Optional<Supplier<T>> getSupplier(TypeToken<T> token) {
     // TODO
     Optional<Supplier<T>> optional =
-        TypeToken.of(type).getTypes().rawTypes().stream().filter(CLASS_TO_SUPPLIERS::containsKey)
-            .findFirst().map(CLASS_TO_SUPPLIERS::get).map(supplier -> (Supplier<T>) supplier);
-
+        token.getTypes().rawTypes().stream().filter(CLASS_TO_SUPPLIERS::containsKey).findFirst()
+            .map(CLASS_TO_SUPPLIERS::get).map(supplier -> (Supplier<T>) supplier);
     return optional.isPresent() ? optional
-        : ClassUtil.getDefaultConstructor(type).map(InvokableSupplier::of);
+        : ClassUtil.getDefaultConstructor((Class<T>) token.getRawType()).map(InvokableSupplier::of);
   }
-  
+
   public static <T> Optional<T> newInstance(Class<T> type) {
     return getSupplier(type).map(Supplier::get);
   }

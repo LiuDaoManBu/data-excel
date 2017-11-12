@@ -104,6 +104,12 @@ public class TestGuava {
     
     TypeToken<BBB> token=TypeToken.of(BBB.class);
     System.out.println(Arrays.asList(TestGuava.class.getConstructors()));
+    
+    testTypeToken(new TypeToken<Collection<String>>() {});
+  }
+  
+  public static <T> void testTypeToken(TypeToken<T> token) {
+    System.out.println(token.resolveType(token.getRawType().getTypeParameters()[0]));
   }
   
   public static <T> void testInvokableCast() throws Exception{

@@ -3,7 +3,6 @@ package com.caotc.excel4j.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.FluentIterable;
@@ -18,7 +17,7 @@ import com.google.common.reflect.TypeToken;
 
 public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
   private static final ImmutableCollection<Class<?>> COLLECTORS =
-      ImmutableSet.of(Collection.class, Map.class, Multimap.class, Table.class);
+      ImmutableSet.of(Iterable.class, Map.class, Multimap.class, Table.class);
 
   /**
    * get all fields of the Class.
@@ -28,22 +27,37 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
    * @param type Class Object
    * @return all fields of the Class
    */
-  public static <T> ImmutableCollection<Field> getAllFields(Class<?> type) {
-    return FluentIterable.from(TypeToken.of(type).getTypes().classes().rawTypes())
+  public static ImmutableCollection<Field> getAllFields(Class<?> type) {
+    return getAllFields(TypeToken.of(type));
+  }
+
+  public static ImmutableCollection<Field> getAllFields(TypeToken<?> token) {
+    return FluentIterable.from(token.getTypes().classes().rawTypes())
         .transform(Class::getDeclaredFields).transformAndConcat(Arrays::asList).toSet();
   }
 
   public static ImmutableMultimap<String, Field> getNameToFields(Class<?> type) {
-    return Multimaps.index(getAllFields(type), Field::getName);
+    return getNameToFields(TypeToken.of(type));
+  }
+
+  public static ImmutableMultimap<String, Field> getNameToFields(TypeToken<?> token) {
+    return Multimaps.index(getAllFields(token), Field::getName);
   }
 
   public static Optional<Field> getField(Class<?> type, String fieldName) {
-    return Optional
-        .ofNullable(Iterables.getOnlyElement(getNameToFields(type).get(fieldName), null));
+    return getField(TypeToken.of(type), fieldName);
   }
 
-  public static <T> boolean isCollector(Class<T> type) {
-    TypeToken<T> token = TypeToken.of(type);
+  public static Optional<Field> getField(TypeToken<?> token, String fieldName) {
+    return Optional
+        .ofNullable(Iterables.getOnlyElement(getNameToFields(token).get(fieldName), null));
+  }
+
+  public static boolean isCollector(Class<?> type) {
+    return isCollector(TypeToken.of(type));
+  }
+
+  public static boolean isCollector(TypeToken<?> token) {
     return token.isArray() || Iterables.any(COLLECTORS, token::isSubtypeOf);
   }
 

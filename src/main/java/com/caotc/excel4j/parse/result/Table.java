@@ -105,7 +105,7 @@ public class Table {
 
   public <T> T get(Class<T> type) {
     Optional<T> optional = GlobalConfig.newInstance(type);
-    Preconditions.checkState(optional.isPresent());
+    Preconditions.checkArgument(optional.isPresent());
     FluentIterable.from(menuTrees).transform(ImmutableTree::getRoot)
         .forEach(menu -> menu.getData().setFieldValue(optional.get()));
     return optional.get();
