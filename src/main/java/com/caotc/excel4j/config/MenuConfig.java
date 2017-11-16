@@ -13,8 +13,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
 
-public class MenuConfig {
-  public static class Builder {
+public class MenuConfig<T> {
+  public static class Builder<T> {
     private TableConfig tableConfig;
     // 菜单匹配器
     private StandardCellMatcher menuMatcher;
@@ -25,9 +25,9 @@ public class MenuConfig {
     private MenuType menuType;
     private MenuConfig parentMenuConfig;
     private ImmutableCollection<MenuConfig> childrenMenuConfigs;
-    private DataConfig dataConfig;
+    private DataConfig<T> dataConfig;
 
-    public MenuConfig build() {
+    public MenuConfig<T> build() {
       Preconditions.checkState(tableConfig != null || parentMenuConfig != null);
       Preconditions.checkNotNull(menuMatcher);
       Preconditions.checkNotNull(menuNecessity);
@@ -44,14 +44,14 @@ public class MenuConfig {
           tableConfig = parentMenuConfig.tableConfig;
         }
       }
-      return new MenuConfig(this);
+      return new MenuConfig<T>(this);
     }
 
     public TableConfig getTableConfig() {
       return tableConfig;
     }
 
-    public Builder setTableConfig(TableConfig tableConfig) {
+    public Builder<T> setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -60,7 +60,7 @@ public class MenuConfig {
       return menuMatcher;
     }
 
-    public Builder setMenuMatcher(StandardCellMatcher menuMatcher) {
+    public Builder<T> setMenuMatcher(StandardCellMatcher menuMatcher) {
       this.menuMatcher = menuMatcher;
       return this;
     }
@@ -69,7 +69,7 @@ public class MenuConfig {
       return distance;
     }
 
-    public Builder setDistance(int distance) {
+    public Builder<T> setDistance(int distance) {
       this.distance = distance;
       return this;
     }
@@ -78,7 +78,7 @@ public class MenuConfig {
       return menuNecessity;
     }
 
-    public Builder setMenuNecessity(MenuNecessity menuNecessity) {
+    public Builder<T> setMenuNecessity(MenuNecessity menuNecessity) {
       this.menuNecessity = menuNecessity;
       return this;
     }
@@ -87,7 +87,7 @@ public class MenuConfig {
       return direction;
     }
 
-    public Builder setDirection(Direction direction) {
+    public Builder<T> setDirection(Direction direction) {
       this.direction = direction;
       return this;
     }
@@ -96,7 +96,7 @@ public class MenuConfig {
       return menuType;
     }
 
-    public Builder setMenuType(MenuType menuType) {
+    public Builder<T> setMenuType(MenuType menuType) {
       this.menuType = menuType;
       return this;
     }
@@ -105,7 +105,7 @@ public class MenuConfig {
       return parentMenuConfig;
     }
 
-    public Builder setParentMenuConfig(MenuConfig parentMenuConfig) {
+    public Builder<T> setParentMenuConfig(MenuConfig parentMenuConfig) {
       this.parentMenuConfig = parentMenuConfig;
       return this;
     }
@@ -114,16 +114,16 @@ public class MenuConfig {
       return childrenMenuConfigs;
     }
 
-    public Builder setChildrenMenuConfigs(ImmutableCollection<MenuConfig> childrenMenuConfigs) {
+    public Builder<T> setChildrenMenuConfigs(ImmutableCollection<MenuConfig> childrenMenuConfigs) {
       this.childrenMenuConfigs = childrenMenuConfigs;
       return this;
     }
 
-    public DataConfig getDataConfig() {
+    public DataConfig<T> getDataConfig() {
       return dataConfig;
     }
 
-    public Builder setDataConfig(DataConfig dataConfig) {
+    public Builder<T> setDataConfig(DataConfig<T> dataConfig) {
       this.dataConfig = dataConfig;
       return this;
     }
@@ -133,8 +133,8 @@ public class MenuConfig {
   private static final int DEFAULT_DISTANCE = 1;
   private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
 
-  public static Builder builder() {
-    return new Builder().setDistance(DEFAULT_DISTANCE).setMenuNecessity(DEFAULT_MENU_NECESSITY);
+  public static <T> Builder<T> builder() {
+    return new Builder<T>().setDistance(DEFAULT_DISTANCE).setMenuNecessity(DEFAULT_MENU_NECESSITY);
   }
 
   private final TableConfig tableConfig;
@@ -147,7 +147,7 @@ public class MenuConfig {
   private final MenuType menuType;
   private final MenuConfig parentMenuConfig;
   private final ImmutableCollection<MenuConfig> childrenMenuConfigs;
-  private final DataConfig dataConfig;
+  private final DataConfig<T> dataConfig;
 
   public MenuConfig(Builder builder) {
     tableConfig = builder.tableConfig;
@@ -211,11 +211,11 @@ public class MenuConfig {
     return dataConfig.canCastClasses();
   }
 
-  public <T> boolean canCast(Class<T> clazz) {
+  public <R> boolean canCast(Class<R> clazz) {
     return dataConfig.canCast(clazz);
   }
 
-  public <T> T cast(Object value, Class<T> clazz) {
+  public <R> R cast(Object value, Class<R> clazz) {
     return dataConfig.cast(value, clazz);
   }
   // delegate methods end
@@ -244,7 +244,7 @@ public class MenuConfig {
     return menuNecessity;
   }
 
-  public DataConfig getDataConfig() {
+  public DataConfig<T> getDataConfig() {
     return dataConfig;
   }
 

@@ -9,7 +9,7 @@ public class TestAviator {
 //    Map<String, Object> env = new HashMap<String, Object>();
 //    env.put("data", 4);
 //    // 执行表达式
-//    Boolean result = (Boolean) compiledExp.execute(env);
+//    Boolean result = (Boolean) compiledExp.execute(env);9+/
 //    System.out.println(result);  // false  
   }
 }

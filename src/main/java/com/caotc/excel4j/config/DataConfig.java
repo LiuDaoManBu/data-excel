@@ -7,15 +7,21 @@ import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 
-public class DataConfig {
+public class DataConfig<T> {
   private MenuConfig menuConfig;
   private Field field;
   private DataMatcher dataMatcher;
   private LoadType loadType;
   private Integer dataNumber;
+  private TypeToken<T> fieldType;
+  private String fieldName;
 
-
+  public T cast(Object value) {
+    return (T) dataMatcher.cast(value, fieldType.getRawType());
+  }
+  
   public boolean support(Object value) {
     return dataMatcher.support(value);
   }
@@ -28,18 +34,17 @@ public class DataConfig {
     return dataMatcher.canCastClasses();
   }
 
-  public <T> boolean canCast(Class<T> clazz) {
+  public <R> boolean canCast(Class<R> clazz) {
     return dataMatcher.canCast(clazz);
   }
 
-  public <T> T cast(Object value, Class<T> clazz) {
+  public <R> R cast(Object value, Class<R> clazz) {
     return dataMatcher.cast(value, clazz);
   }
 
   public ImmutableList<StandardCell> getDataCells(Menu menu) {
     return loadType.getDataCells(menu);
   }
-
 
   public MenuConfig getMenuConfig() {
     return menuConfig;
@@ -59,6 +64,14 @@ public class DataConfig {
 
   public Field getField() {
     return field;
+  }
+
+  public TypeToken<T> getFieldType() {
+    return fieldType;
+  }
+
+  public String getFieldName() {
+    return fieldName;
   }
   
 }

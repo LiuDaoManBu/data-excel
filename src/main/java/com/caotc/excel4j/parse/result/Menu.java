@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class Menu {
+public class Menu<T> {
   public static class Builder {
     private StandardCell cell;
     private MenuConfig menuConfig;
@@ -70,12 +70,12 @@ public class Menu {
 
   }
 
-  public static  Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
   private final StandardCell cell;
-  private final MenuConfig menuConfig;
+  private final MenuConfig<T> menuConfig;
   private final Table table;
   private final Menu parentMenu;
   private final ImmutableList<Menu> childrenMenus;
@@ -89,8 +89,10 @@ public class Menu {
     parentMenu = builder.parentMenu;
 
     childrenMenus = loadChildrenMenus();
-    valueCells=childrenMenus.isEmpty()?menuConfig.getDataConfig().getLoadType().getDataCells(this):ImmutableList.of();
-    data = new Data(this,menuConfig.getDataConfig(), getValues());
+    valueCells =
+        childrenMenus.isEmpty() ? menuConfig.getDataConfig().getLoadType().getDataCells(this)
+            : ImmutableList.of();
+    data = new Data(this, menuConfig.getDataConfig(), getCellValues());
   }
 
   private ImmutableList<Menu> loadChildrenMenus() {
@@ -104,7 +106,7 @@ public class Menu {
       Preconditions.checkState(Iterables.size(configs) <= 1);
       Menu menu = null;
       if (!Iterables.isEmpty(configs)) {
-        Builder builder=Menu.builder();
+        Builder builder = Menu.builder();
         menu = builder.setCell(cell).setMenuConfig(Iterables.getOnlyElement(configs))
             .setParentMenu(this).build();
       }
@@ -113,11 +115,12 @@ public class Menu {
     }).filter(Optional::isPresent).transform(Optional::get).toList();
   }
 
-  public ImmutableList<Object> getValues(){
-    //TODO
-    return ImmutableList.copyOf(Collections2.transform(valueCells, StandardCell::getValue));
+  public ImmutableList<T> getCellValues() {
+    // TODO
+    return FluentIterable.from(valueCells).transform(StandardCell::getValue)
+        .transform(value -> menuConfig.getDataConfig().cast(value)).toList();
   }
-  
+
   public void checkDataCell(StandardCell dataCell) {
     // if (menuConfig.getDataMatcher() != null) {
     // TODO
@@ -228,8 +231,8 @@ public class Menu {
     return Optional.fromNullable(menuConfig.getField());
   }
 
-  
-  //delegate methods start
+
+  // delegate methods start
   public boolean isTopMenu() {
     return menuConfig.isTopMenu();
   }
@@ -237,7 +240,7 @@ public class Menu {
   public boolean isDataMenu() {
     return menuConfig.isDataMenu();
   }
-  
+
   public boolean isFixedDataMenu() {
     return menuConfig.isFixedDataMenu();
   }
@@ -270,11 +273,11 @@ public class Menu {
     return menuConfig.canCastClasses();
   }
 
-  public  <T> boolean canCast(Class<T> clazz) {
+  public <T> boolean canCast(Class<T> clazz) {
     return menuConfig.canCast(clazz);
   }
 
-  public  <T> T cast(Object value, Class<T> clazz) {
+  public <T> T cast(Object value, Class<T> clazz) {
     return menuConfig.cast(value, clazz);
   }
   // delegate methods end
@@ -306,5 +309,5 @@ public class Menu {
   public Data getData() {
     return data;
   }
-  
+
 }
