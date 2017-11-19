@@ -2,6 +2,8 @@ package com.caotc.excel4j.config;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
@@ -26,24 +28,21 @@ public class MenuConfig<T> {
     private MenuConfig parentMenuConfig;
     private ImmutableCollection<MenuConfig> childrenMenuConfigs;
     private DataConfig<T> dataConfig;
+    private ParserConfig parserConfig;
 
     public MenuConfig<T> build() {
-      Preconditions.checkState(tableConfig != null || parentMenuConfig != null);
+      Preconditions.checkState(Objects.nonNull(tableConfig) || Objects.nonNull(parentMenuConfig));
       Preconditions.checkNotNull(menuMatcher);
       Preconditions.checkNotNull(menuNecessity);
-      Preconditions.checkState(direction != null || parentMenuConfig != null);
+      Preconditions.checkState(Objects.nonNull(direction) || Objects.nonNull(parentMenuConfig));
       Preconditions.checkNotNull(menuType);
-      Preconditions.checkState(CollectionUtils.isEmpty(childrenMenuConfigs) || dataConfig != null);
+      Preconditions
+          .checkState(CollectionUtils.isEmpty(childrenMenuConfigs) || Objects.nonNull(dataConfig));
       // TODO
 
-      if (parentMenuConfig != null) {
-        if (direction == null) {
-          direction = parentMenuConfig.direction;
-        }
-        if (tableConfig == null) {
-          tableConfig = parentMenuConfig.tableConfig;
-        }
-      }
+      direction = Optional.ofNullable(direction).orElse(parentMenuConfig.direction);
+      tableConfig = Optional.ofNullable(tableConfig).orElse(parentMenuConfig.tableConfig);
+      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
       return new MenuConfig<T>(this);
     }
 
@@ -148,6 +147,7 @@ public class MenuConfig<T> {
   private final MenuConfig parentMenuConfig;
   private final ImmutableCollection<MenuConfig> childrenMenuConfigs;
   private final DataConfig<T> dataConfig;
+  private final ParserConfig parserConfig;
 
   public MenuConfig(Builder builder) {
     tableConfig = builder.tableConfig;
@@ -159,10 +159,15 @@ public class MenuConfig<T> {
     parentMenuConfig = builder.parentMenuConfig;
     childrenMenuConfigs = builder.childrenMenuConfigs;
     dataConfig = builder.dataConfig;
+    parserConfig=builder.parserConfig;
   }
 
-  public Field getField() {
-    return dataConfig == null ? null : dataConfig.getField();
+  public Optional<Field> getField() {
+    return Optional.ofNullable(dataConfig).map(DataConfig::getField);
+  }
+
+  public Optional<String> getFieldName() {
+    return Optional.ofNullable(dataConfig).map(DataConfig::getFieldName);
   }
 
   public boolean isTopMenu() {
@@ -254,6 +259,10 @@ public class MenuConfig<T> {
 
   public TableConfig getTableConfig() {
     return tableConfig;
+  }
+
+  public ParserConfig getParserConfig() {
+    return parserConfig;
   }
 
 }

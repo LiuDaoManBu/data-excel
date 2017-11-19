@@ -7,7 +7,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.base.collect.ImmutableTree;
-import com.caotc.excel4j.config.GlobalConfig;
+import com.caotc.excel4j.config.ParserConfig;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
@@ -104,7 +104,7 @@ public class Table {
   }
 
   public <T> T get(Class<T> type) {
-    Optional<T> optional = GlobalConfig.newInstance(type);
+    Optional<T> optional = tableConfig.getParserConfig().newInstance(type);
     Preconditions.checkArgument(optional.isPresent());
     FluentIterable.from(menuTrees).transform(ImmutableTree::getRoot)
         .forEach(menu -> menu.getData().setFieldValue(optional.get()));

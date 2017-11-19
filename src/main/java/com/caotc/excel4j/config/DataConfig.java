@@ -2,6 +2,7 @@ package com.caotc.excel4j.config;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import com.caotc.excel4j.constant.CastType;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.parse.result.Menu;
@@ -10,13 +11,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
 public class DataConfig<T> {
-  private MenuConfig menuConfig;
+  private MenuConfig<T> menuConfig;
   private Field field;
   private DataMatcher dataMatcher;
   private LoadType loadType;
   private Integer dataNumber;
   private TypeToken<T> fieldType;
   private String fieldName;
+  private CastType castType; 
 
   public T cast(Object value) {
     return (T) dataMatcher.cast(value, fieldType.getRawType());
@@ -46,7 +48,7 @@ public class DataConfig<T> {
     return loadType.getDataCells(menu);
   }
 
-  public MenuConfig getMenuConfig() {
+  public MenuConfig<T> getMenuConfig() {
     return menuConfig;
   }
 
@@ -72,6 +74,10 @@ public class DataConfig<T> {
 
   public String getFieldName() {
     return fieldName;
+  }
+
+  public CastType getCastType() {
+    return castType;
   }
   
 }

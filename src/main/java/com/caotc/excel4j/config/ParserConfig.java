@@ -17,10 +17,12 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.reflect.TypeToken;
 
-public class GlobalConfig {
-  private static final Map<Class<?>, Supplier<?>> CLASS_TO_SUPPLIERS = Maps.newHashMap();
+public class ParserConfig {
+  public static final ParserConfig GLOBAL = new ParserConfig();
 
-  static {
+  private final Map<Class<?>, Supplier<?>> classToSuppliers = Maps.newHashMap();
+
+  public ParserConfig() {
     setSupplier(List.class, Lists::newArrayList);
     setSupplier(Set.class, Sets::newHashSet);
     setSupplier(Collection.class, Lists::newArrayList);
@@ -29,25 +31,29 @@ public class GlobalConfig {
     setSupplier(Table.class, HashBasedTable::create);
   }
 
-  public static <T> void setSupplier(Class<T> type, Supplier<T> supplier) {
-    CLASS_TO_SUPPLIERS.put(type, supplier);
+  public <T> void setSupplier(Class<T> type, Supplier<T> supplier) {
+    classToSuppliers.put(type, supplier);
   }
 
-  public static <T> Optional<Supplier<T>> getSupplier(Class<T> type) {
+  public <T> Optional<Supplier<T>> getSupplier(Class<T> type) {
     return getSupplier(TypeToken.of(type));
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Optional<Supplier<T>> getSupplier(TypeToken<T> token) {
+  public <T> Optional<Supplier<T>> getSupplier(TypeToken<T> token) {
     // TODO
     Optional<Supplier<T>> optional =
-        token.getTypes().rawTypes().stream().filter(CLASS_TO_SUPPLIERS::containsKey).findFirst()
-            .map(CLASS_TO_SUPPLIERS::get).map(supplier -> (Supplier<T>) supplier);
+        token.getTypes().rawTypes().stream().filter(classToSuppliers::containsKey).findFirst()
+            .map(classToSuppliers::get).map(supplier -> (Supplier<T>) supplier);
     return optional.isPresent() ? optional
         : ClassUtil.getDefaultConstructor((Class<T>) token.getRawType()).map(InvokableSupplier::of);
   }
 
-  public static <T> Optional<T> newInstance(Class<T> type) {
-    return getSupplier(type).map(Supplier::get);
+  public <T> Optional<T> newInstance(Class<T> type) {
+    return newInstance(TypeToken.of(type));
+  }
+  
+  public <T> Optional<T> newInstance(TypeToken<T> token) {
+    return getSupplier(token).map(Supplier::get);
   }
 }

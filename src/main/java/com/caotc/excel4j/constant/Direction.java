@@ -4,13 +4,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressBase;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.ExcelUtil;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -138,7 +138,7 @@ public enum Direction {
   public Optional<StandardCell> nextCell(StandardCell cell) {
     Preconditions.checkNotNull(cell);
     List<StandardCell> cells = next(cell);
-    return CollectionUtils.isEmpty(cells) ? Optional.absent()
+    return CollectionUtils.isEmpty(cells) ? Optional.empty()
         : Optional.of(Iterables.getOnlyElement(cells));
   }
 
@@ -147,7 +147,7 @@ public enum Direction {
     Preconditions.checkArgument(distance > 0);
 
     List<StandardCell> cells = get(cell, distance);
-    return CollectionUtils.isEmpty(cells) ? Optional.absent()
+    return CollectionUtils.isEmpty(cells) ? Optional.empty()
         : Optional.of(Iterables.getOnlyElement(cells));
   }
 }
