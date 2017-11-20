@@ -2,6 +2,7 @@ package com.caotc.excel4j.constant;
 
 import java.util.Optional;
 import com.caotc.excel4j.parse.result.Menu;
+import com.google.common.reflect.TypeToken;
 
 public enum CastType {
   OBJECT {
@@ -17,18 +18,9 @@ public enum CastType {
     }
   },
   COLLECTION {
-    @Override
-    public <T> T castValue(Menu<T> menu) {
-      // TODO Auto-generated method stub
-      return null;
-    }
   },
   MAP {
-    @Override
-    public <T> T castValue(Menu<T> menu) {
-      // TODO Auto-generated method stub
-      return null;
-    }
   };
   public abstract <T> T castValue(Menu<T> menu);
+  public abstract <T> T castValue(TypeToken<T> targetType);
 }
