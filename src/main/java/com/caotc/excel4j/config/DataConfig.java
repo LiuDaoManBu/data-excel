@@ -2,7 +2,7 @@ package com.caotc.excel4j.config;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import com.caotc.excel4j.constant.CastType;
+import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.parse.result.Menu;
@@ -18,7 +18,7 @@ public class DataConfig<T> {
   private Integer dataNumber;
   private TypeToken<T> fieldType;
   private String fieldName;
-  private CastType castType; 
+  private ConstructType castType; 
 
   public T cast(Object value) {
     return (T) dataMatcher.cast(value, fieldType.getRawType());
@@ -76,7 +76,7 @@ public class DataConfig<T> {
     return fieldName;
   }
 
-  public CastType getCastType() {
+  public ConstructType getCastType() {
     return castType;
   }
   

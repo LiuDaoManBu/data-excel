@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.config.DataConfig;
-import com.caotc.excel4j.constant.CastType;
+import com.caotc.excel4j.constant.ConstructType;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -43,14 +43,14 @@ public class Data<T> {
       return Optional.empty();
     }
     if (menu.isDataMenu()) {
-      if (Objects.equals(CastType.OBJECT, dataConfig.getCastType()) && menu.isFixedDataMenu()
+      if (Objects.equals(ConstructType.OBJECT, dataConfig.getCastType()) && menu.isFixedDataMenu()
           && dataConfig.getDataNumber() == 1) {
         return Optional
             .ofNullable(dataConfig.cast(Iterables.getOnlyElement(valueCells).getValue()));
       }
       return Optional.ofNullable(dataConfig.cast(getCellValues()));
     }
-    return Optional.ofNullable(dataConfig.getCastType().castValue(menu));
+    return Optional.ofNullable(dataConfig.getCastType().constructValue(menu));
   }
 
   public ImmutableList<T> getCellValues() {

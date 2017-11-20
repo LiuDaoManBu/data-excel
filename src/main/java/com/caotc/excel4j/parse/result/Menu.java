@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.config.MenuConfig;
-import com.caotc.excel4j.constant.CastType;
+import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
