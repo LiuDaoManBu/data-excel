@@ -2,12 +2,16 @@ package com.caotc.excel4j.constant;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public enum ConstructType {
   OBJECT {
@@ -32,7 +36,6 @@ public enum ConstructType {
 
     @Override
     public JSON construct(Map<String, ?> fieldNameToValues) {
-      // TODO Auto-generated method stub
       return null;
     }
   };
