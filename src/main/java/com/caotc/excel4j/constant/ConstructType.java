@@ -1,17 +1,21 @@
 package com.caotc.excel4j.constant;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.parse.result.Data;
+import com.caotc.excel4j.util.ClassUtil;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public enum ConstructType {
   OBJECT {
@@ -21,19 +25,68 @@ public enum ConstructType {
       fieldNameToValues.forEach((name, value) -> setValue(object, name, value));
       return object;
     }
+
+    @Override
+    public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
+      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(target.getClass());
+      nameToDatas.forEach((name, data) -> {
+        nameToFields.get(name).forEach(field -> {
+          Class<?> filedType = field.getType();
+          Object value = data.getValue().get();
+          // TODO 判断泛型对象cast?
+          if (data.getDataConfig().canCast(filedType)) {
+            field.setAccessible(true);
+            value = data.getDataConfig().cast(value, filedType);
+            try {
+              // TODO NULL?log?
+              field.set(value, target);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+              e.printStackTrace();
+            }
+          }
+        });
+      });
+      return target;
+    }
   },
-  COLLECTION {
+  COLLECTOR {
     @Override
     public JSON construct(Map<String, ?> fieldNameToValues) {
-      JSONArray array=new JSONArray();
+      JSONArray array = new JSONArray();
       fieldNameToValues.forEach((name, value) -> {
-        
+
       });
       return null;
     }
+
+    @Override
+    public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
+      Preconditions.checkArgument(ClassUtil.isArrayOrCollection(target.getClass()));
+      Collection<?> result =
+          target.getClass().isArray() ? Lists.newArrayList() : (Collection<?>) target;
+      
+      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(target.getClass());
+      nameToDatas.forEach((name, data) -> {
+        nameToFields.get(name).forEach(field -> {
+          Class<?> filedType = field.getType();
+          Object value = data.getValue().get();
+          // TODO 判断泛型对象cast?
+          if (data.getDataConfig().canCast(filedType)) {
+            field.setAccessible(true);
+            value = data.getDataConfig().cast(value, filedType);
+            try {
+              // TODO NULL?log?
+              field.set(value, target);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+              e.printStackTrace();
+            }
+          }
+        });
+      });
+      return target;
+    }
   },
   MAP {
-
     @Override
     public JSON construct(Map<String, ?> fieldNameToValues) {
       return null;
@@ -55,4 +108,7 @@ public enum ConstructType {
   }
 
   public abstract JSON construct(Map<String, ?> fieldNameToValues);
+
+  public abstract <T> T construct(T target, Map<String, Data<?>> nameToDatas);
+
 }

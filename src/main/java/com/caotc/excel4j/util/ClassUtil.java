@@ -3,6 +3,7 @@ package com.caotc.excel4j.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.FluentIterable;
@@ -53,12 +54,28 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
         .ofNullable(Iterables.getOnlyElement(getNameToFields(token).get(fieldName), null));
   }
 
+  public static boolean isArrayOrIterable(Class<?> type) {
+    return isArrayOrIterable(TypeToken.of(type));
+  }
+
+  public static boolean isArrayOrIterable(TypeToken<?> token) {
+    return token.isArray() || token.isSubtypeOf(Iterable.class);
+  }
+  
+  public static boolean isArrayOrCollection(Class<?> type) {
+    return isArrayOrCollection(TypeToken.of(type));
+  }
+
+  public static boolean isArrayOrCollection(TypeToken<?> token) {
+    return isArrayOrIterable(token) || token.isSubtypeOf(Collection.class);
+  }
+  
   public static boolean isCollector(Class<?> type) {
     return isCollector(TypeToken.of(type));
   }
 
   public static boolean isCollector(TypeToken<?> token) {
-    return token.isArray() || Iterables.any(COLLECTORS, token::isSubtypeOf);
+    return isArrayOrIterable(token) || Iterables.any(COLLECTORS, token::isSubtypeOf);
   }
 
   @SuppressWarnings("unchecked")
