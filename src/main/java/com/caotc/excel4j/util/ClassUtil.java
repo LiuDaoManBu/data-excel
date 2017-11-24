@@ -78,6 +78,11 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
     return isArrayOrIterable(token) || Iterables.any(COLLECTORS, token::isSubtypeOf);
   }
 
+  public static void ComponentTypes(TypeToken<?> token) {
+    
+    token.getComponentType();
+  }
+  
   @SuppressWarnings("unchecked")
   public static <T> Optional<Constructor<T>> getDefaultConstructor(Class<T> type) {
     return Arrays.stream(type.getDeclaredConstructors())

@@ -49,7 +49,7 @@ public enum ConstructType {
       return target;
     }
   },
-  COLLECTOR {
+  COLLECTION {
     @Override
     public JSON construct(Map<String, ?> fieldNameToValues) {
       JSONArray array = new JSONArray();
