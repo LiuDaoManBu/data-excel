@@ -13,9 +13,11 @@ import com.caotc.excel4j.parse.result.Data;
 import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 
 public enum ConstructType {
   OBJECT {
@@ -49,47 +51,30 @@ public enum ConstructType {
       return target;
     }
   },
-  COLLECTION {
+  ITERABLE {
     @Override
     public JSON construct(Map<String, ?> fieldNameToValues) {
       JSONArray array = new JSONArray();
       fieldNameToValues.forEach((name, value) -> {
-
       });
       return null;
     }
 
     @Override
     public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
-      Preconditions.checkArgument(ClassUtil.isArrayOrCollection(target.getClass()));
-      Collection<?> result =
-          target.getClass().isArray() ? Lists.newArrayList() : (Collection<?>) target;
+      Preconditions.checkArgument(ClassUtil.isArrayOrIterable(target.getClass()));
+      TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(target.getClass());
+      Collection<? extends Object> result=Lists.newLinkedList();
+      nameToDatas.forEach(action);
       
-      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(target.getClass());
-      nameToDatas.forEach((name, data) -> {
-        nameToFields.get(name).forEach(field -> {
-          Class<?> filedType = field.getType();
-          Object value = data.getValue().get();
-          // TODO 判断泛型对象cast?
-          if (data.getDataConfig().canCast(filedType)) {
-            field.setAccessible(true);
-            value = data.getDataConfig().cast(value, filedType);
-            try {
-              // TODO NULL?log?
-              field.set(value, target);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-              e.printStackTrace();
-            }
-          }
-        });
-      });
+      if(target.getClass().isArray()) {
+      }
+      
+      if(target instanceof Collection) {
+      }
+      
+      
       return target;
-    }
-  },
-  MAP {
-    @Override
-    public JSON construct(Map<String, ?> fieldNameToValues) {
-      return null;
     }
   };
   private static final Splitter SPLITTER = Splitter.on(".").omitEmptyStrings();
@@ -107,8 +92,11 @@ public enum ConstructType {
     }
   }
 
+  private static <T> T[] toArray(Object o) {
+    return (T[]) o;
+  }
+
   public abstract JSON construct(Map<String, ?> fieldNameToValues);
 
   public abstract <T> T construct(T target, Map<String, Data<?>> nameToDatas);
-
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -61,7 +62,7 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
   public static boolean isArrayOrIterable(TypeToken<?> token) {
     return token.isArray() || token.isSubtypeOf(Iterable.class);
   }
-  
+
   public static boolean isArrayOrCollection(Class<?> type) {
     return isArrayOrCollection(TypeToken.of(type));
   }
@@ -69,7 +70,7 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
   public static boolean isArrayOrCollection(TypeToken<?> token) {
     return isArrayOrIterable(token) || token.isSubtypeOf(Collection.class);
   }
-  
+
   public static boolean isCollector(Class<?> type) {
     return isCollector(TypeToken.of(type));
   }
@@ -78,11 +79,40 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
     return isArrayOrIterable(token) || Iterables.any(COLLECTORS, token::isSubtypeOf);
   }
 
-  public static void ComponentTypes(TypeToken<?> token) {
-    
-    token.getComponentType();
+  public static TypeToken<?> getGenericType(Class<?> type) {
+    return getGenericType(TypeToken.of(type));
   }
-  
+
+  public static TypeToken<?> getGenericType(TypeToken<?> token) {
+    return Iterables.getOnlyElement(getGenericTypes(token));
+  }
+
+  public static ImmutableList<TypeToken<?>> getGenericTypes(Class<?> type) {
+    return getGenericTypes(TypeToken.of(type));
+  }
+
+  public static ImmutableList<TypeToken<?>> getGenericTypes(TypeToken<?> token) {
+    FluentIterable<TypeToken<?>> types =
+        FluentIterable.from(token.getRawType().getTypeParameters()).transform(token::resolveType);
+    return types.toList();
+  }
+
+  public static TypeToken<?> getComponentOrGenericType(Class<?> type) {
+    return getComponentOrGenericType(TypeToken.of(type));
+  }
+
+  public static TypeToken<?> getComponentOrGenericType(TypeToken<?> token) {
+    return Iterables.getOnlyElement(getComponentOrGenericTypes(token));
+  }
+
+  public static ImmutableList<TypeToken<?>> getComponentOrGenericTypes(Class<?> type) {
+    return getComponentOrGenericTypes(TypeToken.of(type));
+  }
+
+  public static ImmutableList<TypeToken<?>> getComponentOrGenericTypes(TypeToken<?> token) {
+    return token.isArray() ? ImmutableList.of(token.getComponentType()) : getGenericTypes(token);
+  }
+
   @SuppressWarnings("unchecked")
   public static <T> Optional<Constructor<T>> getDefaultConstructor(Class<T> type) {
     return Arrays.stream(type.getDeclaredConstructors())
