@@ -64,8 +64,11 @@ public enum ConstructType {
     public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
       Preconditions.checkArgument(ClassUtil.isArrayOrIterable(target.getClass()));
       TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(target.getClass());
+      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(genericType);
       Collection<? extends Object> result=Lists.newLinkedList();
-      nameToDatas.forEach(action);
+      nameToDatas.forEach((name,data)->{
+        
+      });
       
       if(target.getClass().isArray()) {
       }
