@@ -1,13 +1,10 @@
 package com.caotc.excel4j;
+import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.matcher.data.type.NaturalDataType;
@@ -16,9 +13,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import com.google.common.reflect.TypeToken;
 
-class A implements Cloneable{
+class A implements Cloneable,Serializable{
   public static String test="test";
 	private String id=null;
 	private Set<Integer> values;
@@ -111,6 +107,7 @@ public class Test {
 //    System.out.println(jsonArray.toJavaObject(Multimap.class));
 //    System.out.println(jsonArray.toJavaObject(Table.class));
     System.out.println("JSONArray end");
+    
 	}
 	
 	public static <T> T getValue(Class<T> type) {
