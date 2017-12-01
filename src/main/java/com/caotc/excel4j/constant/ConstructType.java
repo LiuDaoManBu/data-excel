@@ -9,6 +9,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.config.ParserConfig;
 import com.caotc.excel4j.parse.result.Data;
 import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.base.Preconditions;
@@ -22,15 +23,9 @@ import com.google.common.reflect.TypeToken;
 public enum ConstructType {
   OBJECT {
     @Override
-    public JSON construct(Map<String, ?> fieldNameToValues) {
-      JSONObject object = new JSONObject();
-      fieldNameToValues.forEach((name, value) -> setValue(object, name, value));
-      return object;
-    }
-
-    @Override
-    public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
-      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(target.getClass());
+    public <T> T construct(TypeToken<T> type, Map<String, Data<?>> nameToDatas) {
+      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(type);
+      T target=ParserConfig.GLOBAL.newInstance(type).get();
       nameToDatas.forEach((name, data) -> {
         nameToFields.get(name).forEach(field -> {
           Class<?> filedType = field.getType();
@@ -53,24 +48,16 @@ public enum ConstructType {
   },
   ITERABLE {
     @Override
-    public JSON construct(Map<String, ?> fieldNameToValues) {
-      JSONArray array = new JSONArray();
-      fieldNameToValues.forEach((name, value) -> {
-      });
-      return null;
-    }
-
-    @Override
-    public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
-      Preconditions.checkArgument(ClassUtil.isArrayOrIterable(target.getClass()));
-      TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(target.getClass());
+    public <T> T construct(TypeToken<T> type, Map<String, Data<?>> nameToDatas) {
+      Preconditions.checkArgument(ClassUtil.isArrayOrIterable(type));
+      T target=ParserConfig.GLOBAL.newInstance(type).get();
+      TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(type);
       ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(genericType);
       Collection<? extends Object> result=Lists.newLinkedList();
       nameToDatas.forEach((name,data)->{
         
       });
-      
-      if(target.getClass().isArray()) {
+      if(type.isArray()) {
       }
       
       if(target instanceof Collection) {
@@ -99,7 +86,5 @@ public enum ConstructType {
     return (T[]) o;
   }
 
-  public abstract JSON construct(Map<String, ?> fieldNameToValues);
-
-  public abstract <T> T construct(T target, Map<String, Data<?>> nameToDatas);
+  public abstract <T> T construct(TypeToken<T> type, Map<String, Data<?>> nameToDatas);
 }
