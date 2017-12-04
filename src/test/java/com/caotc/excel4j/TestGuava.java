@@ -123,8 +123,7 @@ public class TestGuava {
 
     testTypeToken(new TypeToken<Collection<String>>() {});
 
-    Iterable<String> strings = Lists.newArrayList();
-    System.out.println(strings instanceof Set);
+   System.out.println(ParserConfig.GLOBAL.newInstance(int[].class));
   }
 
   public static <T> void testTypeToken(TypeToken<T> token) {
