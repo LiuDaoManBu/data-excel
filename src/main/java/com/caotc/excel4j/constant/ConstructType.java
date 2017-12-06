@@ -81,19 +81,6 @@ public enum ConstructType {
   };
   private static final Splitter SPLITTER = Splitter.on(".").omitEmptyStrings();
 
-  private static void setValue(JSONObject object, String name, Object value) {
-    List<String> names = SPLITTER.splitToList(name);
-    if (CollectionUtils.isNotEmpty(names)) {
-      for (String n : names.subList(0, names.size() - 1)) {
-        if (!object.containsKey(n)) {
-          object.put(n, new JSONObject());
-        }
-        object = object.getJSONObject(n);
-      }
-      object.put(Iterables.getLast(names), value);
-    }
-  }
-
   private static <T> T[] toArray(Object value) {
     // TODO 基本类型无法cast为Object[]
     return (T[]) value;
