@@ -1,23 +1,13 @@
 package com.caotc.excel4j;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.util.TypeUtils;
-import com.caotc.excel4j.config.ParserConfig;
-import com.caotc.excel4j.util.ClassUtil;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.AbstractInvocationHandler;
@@ -123,7 +113,12 @@ public class TestGuava {
 
     testTypeToken(new TypeToken<Collection<String>>() {});
 
-   System.out.println(ParserConfig.GLOBAL.newInstance(int[].class));
+    List<String> strings = Lists.newArrayList();
+    TypeToken<List> typeToken=TypeToken.of(List.class);
+    System.out.println(typeToken.isSubtypeOf(TypeToken.of(Collection.class)));
+    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection>() {}));
+    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<String>>() {}));
+    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {}));
   }
 
   public static <T> void testTypeToken(TypeToken<T> token) {
