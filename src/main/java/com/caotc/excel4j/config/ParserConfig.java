@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import com.caotc.excel4j.base.function.InvokableSupplier;
+import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
@@ -21,6 +22,7 @@ public class ParserConfig {
   public static final ParserConfig GLOBAL = new ParserConfig();
 
   private final Map<Class<?>, Supplier<?>> classToSuppliers = Maps.newHashMap();
+  private final Map<Class<?>, ConstructType> classToConstructTypes = Maps.newHashMap();
 
   public ParserConfig() {
     setSupplier(List.class, Lists::newArrayList);
@@ -29,6 +31,29 @@ public class ParserConfig {
     setSupplier(Iterable.class, Lists::newArrayList);
     setSupplier(Multimap.class, ArrayListMultimap::create);
     setSupplier(Table.class, HashBasedTable::create);
+    
+    setConstructType(List.class,ConstructType.ITERABLE);
+    setConstructType(Set.class,ConstructType.ITERABLE);
+    setConstructType(Collection.class,ConstructType.ITERABLE);
+    setConstructType(Iterable.class,ConstructType.ITERABLE);
+  }
+
+  public <T> void setConstructType(Class<T> type, ConstructType constructType) {
+    classToConstructTypes.put(type, constructType);
+  }
+
+  public <T> ConstructType getConstructType(Class<T> type) {
+    return getConstructType(TypeToken.of(type));
+  }
+
+  public <T> ConstructType getConstructType(TypeToken<T> token) {
+    if(token.isArray()) {
+      return ConstructType.ITERABLE;
+    }
+    // TODO 父子关系生效?
+    Optional<ConstructType> optional = token.getTypes().rawTypes().stream()
+        .filter(classToConstructTypes::containsKey).findFirst().map(classToConstructTypes::get);
+    return optional.orElse(ConstructType.OBJECT);
   }
 
   public <T> void setSupplier(Class<T> type, Supplier<T> supplier) {
@@ -41,7 +66,7 @@ public class ParserConfig {
 
   @SuppressWarnings("unchecked")
   public <T> Optional<Supplier<T>> getSupplier(TypeToken<T> token) {
-    // TODO
+    // TODO 父子关系生效?
     Optional<Supplier<T>> optional =
         token.getTypes().rawTypes().stream().filter(classToSuppliers::containsKey).findFirst()
             .map(classToSuppliers::get).map(supplier -> (Supplier<T>) supplier);
@@ -52,7 +77,7 @@ public class ParserConfig {
   public <T> Optional<T> newInstance(Class<T> type) {
     return newInstance(TypeToken.of(type));
   }
-  
+
   public <T> Optional<T> newInstance(TypeToken<T> token) {
     return getSupplier(token).map(Supplier::get);
   }

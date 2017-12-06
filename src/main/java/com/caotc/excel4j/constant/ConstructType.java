@@ -1,47 +1,38 @@
 package com.caotc.excel4j.constant;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.parse.result.Data;
+import com.caotc.excel4j.config.ParserConfig;
 import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 
 public enum ConstructType {
   OBJECT {
     @Override
-    public JSON construct(Map<String, ?> fieldNameToValues) {
-      JSONObject object = new JSONObject();
-      fieldNameToValues.forEach((name, value) -> setValue(object, name, value));
-      return object;
-    }
-
-    @Override
-    public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
-      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(target.getClass());
-      nameToDatas.forEach((name, data) -> {
+    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues) {
+      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(type);
+      T target = ParserConfig.GLOBAL.newInstance(type).get();
+      nameToValues.forEach((name, value) -> {
         nameToFields.get(name).forEach(field -> {
+          field.setAccessible(true);
           Class<?> filedType = field.getType();
-          Object value = data.getValue().get();
-          // TODO 判断泛型对象cast?
-          if (data.getDataConfig().canCast(filedType)) {
-            field.setAccessible(true);
-            value = data.getDataConfig().cast(value, filedType);
+          // TODO 基本类型?
+          if (filedType.isInstance(value)) {
             try {
-              // TODO NULL?log?
-              field.set(value, target);
+              field.set(target, value);
             } catch (IllegalArgumentException | IllegalAccessException e) {
               e.printStackTrace();
             }
@@ -53,31 +44,39 @@ public enum ConstructType {
   },
   ITERABLE {
     @Override
-    public JSON construct(Map<String, ?> fieldNameToValues) {
-      JSONArray array = new JSONArray();
-      fieldNameToValues.forEach((name, value) -> {
+    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues) {
+      Preconditions.checkArgument(ClassUtil.isArrayOrIterable(type));
+      // TODO value为Iterable或Array
+      Preconditions
+          .checkArgument(Iterables.all(nameToValues.values(), value -> value instanceof List));
+      List<Map<String, Object>> params = Lists.newLinkedList();
+      nameToValues.forEach((name, value) -> {
+        List<?> values =
+            value.getClass().isArray() ? Arrays.asList(toArray(value)) : (List<?>) value;
+        for (int i = 0; i < values.size(); i++) {
+          if (params.size() < i + 1) {
+            params.add(Maps.newHashMap());
+          }
+          params.get(i).put(name, values.get(i));
+        }
       });
-      return null;
-    }
 
-    @Override
-    public <T> T construct(T target, Map<String, Data<?>> nameToDatas) {
-      Preconditions.checkArgument(ClassUtil.isArrayOrIterable(target.getClass()));
-      TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(target.getClass());
-      ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(genericType);
-      Collection<? extends Object> result=Lists.newLinkedList();
-      nameToDatas.forEach((name,data)->{
-        
-      });
-      
-      if(target.getClass().isArray()) {
+      TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(type);
+      ConstructType genericConstructType = ParserConfig.GLOBAL.getConstructType(genericType);
+      Stream<?> targets =
+          params.stream().map(param -> genericConstructType.construct(genericType, param));
+      if (type.isArray()) {
+        // TODO T为String[]等时,Object[]无法cast为String[]
+        return (T) targets.toArray();
       }
-      
-      if(target instanceof Collection) {
+
+      if (type.isSubtypeOf(TypeToken.of(Collection.class))) {
+        Collection collection = (Collection) ParserConfig.GLOBAL.newInstance(type).get();
+        Iterables.addAll(collection, targets.collect(Collectors.toList()));
+        return (T) collection;
       }
-      
-      
-      return target;
+
+      return (T) targets.collect(Collectors.toList());
     }
   };
   private static final Splitter SPLITTER = Splitter.on(".").omitEmptyStrings();
@@ -95,11 +94,10 @@ public enum ConstructType {
     }
   }
 
-  private static <T> T[] toArray(Object o) {
-    return (T[]) o;
+  private static <T> T[] toArray(Object value) {
+    // TODO 基本类型无法cast为Object[]
+    return (T[]) value;
   }
 
-  public abstract JSON construct(Map<String, ?> fieldNameToValues);
-
-  public abstract <T> T construct(T target, Map<String, Data<?>> nameToDatas);
+  public abstract <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues);
 }

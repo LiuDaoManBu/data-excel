@@ -7,15 +7,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.matcher.data.type.NaturalDataType;
+import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.reflect.Invokable;
+import com.google.common.reflect.TypeToken;
 
 class A implements Cloneable {
   public static String test = "test";
@@ -84,10 +87,13 @@ class B<T> extends A {
 
 
 public class Test {
-  public static void main(String[] args) throws Exception {
-    testGenericType();
+  public static <T> void main(String[] args) throws Exception {
+    TypeToken<List<String>> type=new TypeToken<List<String>>() {};
+    TypeToken<T> genericType=(TypeToken<T>) ClassUtil.getComponentOrGenericType(type);
+    System.out.println(genericType);
+    System.out.println(genericType.getRawType().isInstance("  "));
   }
-
+  
   public static void testInvokeAbleGenericType() throws Exception {
     Invokable<?, Object> invokable = Invokable.from(Test.class.getDeclaredMethod("testInvokeAble",
         int.class, long.class, String.class, Object.class, Object.class, Object.class));
