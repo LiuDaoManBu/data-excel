@@ -1,7 +1,5 @@
 package com.caotc.excel4j.config;
 
-import com.caotc.excel4j.matcher.data.DataMatcher;
-
 public class DataMatcherConfig<T extends Comparable<T>> {
   private Boolean nullAllow;
   private T maxValue;

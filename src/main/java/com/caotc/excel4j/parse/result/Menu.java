@@ -3,11 +3,8 @@ package com.caotc.excel4j.parse.result;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.config.MenuConfig;
-import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.Direction;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -17,13 +14,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 public class Menu<V> {
-  public static class Builder<T> {
+  public static class Builder<V> {
     private StandardCell cell;
-    private MenuConfig<T> menuConfig;
+    private MenuConfig<V> menuConfig;
     private Table table;
-    private Menu parentMenu;
+    private Menu<?> parentMenu;
 
-    public Menu<T> build() {
+    public Menu<V> build() {
       Preconditions.checkNotNull(cell);
       Preconditions.checkArgument(table != null || parentMenu != null);
       Preconditions.checkArgument(menuConfig != null || parentMenu != null);
@@ -31,23 +28,23 @@ public class Menu<V> {
       if (parentMenu != null && table == null) {
         table = parentMenu.table;
       }
-      return new Menu<T>(this);
+      return new Menu<V>(this);
     }
 
     public StandardCell getCell() {
       return cell;
     }
 
-    public Builder<T> setCell(StandardCell cell) {
+    public Builder<V> setCell(StandardCell cell) {
       this.cell = cell;
       return this;
     }
 
-    public MenuConfig<T> getMenuConfig() {
+    public MenuConfig<V> getMenuConfig() {
       return menuConfig;
     }
 
-    public Builder<T> setMenuConfig(MenuConfig<T> menuConfig) {
+    public Builder<V> setMenuConfig(MenuConfig<V> menuConfig) {
       this.menuConfig = menuConfig;
       return this;
     }
@@ -56,32 +53,32 @@ public class Menu<V> {
       return table;
     }
 
-    public Builder<T> setTable(Table table) {
+    public Builder<V> setTable(Table table) {
       this.table = table;
       return this;
     }
 
-    public Menu getParentMenu() {
+    public Menu<?> getParentMenu() {
       return parentMenu;
     }
 
-    public Builder<T> setParentMenu(Menu parentMenu) {
+    public Builder<V> setParentMenu(Menu<?> parentMenu) {
       this.parentMenu = parentMenu;
       return this;
     }
 
   }
 
-  public static <T> Builder<T> builder() {
-    return new Builder<T>();
+  public static <V> Builder<V> builder() {
+    return new Builder<V>();
   }
 
   private final StandardCell cell;
   private final MenuConfig<V> menuConfig;
   private final Table table;
-  private final Menu parentMenu;
-  private final ImmutableList<Menu> childrenMenus;
-  private final Data data;
+  private final Menu<?> parentMenu;
+  private final ImmutableList<Menu<?>> childrenMenus;
+  private final Data<V> data;
 
   public Menu(Builder<V> builder) {
     cell = builder.cell;
@@ -90,29 +87,30 @@ public class Menu<V> {
     parentMenu = builder.parentMenu;
 
     childrenMenus = loadChildrenMenus();
-    data = new Data(this, menuConfig.getDataConfig(),
-        childrenMenus.isEmpty() ? menuConfig.getDataConfig().getLoadType().getDataCells(this)
-            : ImmutableList.of());
+    data = new Data<V>(this,childrenMenus.isEmpty() ? menuConfig.getDataConfig().getLoadType().getDataCells(this)
+        : ImmutableList.of());
   }
 
-  private ImmutableList<Menu> loadChildrenMenus() {
-    ImmutableCollection<MenuConfig> childrenConfigs = menuConfig.getChildrenMenuConfigs();
+  private <T> ImmutableList<Menu<?>> loadChildrenMenus() {
+    ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrenMenuConfigs();
 
     List<StandardCell> menuCells =
         menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
-    return FluentIterable.from(menuCells).transform(cell -> {
-      Iterable<MenuConfig> configs =
+    FluentIterable<Menu<?>> menus= FluentIterable.from(menuCells).transform(cell -> {
+      Iterable<MenuConfig<?>> configs =
           Iterables.filter(childrenConfigs, config -> config.matches(cell));
       Preconditions.checkState(Iterables.size(configs) <= 1);
-      Menu menu = null;
+      Menu<?> menu = null;
       if (!Iterables.isEmpty(configs)) {
         Builder builder = Menu.builder();
-        menu = builder.setCell(cell).setMenuConfig(Iterables.getOnlyElement(configs))
-            .setParentMenu(this).build();
+        builder.setCell(cell);
+        builder.setMenuConfig(Iterables.getOnlyElement(configs));
+        builder.setParentMenu(this);
+        menu = builder.build();
       }
-
       return Optional.ofNullable(menu);
-    }).filter(Optional::isPresent).transform(Optional::get).toList();
+    }).filter(Optional::isPresent).transform(Optional::get);
+    return menus.toList();
   }
 
   public void checkDataCell(StandardCell dataCell) {
@@ -156,31 +154,30 @@ public class Menu<V> {
     // }
   }
 
-  public Optional<Menu> getSuper(Predicate<? super Menu> predicate) {
+  public Optional<Menu<?>> getSuper(Predicate<? super Menu<?>> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isTopMenu()) {
       return Optional.empty();
     }
-    return predicate.apply(parentMenu) ? Optional.of(parentMenu)
-        : parentMenu.getSuper(predicate);
+    return predicate.apply(parentMenu) ? Optional.of(parentMenu) : parentMenu.getSuper(predicate);
   }
 
-  public Optional<Menu> getFieldParent() {
+  public Optional<Menu<?>> getFieldParent() {
     return getSuper(menu -> menu.getFieldName().isPresent());
   }
 
-  public FluentIterable<Menu> getSubs(Predicate<? super Menu> predicate) {
+  public FluentIterable<Menu<?>> getSubs(Predicate<? super Menu<?>> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isDataMenu()) {
       return FluentIterable.of();
     }
-    FluentIterable<Menu> subs = FluentIterable.from(childrenMenus).filter(predicate);
+    FluentIterable<Menu<?>> subs = FluentIterable.from(childrenMenus).filter(predicate);
     return subs.isEmpty()
         ? FluentIterable.from(childrenMenus).transformAndConcat(menu -> menu.getSubs(predicate))
         : subs;
   }
 
-  public FluentIterable<Menu> getFieldChildrens() {
+  public FluentIterable<Menu<?>> getFieldChildrens() {
     return getSubs(menu -> menu.getFieldName().isPresent());
   }
 
@@ -190,9 +187,9 @@ public class Menu<V> {
     }
     com.google.common.collect.ImmutableList.Builder<Field> builder = ImmutableList.builder();
     builder.add(getField().get());
-    Optional<Menu> optional = getFieldParent();
+    Optional<Menu<?>> optional = getFieldParent();
     while (optional.isPresent()) {
-      Menu menu = optional.get();
+      Menu<?> menu = optional.get();
       builder.add(menu.getField().get());
       optional = menu.getFieldParent();
     }
@@ -210,7 +207,7 @@ public class Menu<V> {
         : direction.nextCell(cell);
   }
 
-  public boolean hasChildrenMenu(Menu childrenMenu) {
+  public boolean hasChildrenMenu(Menu<?> childrenMenu) {
     return childrenMenus.contains(childrenMenu);
   }
 
@@ -284,11 +281,11 @@ public class Menu<V> {
     return cell;
   }
 
-  public MenuConfig getMenuConfig() {
+  public MenuConfig<V> getMenuConfig() {
     return menuConfig;
   }
 
-  public Menu getParentMenu() {
+  public Menu<?> getParentMenu() {
     return parentMenu;
   }
 
@@ -296,15 +293,11 @@ public class Menu<V> {
     return table;
   }
 
-  public ImmutableList<Menu> getChildrenMenus() {
+  public ImmutableList<Menu<?>> getChildrenMenus() {
     return childrenMenus;
   }
 
-  public ImmutableList<StandardCell> getValueCells() {
-    return valueCells;
-  }
-
-  public Data getData() {
+  public Data<V> getData() {
     return data;
   }
 

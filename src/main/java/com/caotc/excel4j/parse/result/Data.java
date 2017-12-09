@@ -13,10 +13,10 @@ public class Data<V> {
   private final DataConfig<V> dataConfig;
   private final ImmutableList<StandardCell> valueCells;
 
-  public Data(Menu<V> menu, DataConfig<V> dataConfig, ImmutableList<StandardCell> valueCells) {
+  public Data(Menu<V> menu, ImmutableList<StandardCell> valueCells) {
     super();
     this.menu = menu;
-    this.dataConfig = dataConfig;
+    this.dataConfig = menu.getMenuConfig().getDataConfig();
     this.valueCells = valueCells;
   }
 
@@ -48,7 +48,7 @@ public class Data<V> {
 //        value=dataConfig.getCastType().constructValue(menu);
 //      }
       if(!menu.isDataMenu()) {
-        FluentIterable<Menu> childrens=menu.getFieldChildrens();
+        FluentIterable<Menu<?>> childrens=menu.getFieldChildrens();
         Map<String,Object> vars=Maps.newHashMap();
         //TODO 优化
         childrens.filter(Menu::isDataMenu).forEach(m->{
@@ -57,7 +57,7 @@ public class Data<V> {
         childrens.filter(m->!m.isDataMenu()).forEach(m->{
           vars.put((String) m.getFieldName().get(), menu.getData().getValue());
         });
-        value=dataConfig.getCastType().construct(dataConfig.getFieldType(), vars);
+        value=dataConfig.getConstructType().construct(dataConfig.getFieldType(), vars);
       }
     }
     return Optional.ofNullable(value);

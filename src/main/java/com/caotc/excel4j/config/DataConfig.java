@@ -16,13 +16,14 @@ public class DataConfig<V> {
   private DataMatcher dataMatcher;
   private TypeToken<V> fieldType;
   private String fieldName;
-  private ConstructType castType;
+  private ConstructType constructType;
   
   private LoadType loadType;
   private Integer dataNumber;
   //TODO 自由升降维?
   private boolean beList;
 
+  @SuppressWarnings("unchecked")
   public V cast(Object value) {
     return (V) dataMatcher.cast(value, fieldType.getRawType());
   }
@@ -47,7 +48,7 @@ public class DataConfig<V> {
     return dataMatcher.cast(value, clazz);
   }
 
-  public ImmutableList<StandardCell> getDataCells(Menu menu) {
+  public <T> ImmutableList<StandardCell> getDataCells(Menu<T> menu) {
     return loadType.getDataCells(menu);
   }
 
@@ -79,8 +80,8 @@ public class DataConfig<V> {
     return fieldName;
   }
 
-  public ConstructType getCastType() {
-    return castType;
+  public ConstructType getConstructType() {
+    return constructType;
   }
 
   public boolean isBeList() {

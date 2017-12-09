@@ -10,7 +10,7 @@ public class TableConfig {
     private SheetConfig sheetConfig;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
-    private Collection<MenuConfig> menuConfigs;
+    private Collection<MenuConfig<?>> menuConfigs;
     private ParserConfig parserConfig;
 
     public TableConfig builder() {
@@ -45,11 +45,11 @@ public class TableConfig {
       return this;
     }
 
-    public Collection<MenuConfig> getMenuConfigs() {
+    public Collection<MenuConfig<?>> getMenuConfigs() {
       return menuConfigs;
     }
 
-    public Builder setMenuConfigs(Collection<MenuConfig> menuConfigs) {
+    public Builder setMenuConfigs(Collection<MenuConfig<?>> menuConfigs) {
       this.menuConfigs = menuConfigs;
       return this;
     }
@@ -68,8 +68,8 @@ public class TableConfig {
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
-  private final Collection<MenuConfig> menuConfigs;
-  private final Collection<MenuConfig> topMenuConfigs;
+  private final Collection<MenuConfig<?>> menuConfigs;
+  private final Collection<MenuConfig<?>> topMenuConfigs;
   private final ParserConfig parserConfig;
 
   public TableConfig(Builder builder) {
@@ -86,7 +86,7 @@ public class TableConfig {
     return sheetConfig;
   }
 
-  public Collection<MenuConfig> getTopMenuConfigs() {
+  public Collection<MenuConfig<?>> getTopMenuConfigs() {
     return topMenuConfigs;
   }
 
@@ -98,7 +98,7 @@ public class TableConfig {
     return unFixedMenuDirection;
   }
 
-  public Collection<MenuConfig> getMenuConfigs() {
+  public Collection<MenuConfig<?>> getMenuConfigs() {
     return menuConfigs;
   }
 

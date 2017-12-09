@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 public enum LoadType {
   UNFIXED {
     @Override
-    public ImmutableList<StandardCell> getDataCells(Menu menu) {
+    public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
       Builder<StandardCell> builder = ImmutableList.builder();
       for (Optional<StandardCell> optional = Optional.of(menu.getCell()); optional
           .isPresent(); optional = menu.nextDataCell(optional.get())) {
@@ -23,7 +23,7 @@ public enum LoadType {
   },
   FIXED {
     @Override
-    public ImmutableList<StandardCell> getDataCells(Menu menu) {
+    public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
       List<StandardCell> cells = Lists.newArrayList();
 
       for (Optional<StandardCell> optional = Optional.of(menu.getCell()); optional.isPresent()
@@ -37,10 +37,10 @@ public enum LoadType {
   },
   MIXED {
     @Override
-    public ImmutableList<StandardCell> getDataCells(Menu menu) {
+    public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
       return UNFIXED.getDataCells(menu);
     }
   };
 
-  public abstract ImmutableList<StandardCell> getDataCells(Menu menu);
+  public abstract <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu);
 }
