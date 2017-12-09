@@ -14,11 +14,14 @@ public class DataConfig<T> {
   private MenuConfig<T> menuConfig;
   private Field field;
   private DataMatcher dataMatcher;
-  private LoadType loadType;
-  private Integer dataNumber;
   private TypeToken<T> fieldType;
   private String fieldName;
-  private ConstructType castType; 
+  private ConstructType castType;
+  
+  private LoadType loadType;
+  private Integer dataNumber;
+  //TODO 自由升降维?
+  private boolean beList;
 
   public T cast(Object value) {
     return (T) dataMatcher.cast(value, fieldType.getRawType());
@@ -78,6 +81,10 @@ public class DataConfig<T> {
 
   public ConstructType getCastType() {
     return castType;
+  }
+
+  public boolean isBeList() {
+    return beList;
   }
   
 }

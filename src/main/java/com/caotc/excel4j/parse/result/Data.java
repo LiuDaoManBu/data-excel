@@ -1,16 +1,12 @@
 package com.caotc.excel4j.parse.result;
 
-import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.config.DataConfig;
-import com.caotc.excel4j.constant.ConstructType;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.Maps;
 
 public class Data<T> {
   private final Menu<T> menu;
@@ -38,19 +34,33 @@ public class Data<T> {
   // }
 
   public Optional<T> getValue() {
+    T value=null;
     //TODO
-    if (Objects.isNull(dataConfig.getFieldName())) {
-      return Optional.empty();
-    }
-    if (menu.isDataMenu()) {
-      if (Objects.equals(ConstructType.OBJECT, dataConfig.getCastType()) && menu.isFixedDataMenu()
-          && dataConfig.getDataNumber() == 1) {
-        return Optional
-            .ofNullable(dataConfig.cast(Iterables.getOnlyElement(valueCells).getValue()));
+    if (Objects.nonNull(dataConfig.getFieldName())) {
+      //TODO DataMenu时是否有返回值
+//      if (menu.isDataMenu()) {
+//        if (Objects.equals(ConstructType.OBJECT, dataConfig.getCastType()) && menu.isFixedDataMenu()
+//            && dataConfig.getDataNumber() == 1) {
+//          value=dataConfig.cast(Iterables.getOnlyElement(valueCells).getValue());
+//        }
+//        value=dataConfig.cast(getCellValues());
+//      }else {
+//        value=dataConfig.getCastType().constructValue(menu);
+//      }
+      if(!menu.isDataMenu()) {
+        FluentIterable<Menu> childrens=menu.getFieldChildrens();
+        Map<String,Object> vars=Maps.newHashMap();
+        //TODO 优化
+        childrens.filter(Menu::isDataMenu).forEach(m->{
+          vars.put((String) m.getFieldName().get(), menu.getData().getCellValues());
+        });
+        childrens.filter(m->!m.isDataMenu()).forEach(m->{
+          vars.put((String) m.getFieldName().get(), menu.getData().getValue());
+        });
+        value=dataConfig.getCastType().construct(dataConfig.getFieldType(), vars);
       }
-      return Optional.ofNullable(dataConfig.cast(getCellValues()));
     }
-    return Optional.ofNullable(dataConfig.getCastType().constructValue(menu));
+    return Optional.ofNullable(value);
   }
 
   public ImmutableList<T> getCellValues() {
@@ -61,31 +71,6 @@ public class Data<T> {
 
   // TODO
   public <T> void setFieldValue(T Object) {
-    Optional<Menu> optional = menu.getFieldParent();
-    Class<?> parentType = optional.isPresent() ? optional.get().getField().get().getType()
-        : dataConfig.getMenuConfig().getTableConfig().getType();
-    TypeToken<?> parentTypeToken = TypeToken.of(parentType);
-
-    Field field = dataConfig.getField();
-    Class<?> type = field.getType();
-    TypeToken<?> typeToken = TypeToken.of(type);
-    boolean typeSingle = !(typeToken.isArray() || typeToken.isSubtypeOf(Collection.class)
-        || typeToken.isSubtypeOf(Map.class));
-    // TODO
-    if (parentTypeToken.isArray() || parentTypeToken.isSubtypeOf(Collection.class)
-        || parentTypeToken.isSubtypeOf(Map.class)) {
-      if (typeSingle) {
-
-      } else {
-
-      }
-    } else {
-      if (typeSingle) {
-        menu.cast(Iterables.getOnlyElement(values, null), typeToken.getRawType());
-      } else {
-
-      }
-    }
 
   }
 
