@@ -15,8 +15,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
 
-public class MenuConfig<T> {
-  public static class Builder<T> {
+public class MenuConfig<V> {
+  public static class Builder<V> {
     private TableConfig tableConfig;
     // 菜单匹配器
     private StandardCellMatcher menuMatcher;
@@ -27,10 +27,10 @@ public class MenuConfig<T> {
     private MenuType menuType;
     private MenuConfig parentMenuConfig;
     private ImmutableCollection<MenuConfig> childrenMenuConfigs;
-    private DataConfig<T> dataConfig;
+    private DataConfig<V> dataConfig;
     private ParserConfig parserConfig;
 
-    public MenuConfig<T> build() {
+    public MenuConfig<V> build() {
       Preconditions.checkState(Objects.nonNull(tableConfig) || Objects.nonNull(parentMenuConfig));
       Preconditions.checkNotNull(menuMatcher);
       Preconditions.checkNotNull(menuNecessity);
@@ -43,14 +43,14 @@ public class MenuConfig<T> {
       direction = Optional.ofNullable(direction).orElse(parentMenuConfig.direction);
       tableConfig = Optional.ofNullable(tableConfig).orElse(parentMenuConfig.tableConfig);
       parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
-      return new MenuConfig<T>(this);
+      return new MenuConfig<V>(this);
     }
 
     public TableConfig getTableConfig() {
       return tableConfig;
     }
 
-    public Builder<T> setTableConfig(TableConfig tableConfig) {
+    public Builder<V> setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -59,7 +59,7 @@ public class MenuConfig<T> {
       return menuMatcher;
     }
 
-    public Builder<T> setMenuMatcher(StandardCellMatcher menuMatcher) {
+    public Builder<V> setMenuMatcher(StandardCellMatcher menuMatcher) {
       this.menuMatcher = menuMatcher;
       return this;
     }
@@ -68,7 +68,7 @@ public class MenuConfig<T> {
       return distance;
     }
 
-    public Builder<T> setDistance(int distance) {
+    public Builder<V> setDistance(int distance) {
       this.distance = distance;
       return this;
     }
@@ -77,7 +77,7 @@ public class MenuConfig<T> {
       return menuNecessity;
     }
 
-    public Builder<T> setMenuNecessity(MenuNecessity menuNecessity) {
+    public Builder<V> setMenuNecessity(MenuNecessity menuNecessity) {
       this.menuNecessity = menuNecessity;
       return this;
     }
@@ -86,7 +86,7 @@ public class MenuConfig<T> {
       return direction;
     }
 
-    public Builder<T> setDirection(Direction direction) {
+    public Builder<V> setDirection(Direction direction) {
       this.direction = direction;
       return this;
     }
@@ -95,7 +95,7 @@ public class MenuConfig<T> {
       return menuType;
     }
 
-    public Builder<T> setMenuType(MenuType menuType) {
+    public Builder<V> setMenuType(MenuType menuType) {
       this.menuType = menuType;
       return this;
     }
@@ -104,7 +104,7 @@ public class MenuConfig<T> {
       return parentMenuConfig;
     }
 
-    public Builder<T> setParentMenuConfig(MenuConfig parentMenuConfig) {
+    public Builder<V> setParentMenuConfig(MenuConfig parentMenuConfig) {
       this.parentMenuConfig = parentMenuConfig;
       return this;
     }
@@ -113,16 +113,16 @@ public class MenuConfig<T> {
       return childrenMenuConfigs;
     }
 
-    public Builder<T> setChildrenMenuConfigs(ImmutableCollection<MenuConfig> childrenMenuConfigs) {
+    public Builder<V> setChildrenMenuConfigs(ImmutableCollection<MenuConfig> childrenMenuConfigs) {
       this.childrenMenuConfigs = childrenMenuConfigs;
       return this;
     }
 
-    public DataConfig<T> getDataConfig() {
+    public DataConfig<V> getDataConfig() {
       return dataConfig;
     }
 
-    public Builder<T> setDataConfig(DataConfig<T> dataConfig) {
+    public Builder<V> setDataConfig(DataConfig<V> dataConfig) {
       this.dataConfig = dataConfig;
       return this;
     }
@@ -146,7 +146,7 @@ public class MenuConfig<T> {
   private final MenuType menuType;
   private final MenuConfig parentMenuConfig;
   private final ImmutableCollection<MenuConfig> childrenMenuConfigs;
-  private final DataConfig<T> dataConfig;
+  private final DataConfig<V> dataConfig;
   private final ParserConfig parserConfig;
 
   public MenuConfig(Builder builder) {
@@ -249,7 +249,7 @@ public class MenuConfig<T> {
     return menuNecessity;
   }
 
-  public DataConfig<T> getDataConfig() {
+  public DataConfig<V> getDataConfig() {
     return dataConfig;
   }
 
