@@ -10,11 +10,11 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
-public class DataConfig<T> {
-  private MenuConfig<T> menuConfig;
+public class DataConfig<V> {
+  private MenuConfig<V> menuConfig;
   private Field field;
   private DataMatcher dataMatcher;
-  private TypeToken<T> fieldType;
+  private TypeToken<V> fieldType;
   private String fieldName;
   private ConstructType castType;
   
@@ -23,8 +23,8 @@ public class DataConfig<T> {
   //TODO 自由升降维?
   private boolean beList;
 
-  public T cast(Object value) {
-    return (T) dataMatcher.cast(value, fieldType.getRawType());
+  public V cast(Object value) {
+    return (V) dataMatcher.cast(value, fieldType.getRawType());
   }
   
   public boolean support(Object value) {
@@ -51,7 +51,7 @@ public class DataConfig<T> {
     return loadType.getDataCells(menu);
   }
 
-  public MenuConfig<T> getMenuConfig() {
+  public MenuConfig<V> getMenuConfig() {
     return menuConfig;
   }
 
@@ -71,7 +71,7 @@ public class DataConfig<T> {
     return field;
   }
 
-  public TypeToken<T> getFieldType() {
+  public TypeToken<V> getFieldType() {
     return fieldType;
   }
 

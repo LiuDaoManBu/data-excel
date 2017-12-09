@@ -8,12 +8,12 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-public class Data<T> {
-  private final Menu<T> menu;
-  private final DataConfig<T> dataConfig;
+public class Data<V> {
+  private final Menu<V> menu;
+  private final DataConfig<V> dataConfig;
   private final ImmutableList<StandardCell> valueCells;
 
-  public Data(Menu<T> menu, DataConfig<T> dataConfig, ImmutableList<StandardCell> valueCells) {
+  public Data(Menu<V> menu, DataConfig<V> dataConfig, ImmutableList<StandardCell> valueCells) {
     super();
     this.menu = menu;
     this.dataConfig = dataConfig;
@@ -33,8 +33,8 @@ public class Data<T> {
   // return result;
   // }
 
-  public Optional<T> getValue() {
-    T value=null;
+  public Optional<V> getValue() {
+    V value=null;
     //TODO
     if (Objects.nonNull(dataConfig.getFieldName())) {
       //TODO DataMenu时是否有返回值
@@ -63,7 +63,7 @@ public class Data<T> {
     return Optional.ofNullable(value);
   }
 
-  public ImmutableList<T> getCellValues() {
+  public ImmutableList<V> getCellValues() {
     // TODO
     return FluentIterable.from(valueCells).transform(StandardCell::getValue)
         .transform(dataConfig::cast).toList();
@@ -74,11 +74,11 @@ public class Data<T> {
 
   }
 
-  public Menu<T> getMenu() {
+  public Menu<V> getMenu() {
     return menu;
   }
 
-  public DataConfig<T> getDataConfig() {
+  public DataConfig<V> getDataConfig() {
     return dataConfig;
   }
 

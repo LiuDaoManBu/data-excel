@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class Menu<T> {
+public class Menu<V> {
   public static class Builder<T> {
     private StandardCell cell;
     private MenuConfig<T> menuConfig;
@@ -77,13 +77,13 @@ public class Menu<T> {
   }
 
   private final StandardCell cell;
-  private final MenuConfig<T> menuConfig;
+  private final MenuConfig<V> menuConfig;
   private final Table table;
   private final Menu parentMenu;
   private final ImmutableList<Menu> childrenMenus;
   private final Data data;
 
-  public Menu(Builder<T> builder) {
+  public Menu(Builder<V> builder) {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
     table = builder.table;
