@@ -201,7 +201,7 @@ public class MenuConfig<V> {
   // delegate methods start
 
   public boolean matches(StandardCell cell) {
-    return menuMatcher.matches(cell);
+    return menuMatcher.test(cell);
   }
 
   public boolean matches(Object value) {

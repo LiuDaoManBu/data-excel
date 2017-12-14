@@ -98,7 +98,7 @@ public class Table {
         StandardCell cell =
             StandardCell.valueOf(row.getCell(columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK));
         com.google.common.base.Optional<MenuConfig<?>> optional =
-            Iterables.tryFind(menuConfigs, menuConfig -> menuConfig.getMenuMatcher().matches(cell));
+            Iterables.tryFind(menuConfigs, menuConfig -> menuConfig.getMenuMatcher().test(cell));
         if (optional.isPresent()) {
           com.caotc.excel4j.parse.result.Menu.Builder topMenuBuilder = Menu.builder();
           builder.add(

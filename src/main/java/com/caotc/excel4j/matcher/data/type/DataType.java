@@ -1,19 +1,23 @@
 package com.caotc.excel4j.matcher.data.type;
 
-import java.util.Collection;
-import com.caotc.excel4j.matcher.Matcher;
+import java.util.function.Predicate;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.reflect.TypeToken;
 
 
 
-public interface DataType extends Matcher {
-  @Override
-  default boolean support(Object value) {
-    return true;
+public interface DataType extends Predicate<Object> {
+  abstract ImmutableCollection<TypeToken<?>> canCastTypes();
+  
+  default <T> boolean canCast(Class<T> type) {
+    return canCast(TypeToken.of(type));
   }
+  
+  abstract <T> boolean canCast(TypeToken<T> type);
 
-  abstract Collection<Class<?>> canCastClasses();
-
-  abstract <T> boolean canCast(Class<T> clazz);
-
-  abstract <T> T cast(Object value, Class<T> clazz);
+  default <T> T cast(Object value, Class<T> type) {
+    return cast(value,TypeToken.of(type));
+  }
+  
+  abstract <T> T cast(Object value, TypeToken<T> type);
 }
