@@ -12,6 +12,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.reflect.TypeToken;
 
 public class Menu<V> {
   public static class Builder<V> {
@@ -264,8 +265,8 @@ public class Menu<V> {
     return menuConfig.support(value);
   }
 
-  public Collection<Class<?>> canCastClasses() {
-    return menuConfig.canCastClasses();
+  public V cast(Object value) {
+    return menuConfig.cast(value);
   }
 
   public <T> boolean canCast(Class<T> clazz) {
@@ -275,6 +276,19 @@ public class Menu<V> {
   public <T> T cast(Object value, Class<T> clazz) {
     return menuConfig.cast(value, clazz);
   }
+
+  public ImmutableCollection<TypeToken<?>> canCastTypes() {
+    return menuConfig.canCastTypes();
+  }
+
+  public <T> boolean canCast(TypeToken<T> type) {
+    return menuConfig.canCast(type);
+  }
+
+  public <T> T cast(Object value, TypeToken<T> type) {
+    return menuConfig.cast(value, type);
+  }
+
   // delegate methods end
 
   public StandardCell getCell() {

@@ -1,7 +1,6 @@
 package com.caotc.excel4j.config;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +13,7 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
+import com.google.common.reflect.TypeToken;
 
 public class MenuConfig<V> {
   public static class Builder<V> {
@@ -113,7 +113,8 @@ public class MenuConfig<V> {
       return childrenMenuConfigs;
     }
 
-    public Builder<V> setChildrenMenuConfigs(ImmutableCollection<MenuConfig<?>> childrenMenuConfigs) {
+    public Builder<V> setChildrenMenuConfigs(
+        ImmutableCollection<MenuConfig<?>> childrenMenuConfigs) {
       this.childrenMenuConfigs = childrenMenuConfigs;
       return this;
     }
@@ -159,7 +160,7 @@ public class MenuConfig<V> {
     parentMenuConfig = builder.parentMenuConfig;
     childrenMenuConfigs = builder.childrenMenuConfigs;
     dataConfig = builder.dataConfig;
-    parserConfig=builder.parserConfig;
+    parserConfig = builder.parserConfig;
   }
 
   public Optional<Field> getField() {
@@ -212,17 +213,30 @@ public class MenuConfig<V> {
     return dataConfig.support(value);
   }
 
-  public Collection<Class<?>> canCastClasses() {
-    return dataConfig.canCastClasses();
+  public V cast(Object value) {
+    return dataConfig.cast(value);
   }
 
-  public <R> boolean canCast(Class<R> clazz) {
+  public <T> boolean canCast(Class<T> clazz) {
     return dataConfig.canCast(clazz);
   }
 
-  public <R> R cast(Object value, Class<R> clazz) {
+  public <T> T cast(Object value, Class<T> clazz) {
     return dataConfig.cast(value, clazz);
   }
+
+  public ImmutableCollection<TypeToken<?>> canCastTypes() {
+    return dataConfig.canCastTypes();
+  }
+
+  public <T> boolean canCast(TypeToken<T> type) {
+    return dataConfig.canCast(type);
+  }
+
+  public <T> T cast(Object value, TypeToken<T> type) {
+    return dataConfig.cast(value, type);
+  }
+  
   // delegate methods end
 
   public MenuType getMenuType() {
