@@ -1,7 +1,6 @@
 package com.caotc.excel4j.config;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.data.NativeDataMatcher;
