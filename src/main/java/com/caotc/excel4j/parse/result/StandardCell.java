@@ -19,7 +19,6 @@ import org.apache.poi.util.Removal;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
