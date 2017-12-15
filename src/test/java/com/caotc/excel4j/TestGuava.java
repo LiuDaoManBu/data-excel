@@ -118,7 +118,7 @@ public class TestGuava {
     System.out.println(typeToken.isSubtypeOf(TypeToken.of(Collection.class)));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection>() {}));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<String>>() {}));
-    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {}));
+    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {})); 
   }
 
   public static <T> void testTypeToken(TypeToken<T> token) {
