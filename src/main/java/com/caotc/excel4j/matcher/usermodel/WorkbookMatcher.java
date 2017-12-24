@@ -1,9 +1,9 @@
 package com.caotc.excel4j.matcher.usermodel;
 
-import java.util.function.Predicate;
 import org.apache.poi.ss.usermodel.Workbook;
+import com.caotc.excel4j.matcher.BaseMatcher;
 
-public class WorkbookMatcher implements Predicate<Workbook>{
+public class WorkbookMatcher extends BaseMatcher<Workbook>{
 
   @Override
   public boolean test(Workbook t) {

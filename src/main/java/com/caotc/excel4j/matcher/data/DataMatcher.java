@@ -1,7 +1,7 @@
 package com.caotc.excel4j.matcher.data;
 
-import java.util.function.Predicate;
+import com.caotc.excel4j.matcher.Matcher;
 
-public interface DataMatcher extends Predicate<Object> {
+public interface DataMatcher extends Matcher<Object> {
   boolean support(Object value);
 }
