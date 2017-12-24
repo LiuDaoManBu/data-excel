@@ -59,5 +59,10 @@
 			<artifactId>aviator</artifactId>
 			<version>3.1.0</version>
 		</dependency>
+		<dependency>
+		  <groupId>io.ebean</groupId>
+		  <artifactId>ebean</artifactId>
+		  <version>11.7.1</version>
+		</dependency>
 	</dependencies>
 </project>
