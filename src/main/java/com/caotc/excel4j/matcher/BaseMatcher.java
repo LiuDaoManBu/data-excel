@@ -40,6 +40,10 @@ public class BaseMatcher<T> implements Matcher<T> {
     return add(Type.NOT);
   }
 
+  public Matcher<T> not(Predicate<T> other) {
+    return add(Type.NOT);
+  }
+  
   @Override
   public Matcher<T> and() {
     return add(Type.AND);
@@ -50,6 +54,7 @@ public class BaseMatcher<T> implements Matcher<T> {
     return add(Type.OR);
   }
 
+  @Override
   public Matcher<T> end() {
     return Optional.ofNullable(parent).orElse(this);                                        
   }
