@@ -1,20 +1,21 @@
 package com.caotc.excel4j.matcher;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 
-public class BaseMatcher<T> implements Matcher<T> {
+public class BaseMatcher<T> extends AbstractMatcher<T> {
   private Type type;
   private Matcher<T> parent;
   private List<Matcher<T>> list;
 
   public BaseMatcher() {
-    
+
   }
-  
+
   public BaseMatcher(Type type, Matcher<T> parent, List<Matcher<T>> list) {
     super();
     this.type = type;
@@ -29,33 +30,25 @@ public class BaseMatcher<T> implements Matcher<T> {
   }
 
   @Override
-  public Matcher<T> add(Type type) {
-    Matcher<T> predicateList = new BaseMatcher<T>(type, this, Lists.newArrayList());
-    list.add(predicateList);
-    return predicateList;
-  }
-
-  @Override
-  public Matcher<T> not() {
-    return add(Type.NOT);
-  }
-
-  public Matcher<T> not(Predicate<T> other) {
-    return add(Type.NOT);
+  public Matcher<T> add(Predicate<T> predicate) {
+    Matcher<T> matcher = new BaseMatcher<T>(Type.AND, this, Lists.newArrayList());
+    list.add(matcher);
+    return this;
   }
   
   @Override
-  public Matcher<T> and() {
-    return add(Type.AND);
+  public Matcher<T> stratJunction(Type type) {
+    Matcher<T> matcher = new BaseMatcher<T>(type, this, Lists.newArrayList());
+    list.add(matcher);
+    return matcher;
+  }
+
+  public Matcher<T> not(Predicate<T> other) {
+    return stratJunction(Type.NOT);
   }
 
   @Override
-  public Matcher<T> or() {
-    return add(Type.OR);
-  }
-
-  @Override
-  public Matcher<T> end() {
-    return Optional.ofNullable(parent).orElse(this);                                        
+  public Matcher<T> endJunction(Type type) {
+    return Objects.equals(this.type, type) ? Optional.ofNullable(parent).orElse(this) : this;
   }
 }
