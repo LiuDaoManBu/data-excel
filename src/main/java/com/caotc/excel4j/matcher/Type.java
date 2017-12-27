@@ -15,12 +15,6 @@ public enum Type {
     public <T> Predicate<T> apply(Collection<Predicate<T>> list) {
       return list.stream().reduce(Predicate::or).get();
     }
-  },
-  NOT {
-    @Override
-    public <T> Predicate<T> apply(Collection<Predicate<T>> list) {
-      return AND.apply(list).negate();
-    }
   };
   public abstract <T> Predicate<T> apply(Collection<Predicate<T>> list);
 }

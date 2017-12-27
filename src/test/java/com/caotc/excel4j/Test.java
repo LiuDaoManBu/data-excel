@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.matcher.data.constant.NativeDataType;
+import com.caotc.excel4j.matcher.data.constant.BaseDataType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
@@ -111,7 +111,7 @@ public class Test {
   public static <T> T getValue(Class<T> type) {
     Object value = null;
     if (value != null && !value.getClass().equals(type)) {
-      value = NativeDataType.DECIMAL.cast(value, type);
+      value = BaseDataType.DECIMAL.cast(value, type);
     }
     return (T) value;
   }

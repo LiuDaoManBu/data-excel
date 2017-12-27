@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
 
-public enum NativeDataType implements DataType {
+public enum BaseDataType implements DataType {
   DECIMAL(float.class, Float.class, double.class, Double.class, BigDecimal.class) {
     @Override
     public boolean test(Object value) {
@@ -112,15 +112,15 @@ public enum NativeDataType implements DataType {
   private static final int ZERO = 0;
   private final ImmutableCollection<TypeToken<?>> types;
 
-  private NativeDataType(Iterable<TypeToken<?>> types) {
+  private BaseDataType(Iterable<TypeToken<?>> types) {
     this.types=ImmutableSet.copyOf(types);
   }
 
-  private NativeDataType(Class<?>... types) {
+  private BaseDataType(Class<?>... types) {
     this(FluentIterable.from(types).transform(TypeToken::of));
   }
   
-  private NativeDataType(DataType dataType,Class<?>... types) {
+  private BaseDataType(DataType dataType,Class<?>... types) {
     FluentIterable<TypeToken<?>> typeTokens=FluentIterable.from(types).transform(TypeToken::of);
     typeTokens.append(dataType.canCastTypes());
     this.types=typeTokens.toSet();
