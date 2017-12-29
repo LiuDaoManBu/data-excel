@@ -116,20 +116,21 @@ public class TestGuava {
     testTypeToken(new TypeToken<Collection<String>>() {});
 
     List<String> strings = Lists.newArrayList();
-    TypeToken<List> typeToken=TypeToken.of(List.class);
+    TypeToken<List> typeToken = TypeToken.of(List.class);
     System.out.println(typeToken.isSubtypeOf(TypeToken.of(Collection.class)));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection>() {}));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<String>>() {}));
-    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {})); 
-    
+    System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {}));
+
     testCollector();
   }
 
   public static void testCollector() {
-    ImmutableList<Integer> list=Lists.newArrayList(1,2,3,4,5,6,7,8,9,10).stream().collect(ImmutableList.toImmutableList());
+    ImmutableList<Integer> list = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).parallelStream()
+        .peek(System.out::println).collect(ImmutableList.toImmutableList());
     System.out.println(list);
   }
-  
+
   public static <T> void testTypeToken(TypeToken<T> token) {
     System.out.println(token.resolveType(token.getRawType().getTypeParameters()[0]));
   }
