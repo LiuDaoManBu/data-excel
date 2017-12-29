@@ -6,8 +6,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.AbstractInvocationHandler;
@@ -119,8 +121,15 @@ public class TestGuava {
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection>() {}));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<String>>() {}));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {})); 
+    
+    testCollector();
   }
 
+  public static void testCollector() {
+    ImmutableList<Integer> list=Lists.newArrayList(1,2,3,4,5,6,7,8,9,10).stream().collect(ImmutableList.toImmutableList());
+    System.out.println(list);
+  }
+  
   public static <T> void testTypeToken(TypeToken<T> token) {
     System.out.println(token.resolveType(token.getRawType().getTypeParameters()[0]));
   }
