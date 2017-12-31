@@ -1,30 +1,14 @@
 package com.caotc.excel4j.matcher;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import com.caotc.excel4j.matcher.constant.Type;
 import com.google.common.collect.Lists;
 
 public class BaseMatcher<T> implements Matcher<T> {
-  static enum Type {
-    AND {
-      @Override
-      public <T> Predicate<T> apply(Collection<Predicate<T>> list) {
-        
-        return list.stream().reduce(Predicate::and).get();
-      }
-    },
-    OR {
-      @Override
-      public <T> Predicate<T> apply(Collection<Predicate<T>> list) {
-        return list.stream().reduce(Predicate::or).get();
-      }
-    };
-    public abstract <T> Predicate<T> apply(Collection<Predicate<T>> list);
-  }
-  
   private final Type type;
   private final Matcher<T> parent;
   private final List<Predicate<T>> list;
@@ -32,13 +16,13 @@ public class BaseMatcher<T> implements Matcher<T> {
   public BaseMatcher() {
     this(Type.AND);
   }
-  
+
   public BaseMatcher(Type type) {
-    this(type,null);
+    this(type, null);
   }
 
   public BaseMatcher(Type type, Matcher<T> parent) {
-    this(type,parent,Lists.newArrayList());
+    this(type, parent, Lists.newArrayList());
   }
 
   public BaseMatcher(Type type, Matcher<T> parent, List<Predicate<T>> list) {
@@ -57,6 +41,11 @@ public class BaseMatcher<T> implements Matcher<T> {
   public Matcher<T> add(Predicate<T> predicate) {
     list.add(predicate);
     return this;
+  }
+
+  @Override
+  public <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform) {
+    return add(value -> predicate.test(transform.apply(value)));
   }
 
   public Matcher<T> stratJunction(Type type) {
@@ -88,4 +77,5 @@ public class BaseMatcher<T> implements Matcher<T> {
   public Matcher<T> endOr() {
     return endJunction(Type.OR);
   }
+
 }

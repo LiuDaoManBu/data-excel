@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.matcher.ComparableMatcher;
 import com.caotc.excel4j.matcher.data.constant.BaseDataType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -54,7 +55,7 @@ class A implements Cloneable {
 class B<T> extends A {
   private final int id;
   private final Collection<Integer> values;
-  private T[] t ;
+  private T[] t;
 
   public B() {
     super();
@@ -85,7 +86,12 @@ class B<T> extends A {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    testGenericType();
+    test();
+  }
+
+  public static void testGeneric() {
+    ComparableMatcher<Integer> matcher = new ComparableMatcher<Integer>(BaseDataType.DECIMAL);
+    System.out.println(matcher.getType());
   }
 
   public static void testInvokeAbleGenericType() throws Exception {
@@ -126,7 +132,7 @@ public class Test {
     // JSONObject jsonObject=new JSONObject();
     // jsonObject.put("id", "1");
     // System.out.println(JSONObject.toJavaObject(jsonObject, A.class));
-    B b = new B();
+    B<?> b = new B<Object>();
     System.out.println(b);
     Field field = B.class.getDeclaredField("values");
     field.setAccessible(true);
