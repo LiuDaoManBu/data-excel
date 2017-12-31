@@ -3,7 +3,8 @@ package com.caotc.excel4j.config;
 import java.lang.reflect.Field;
 import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.matcher.data.NativeDataMatcher;
+import com.caotc.excel4j.matcher.data.DataMatcher;
+import com.caotc.excel4j.matcher.data.type.DataType;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.collect.ImmutableCollection;
@@ -13,7 +14,8 @@ import com.google.common.reflect.TypeToken;
 public class DataConfig<V> {
   private MenuConfig<V> menuConfig;
   private Field field;
-  private NativeDataMatcher dataMatcher;
+  private DataType dataType;
+  private DataMatcher dataMatcher;
   private TypeToken<V> fieldType;
   private String fieldName;
   private ConstructType constructType;
@@ -25,7 +27,7 @@ public class DataConfig<V> {
 
   @SuppressWarnings("unchecked")
   public V cast(Object value) {
-    return (V) dataMatcher.cast(value, fieldType.getRawType());
+    return (V) dataType.cast(value, fieldType.getRawType());
   }
   
   public boolean support(Object value) {
@@ -37,23 +39,23 @@ public class DataConfig<V> {
   }
 
   public <T> boolean canCast(Class<T> clazz) {
-    return dataMatcher.canCast(clazz);
+    return dataType.canCast(clazz);
   }
 
   public <T> T cast(Object value, Class<T> clazz) {
-    return dataMatcher.cast(value, clazz);
+    return dataType.cast(value, clazz);
   }
 
   public ImmutableCollection<TypeToken<?>> canCastTypes() {
-    return dataMatcher.canCastTypes();
+    return dataType.canCastTypes();
   }
 
   public <T> boolean canCast(TypeToken<T> type) {
-    return dataMatcher.canCast(type);
+    return dataType.canCast(type);
   }
 
   public <T> T cast(Object value, TypeToken<T> type) {
-    return dataMatcher.cast(value, type);
+    return dataType.cast(value, type);
   }
 
   public <T> ImmutableList<StandardCell> getDataCells(Menu<T> menu) {
@@ -64,7 +66,7 @@ public class DataConfig<V> {
     return menuConfig;
   }
 
-  public NativeDataMatcher getDataMatcher() {
+  public DataMatcher getDataMatcher() {
     return dataMatcher;
   }
 
