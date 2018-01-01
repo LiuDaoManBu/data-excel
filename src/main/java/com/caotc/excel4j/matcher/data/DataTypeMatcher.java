@@ -1,42 +1,37 @@
 package com.caotc.excel4j.matcher.data;
 
-import java.lang.reflect.TypeVariable;
 import java.util.List;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.Matcher;
+import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
+import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.google.common.reflect.TypeToken;
 
-public abstract class DataTypeMatcher<T> extends BaseMatcher<Object> implements DataMatcher {
+public abstract class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher {
   private final DataType dataType;
-  //TODO 改为动态传入?
-  private final TypeToken<T> type;
 
   public DataTypeMatcher(DataType dataType) {
     super();
     this.dataType = dataType;
-    type = findType();
   }
 
   public DataTypeMatcher(Type type, DataType dataType) {
     super(type);
     this.dataType = dataType;
-    this.type = findType();
   }
 
   public DataTypeMatcher(Type type, Matcher<Object> parent, DataType dataType) {
     super(type, parent);
     this.dataType = dataType;
-    this.type = findType();
   }
 
   public DataTypeMatcher(Type type, Matcher<Object> parent, List<Predicate<Object>> list,
       DataType dataType) {
     super(type, parent, list);
     this.dataType = dataType;
-    this.type = findType();
   }
 
   @Override
@@ -44,24 +39,26 @@ public abstract class DataTypeMatcher<T> extends BaseMatcher<Object> implements 
     return dataType.test(value);
   }
 
-  public DataMatcher addDataPredicate(Predicate<T> predicate) {
-    add(predicate,this::cast);
+  public <T> DataMatcher addDataPredicate(Predicate<T> predicate, TypeToken<T> type) {
+    add(predicate, value -> dataType.cast(value, type));
     return this;
   }
 
-  private T cast(Object value) {
-    return dataType.cast(value, type);
+  public DataMatcher addDataPredicate(StringMatcherType type, String predicateValue) {
+    add(type,predicateValue, value -> dataType.cast(value, String.class));
+    return this;
   }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private TypeToken<T> findType() {
-    TypeToken<? extends DataTypeMatcher> token = TypeToken.of(getClass());
-    TypeVariable<?>[] types =
-        token.getSupertype(DataTypeMatcher.class).getRawType().getTypeParameters();
-    return TypeToken.of((Class<T>) token.resolveType(types[0]).getRawType());
+  
+  public <T extends Comparable<T>> DataMatcher addDataPredicate(ComparableMatcherType type, T predicateValue) {
+    //TODO safe?
+    add(type,predicateValue, value -> (T)dataType.cast(value,predicateValue.getClass()));
+    return this;
   }
-
-  public TypeToken<T> getType() {
-    return type;
-  }
+  
+  // @SuppressWarnings({"rawtypes", "unchecked"})
+  // private static <T> TypeToken<T> findType(Predicate<T> predicate) {
+  // TypeToken<? extends Predicate> token = TypeToken.of(predicate.getClass());
+  // TypeVariable<?>[] types = token.getSupertype(Predicate.class).getRawType().getTypeParameters();
+  // return TypeToken.of((Class<T>) token.resolveType(types[0]).getRawType());
+  // }
 }

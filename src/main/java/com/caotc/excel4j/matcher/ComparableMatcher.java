@@ -1,6 +1,7 @@
 package com.caotc.excel4j.matcher;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
@@ -22,9 +23,9 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
   public ComparableMatcher() {
     super();
   }
-  
+
   public ComparableMatcher<T> add(ComparableMatcherType type, T predicateValue) {
-    add(value -> type.apply(value, predicateValue));
+    add(type, predicateValue, Function.identity());
     return this;
   }
 
@@ -58,6 +59,7 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
     return this;
   }
 
+  //TODO between和其他type对于参数个数不同要求的处理?
   public ComparableMatcher<T> between(T lowValue, T highValue) {
     add(value -> ComparableMatcherType.LE.apply(value, highValue)
         && ComparableMatcherType.GE.apply(value, lowValue));

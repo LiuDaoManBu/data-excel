@@ -1,6 +1,7 @@
 package com.caotc.excel4j.matcher;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
@@ -25,7 +26,7 @@ public class StringMatcher extends BaseMatcher<String> {
   }
 
   public StringMatcher add(StringMatcherType type, String predicateValue) {
-    add(value -> type.apply(value, predicateValue));
+    add(type, predicateValue, Function.identity());
     return this;
   }
 
@@ -65,7 +66,7 @@ public class StringMatcher extends BaseMatcher<String> {
   }
 
   public StringMatcher addLengthPredicate(ComparableMatcherType type, int predicateValue) {
-    addLengthPredicate(value -> type.apply(value, predicateValue));
+    add(type,predicateValue,String::length);
     return this;
   }
 

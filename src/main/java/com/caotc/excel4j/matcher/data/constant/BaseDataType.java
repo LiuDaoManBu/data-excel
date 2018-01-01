@@ -23,8 +23,8 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  WHOLE_NUMBER(DECIMAL,byte.class, Byte.class, short.class, Short.class, int.class,
-      Integer.class, long.class, Long.class, BigInteger.class) {
+  WHOLE_NUMBER(DECIMAL, byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
+      long.class, Long.class, BigInteger.class) {
     @Override
     public boolean test(Object value) {
       try {
@@ -63,13 +63,15 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  POSITIVE_WHOLE_NUMBER(FluentIterable.from(POSITIVE_NUMBER.types).filter(WHOLE_NUMBER.types::contains)) {
+  POSITIVE_WHOLE_NUMBER(
+      FluentIterable.from(POSITIVE_NUMBER.types).filter(WHOLE_NUMBER.types::contains)) {
     @Override
     public boolean test(Object value) {
       return POSITIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
     }
   },
-  NEGATIVE_WHOLE_NUMBER(FluentIterable.from(NEGATIVE_NUMBER.types).filter(WHOLE_NUMBER.types::contains)) {
+  NEGATIVE_WHOLE_NUMBER(
+      FluentIterable.from(NEGATIVE_NUMBER.types).filter(WHOLE_NUMBER.types::contains)) {
     @Override
     public boolean test(Object value) {
       return NEGATIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
@@ -92,7 +94,7 @@ public enum BaseDataType implements DataType {
       return DECIMAL.test(value) && POSITIVE_NUMBER.test(value);
     }
   },
-  NEGATIVE_DECIMAL(FluentIterable.from(NEGATIVE_NUMBER.types).filter(DECIMAL.types::contains)){
+  NEGATIVE_DECIMAL(FluentIterable.from(NEGATIVE_NUMBER.types).filter(DECIMAL.types::contains)) {
     @Override
     public boolean test(Object value) {
       return DECIMAL.test(value) && NEGATIVE_NUMBER.test(value);
@@ -113,19 +115,19 @@ public enum BaseDataType implements DataType {
   private final ImmutableCollection<TypeToken<?>> types;
 
   private BaseDataType(Iterable<TypeToken<?>> types) {
-    this.types=ImmutableSet.copyOf(types);
+    this.types = ImmutableSet.copyOf(types);
   }
 
   private BaseDataType(Class<?>... types) {
     this(FluentIterable.from(types).transform(TypeToken::of));
   }
-  
-  private BaseDataType(DataType dataType,Class<?>... types) {
-    FluentIterable<TypeToken<?>> typeTokens=FluentIterable.from(types).transform(TypeToken::of);
+
+  private BaseDataType(DataType dataType, Class<?>... types) {
+    FluentIterable<TypeToken<?>> typeTokens = FluentIterable.from(types).transform(TypeToken::of);
     typeTokens.append(dataType.canCastTypes());
-    this.types=typeTokens.toSet();
+    this.types = typeTokens.toSet();
   }
-  
+
   @Override
   public ImmutableCollection<TypeToken<?>> canCastTypes() {
     return types;
@@ -133,16 +135,17 @@ public enum BaseDataType implements DataType {
 
   @Override
   public <T> boolean canCast(TypeToken<T> type) {
-    //TODO 父子类
+    // TODO 父子类
     return types.contains(type);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T cast(Object value, TypeToken<T> type) {
-    //TODO 
-    if (FluentIterable.of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
-        long.class, Long.class, BigInteger.class).transform(TypeToken::of).contains(type)) {
+    // TODO
+    if (FluentIterable.of(byte.class, Byte.class, short.class, Short.class, int.class,
+        Integer.class, long.class, Long.class, BigInteger.class).transform(TypeToken::of)
+        .contains(type)) {
       value = TypeUtils.castToBigDecimal(value).toBigIntegerExact();
     }
     return (T) TypeUtils.castToJavaBean(value, type.getRawType());

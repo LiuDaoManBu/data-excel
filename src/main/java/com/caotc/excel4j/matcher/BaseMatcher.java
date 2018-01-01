@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
+import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
 import com.google.common.collect.Lists;
 
@@ -46,6 +48,18 @@ public class BaseMatcher<T> implements Matcher<T> {
   @Override
   public <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform) {
     return add(value -> predicate.test(transform.apply(value)));
+  }
+
+  @Override
+  public Matcher<T> add(StringMatcherType type, String predicateValue,
+      Function<T, String> transform) {
+    return add(value -> type.apply(value, predicateValue), transform);
+  }
+
+  @Override
+  public <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
+      Function<T, R> transform) {
+    return add(value -> type.apply(value, predicateValue), transform);
   }
 
   public Matcher<T> stratJunction(Type type) {
