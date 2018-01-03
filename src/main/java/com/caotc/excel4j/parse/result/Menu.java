@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.parse.error.MenuError;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
@@ -76,6 +77,7 @@ public class Menu<V> {
 
   private final StandardCell cell;
   private final MenuConfig<V> menuConfig;
+  private final ImmutableList<MenuError> menuErrors;
   private final Table table;
   private final Menu<?> parentMenu;
   private final ImmutableList<Menu<?>> childrenMenus;
@@ -84,6 +86,8 @@ public class Menu<V> {
   public Menu(Builder<V> builder) {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
+    //TODO
+    menuErrors=null;
     table = builder.table;
     parentMenu = builder.parentMenu;
 

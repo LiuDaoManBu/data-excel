@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.config.DataConfig;
+import com.caotc.excel4j.parse.error.DataError;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -11,11 +12,14 @@ import com.google.common.collect.Maps;
 public class Data<V> {
   private final Menu<V> menu;
   private final DataConfig<V> dataConfig;
+  private final ImmutableList<DataError> dataErrors;
   private final ImmutableList<StandardCell> valueCells;
 
   public Data(Menu<V> menu, ImmutableList<StandardCell> valueCells) {
     super();
     this.menu = menu;
+    //TODO
+    dataErrors=null;
     this.dataConfig = menu.getMenuConfig().getDataConfig();
     this.valueCells = valueCells;
   }

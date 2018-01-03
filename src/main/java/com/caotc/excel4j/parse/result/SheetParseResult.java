@@ -24,6 +24,8 @@ public class SheetParseResult {
   private Sheet sheet;
   private SheetConfig sheetConfig;
   private List<SheetError> sheetErrors;
+  private List<Table> tables;
+  private WorkbookParseResult workbookParseResult;
 
   public SheetParseResult(Sheet sheet, SheetConfig sheetConfig) {
     this.sheet = sheet;
