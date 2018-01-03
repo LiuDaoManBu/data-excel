@@ -17,7 +17,7 @@ public enum BaseDataType implements DataType {
     @Override
     public boolean test(Object value) {
       try {
-        return TypeUtils.castToBigDecimal(value).scale() > ZERO;
+        return TypeUtils.castToBigDecimal(value).scale() > 0;
       } catch (NumberFormatException e) {
         return Boolean.FALSE;
       }
@@ -46,7 +46,7 @@ public enum BaseDataType implements DataType {
     public boolean test(Object value) {
       try {
         return NUMBER.test(value)
-            && TypeUtils.castToBigDecimal(value).compareTo(BigDecimal.ZERO) > ZERO;
+            && TypeUtils.castToBigDecimal(value).compareTo(BigDecimal.ZERO) > 0;
       } catch (NumberFormatException e) {
         return Boolean.FALSE;
       }
@@ -57,7 +57,7 @@ public enum BaseDataType implements DataType {
     public boolean test(Object value) {
       try {
         return NUMBER.test(value)
-            && TypeUtils.castToBigDecimal(value).compareTo(BigDecimal.ZERO) < ZERO;
+            && TypeUtils.castToBigDecimal(value).compareTo(BigDecimal.ZERO) < 0;
       } catch (NumberFormatException e) {
         return Boolean.FALSE;
       }
@@ -109,7 +109,6 @@ public enum BaseDataType implements DataType {
       }
     }
   };
-  private static final int ZERO = 0;
   private static final ImmutableCollection<TypeToken<?>> INT_TYPES =
       Stream
           .of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
