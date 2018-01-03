@@ -1,25 +1,25 @@
 package com.caotc.excel4j.parse.error;
 
-import org.apache.poi.ss.usermodel.Cell;
+import com.caotc.excel4j.parse.result.StandardCell;
 
-public class CellError {
-  private Cell cell;
+public class StandardCellError {
+  private StandardCell cell;
   private String errorMessage;
 
-  public CellError(String errorMessage) {
+  public StandardCellError(String errorMessage) {
     this.errorMessage = errorMessage;
   }
 
-  public CellError(Cell cell, String errorMessage) {
+  public StandardCellError(StandardCell cell, String errorMessage) {
     this.cell = cell;
     this.errorMessage = errorMessage;
   }
 
-  public Cell getCell() {
+  public StandardCell getCell() {
     return cell;
   }
 
-  public void setCell(Cell cell) {
+  public void setCell(StandardCell cell) {
     this.cell = cell;
   }
 
