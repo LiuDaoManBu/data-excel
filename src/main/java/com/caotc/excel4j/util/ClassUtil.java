@@ -18,14 +18,13 @@ import com.google.common.collect.Table;
 import com.google.common.reflect.TypeToken;
 
 public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
+
   private static final ImmutableCollection<Class<?>> COLLECTORS =
       ImmutableSet.of(Iterable.class, Map.class, Multimap.class, Table.class);
 
   /**
    * get all fields of the Class.
-   * 
-   * @param <T>
-   * 
+   *
    * @param type Class Object
    * @return all fields of the Class
    */
@@ -34,8 +33,9 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
   }
 
   public static ImmutableCollection<Field> getAllFields(TypeToken<?> token) {
-    return FluentIterable.from(token.getTypes().classes().rawTypes())
-        .transform(Class::getDeclaredFields).transformAndConcat(Arrays::asList).toSet();
+    return token.getTypes().classes().rawTypes().stream()
+        .map(Class::getDeclaredFields).flatMap(Arrays::stream)
+        .collect(ImmutableSet.toImmutableSet());
   }
 
   public static ImmutableMultimap<String, Field> getNameToFields(Class<?> type) {
@@ -92,9 +92,8 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
   }
 
   public static ImmutableList<TypeToken<?>> getGenericTypes(TypeToken<?> token) {
-    FluentIterable<TypeToken<?>> types =
-        FluentIterable.from(token.getRawType().getTypeParameters()).transform(token::resolveType);
-    return types.toList();
+    return Arrays.stream(token.getRawType().getTypeParameters()).map(token::resolveType)
+        .collect(ImmutableList.toImmutableList());
   }
 
   public static TypeToken<?> getComponentOrGenericType(Class<?> type) {
