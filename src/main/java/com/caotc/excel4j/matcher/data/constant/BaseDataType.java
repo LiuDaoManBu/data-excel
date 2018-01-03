@@ -63,15 +63,13 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  POSITIVE_WHOLE_NUMBER(
-      POSITIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)) {
+  POSITIVE_WHOLE_NUMBER(POSITIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)) {
     @Override
     public boolean test(Object value) {
       return POSITIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
     }
   },
-  NEGATIVE_WHOLE_NUMBER(
-      NEGATIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)) {
+  NEGATIVE_WHOLE_NUMBER(NEGATIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)) {
     @Override
     public boolean test(Object value) {
       return NEGATIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
@@ -112,6 +110,11 @@ public enum BaseDataType implements DataType {
     }
   };
   private static final int ZERO = 0;
+  private static final ImmutableCollection<TypeToken<?>> INT_TYPES =
+      Stream
+          .of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
+              long.class, Long.class, BigInteger.class)
+          .map(TypeToken::of).collect(ImmutableSet.toImmutableSet());
   private final ImmutableCollection<TypeToken<?>> types;
 
   private BaseDataType(Stream<TypeToken<?>> types) {
@@ -123,9 +126,9 @@ public enum BaseDataType implements DataType {
   }
 
   private BaseDataType(DataType dataType, Class<?>... types) {
-    this.types = Stream
-        .concat(Stream.of(types).map(TypeToken::of), dataType.canCastTypes().stream())
-        .collect(ImmutableSet.toImmutableSet());
+    this.types =
+        Stream.concat(Stream.of(types).map(TypeToken::of), dataType.canCastTypes().stream())
+            .collect(ImmutableSet.toImmutableSet());
   }
 
   @Override
@@ -134,19 +137,26 @@ public enum BaseDataType implements DataType {
   }
 
   @Override
+  public <T> boolean canCast(Class<T> type) {
+    return canCast(TypeToken.of(type));
+  }
+
+  @Override
   public <T> boolean canCast(TypeToken<T> type) {
     // TODO 父子类
     return types.contains(type);
+  }
+
+  @Override
+  public <T> T cast(Object value, Class<T> type) {
+    return cast(value, TypeToken.of(type));
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T cast(Object value, TypeToken<T> type) {
     // TODO
-    if (Stream.of(byte.class, Byte.class, short.class, Short.class, int.class,
-        Integer.class, long.class, Long.class, BigInteger.class).map(TypeToken::of)
-        .collect(ImmutableSet.toImmutableSet())
-        .contains(type)) {
+    if (INT_TYPES.contains(type)) {
       value = TypeUtils.castToBigDecimal(value).toBigIntegerExact();
     }
     return (T) TypeUtils.castToJavaBean(value, type.getRawType());
