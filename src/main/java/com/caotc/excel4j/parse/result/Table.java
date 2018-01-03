@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
@@ -70,14 +71,13 @@ public class Table {
     // TODO
     errors = null;
     sheetParseResult = builder.sheetParseResult;
-    topMenus=loadTopMenus();
-    menuTraverser=Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
+    topMenus = loadTopMenus();
+    menuTraverser = Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
       @Override
       public Iterable<? extends Menu<?>> successors(Menu<?> node) {
         return node.getChildrenMenus();
       }
     });
-
     // dataMenus = Collections2.filter(menus, Menu::isDataMenu);
     // fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
     // unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
@@ -187,32 +187,36 @@ public class Table {
     return Iterables.tryFind(getMenus(), menu -> menu.getName().equals(menuName)).toJavaUtil();
   }
 
-  public FluentIterable<Menu<?>> getMenus() {
-    return FluentIterable.from(topMenus).transformAndConcat(menuTraverser::breadthFirst);
+  public ImmutableList<Menu<?>> getMenus() {
+    return topMenus.stream().map(menuTraverser::breadthFirst).flatMap(Streams::stream)
+        .collect(ImmutableList.toImmutableList());
   }
 
-  public FluentIterable<Menu<?>> getDataMenus() {
-    return getMenus().filter(Menu::isDataMenu);
+  public ImmutableList<Menu<?>> getDataMenus() {
+    return getMenus().stream().filter(Menu::isDataMenu).collect(ImmutableList.toImmutableList());
   }
 
-  public FluentIterable<Menu<?>> getFixedDataMenus() {
-    return getDataMenus().filter(Menu::isFixedDataMenu);
+  public ImmutableList<Menu<?>> getFixedDataMenus() {
+    return getDataMenus().stream().filter(Menu::isFixedDataMenu)
+        .collect(ImmutableList.toImmutableList());
   }
 
-  public FluentIterable<Menu<?>> getUnFixedDataMenus() {
-    return getDataMenus().filter(Menu::isUnFixedDataMenu);
+  public ImmutableList<Menu<?>> getUnFixedDataMenus() {
+    return getDataMenus().stream().filter(Menu::isUnFixedDataMenu)
+        .collect(ImmutableList.toImmutableList());
   }
 
-  public FluentIterable<Menu<?>> getMixedDataMenus() {
-    return getDataMenus().filter(Menu::isMixedDataMenu);
+  public ImmutableList<Menu<?>> getMixedDataMenus() {
+    return getDataMenus().stream().filter(Menu::isMixedDataMenu)
+        .collect(ImmutableList.toImmutableList());
   }
 
-  public FluentIterable<Menu<?>> getMustMenus() {
-    return getMenus().filter(Menu::isMustMenu);
+  public ImmutableList<Menu<?>> getMustMenus() {
+    return getMenus().stream().filter(Menu::isMustMenu).collect(ImmutableList.toImmutableList());
   }
 
-  public FluentIterable<Menu<?>> getNotMustMenus() {
-    return getMenus().filter(Menu::isNotMustMenu);
+  public ImmutableList<Menu<?>> getNotMustMenus() {
+    return getMenus().stream().filter(Menu::isNotMustMenu).collect(ImmutableList.toImmutableList());
   }
 
   public TableConfig getTableConfig() {

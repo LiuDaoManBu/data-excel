@@ -1,9 +1,9 @@
 package com.caotc.excel4j.parse.result;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.parse.error.MenuError;
@@ -86,14 +86,15 @@ public class Menu<V> {
   public Menu(Builder<V> builder) {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
-    //TODO
-    menuErrors=null;
+    // TODO
+    menuErrors = null;
     table = builder.table;
     parentMenu = builder.parentMenu;
 
     childrenMenus = loadChildrenMenus();
-    data = new Data<V>(this,childrenMenus.isEmpty() ? menuConfig.getDataConfig().getLoadType().getDataCells(this)
-        : ImmutableList.of());
+    data = new Data<V>(this,
+        childrenMenus.isEmpty() ? menuConfig.getDataConfig().getLoadType().getDataCells(this)
+            : ImmutableList.of());
   }
 
   private <T> ImmutableList<Menu<?>> loadChildrenMenus() {
@@ -101,7 +102,7 @@ public class Menu<V> {
 
     List<StandardCell> menuCells =
         menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
-    FluentIterable<Menu<?>> menus= FluentIterable.from(menuCells).transform(cell -> {
+    return menuCells.stream().map(cell -> {
       Iterable<MenuConfig<?>> configs =
           Iterables.filter(childrenConfigs, config -> config.matches(cell));
       Preconditions.checkState(Iterables.size(configs) <= 1);
@@ -114,8 +115,7 @@ public class Menu<V> {
         menu = builder.build();
       }
       return Optional.ofNullable(menu);
-    }).filter(Optional::isPresent).transform(Optional::get);
-    return menus.toList();
+    }).filter(Optional::isPresent).map(Optional::get).collect(ImmutableList.toImmutableList());
   }
 
   public void checkDataCell(StandardCell dataCell) {
@@ -171,18 +171,18 @@ public class Menu<V> {
     return getSuper(menu -> menu.getFieldName().isPresent());
   }
 
-  public FluentIterable<Menu<?>> getSubs(Predicate<? super Menu<?>> predicate) {
+  public ImmutableList<Menu<?>> getSubs(Predicate<? super Menu<?>> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isDataMenu()) {
-      return FluentIterable.of();
+      return ImmutableList.of();
     }
-    FluentIterable<Menu<?>> subs = FluentIterable.from(childrenMenus).filter(predicate);
-    return subs.isEmpty()
-        ? FluentIterable.from(childrenMenus).transformAndConcat(menu -> menu.getSubs(predicate))
-        : subs;
+    ImmutableList<Menu<?>> subs =
+        childrenMenus.stream().filter(predicate).collect(ImmutableList.toImmutableList());
+    return subs.isEmpty() ? childrenMenus.stream().flatMap(menu -> menu.getSubs(predicate).stream())
+        .collect(ImmutableList.toImmutableList()) : subs;
   }
 
-  public FluentIterable<Menu<?>> getFieldChildrens() {
+  public ImmutableList<Menu<?>> getFieldChildrens() {
     return getSubs(menu -> menu.getFieldName().isPresent());
   }
 

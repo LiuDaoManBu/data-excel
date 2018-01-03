@@ -18,8 +18,8 @@ public class Data<V> {
   public Data(Menu<V> menu, ImmutableList<StandardCell> valueCells) {
     super();
     this.menu = menu;
-    //TODO
-    dataErrors=null;
+    // TODO
+    dataErrors = null;
     this.dataConfig = menu.getMenuConfig().getDataConfig();
     this.valueCells = valueCells;
   }
@@ -38,30 +38,31 @@ public class Data<V> {
   // }
 
   public Optional<V> getValue() {
-    V value=null;
-    //TODO
+    V value = null;
+    // TODO
     if (Objects.nonNull(dataConfig.getFieldName())) {
-      //TODO DataMenu时是否有返回值
-//      if (menu.isDataMenu()) {
-//        if (Objects.equals(ConstructType.OBJECT, dataConfig.getCastType()) && menu.isFixedDataMenu()
-//            && dataConfig.getDataNumber() == 1) {
-//          value=dataConfig.cast(Iterables.getOnlyElement(valueCells).getValue());
-//        }
-//        value=dataConfig.cast(getCellValues());
-//      }else {
-//        value=dataConfig.getCastType().constructValue(menu);
-//      }
-      if(!menu.isDataMenu()) {
-        FluentIterable<Menu<?>> childrens=menu.getFieldChildrens();
-        Map<String,Object> vars=Maps.newHashMap();
-        //TODO 优化
-        childrens.filter(Menu::isDataMenu).forEach(m->{
+      // TODO DataMenu时是否有返回值
+      // if (menu.isDataMenu()) {
+      // if (Objects.equals(ConstructType.OBJECT, dataConfig.getCastType()) &&
+      // menu.isFixedDataMenu()
+      // && dataConfig.getDataNumber() == 1) {
+      // value=dataConfig.cast(Iterables.getOnlyElement(valueCells).getValue());
+      // }
+      // value=dataConfig.cast(getCellValues());
+      // }else {
+      // value=dataConfig.getCastType().constructValue(menu);
+      // }
+      if (!menu.isDataMenu()) {
+        ImmutableList<Menu<?>> childrens = menu.getFieldChildrens();
+        Map<String, Object> vars = Maps.newHashMap();
+        // TODO 优化
+        childrens.stream().filter(Menu::isDataMenu).forEach(m -> {
           vars.put((String) m.getFieldName().get(), menu.getData().getCellValues());
         });
-        childrens.filter(m->!m.isDataMenu()).forEach(m->{
+        childrens.stream().filter(m -> !m.isDataMenu()).forEach(m -> {
           vars.put((String) m.getFieldName().get(), menu.getData().getValue());
         });
-        value=dataConfig.getConstructType().construct(dataConfig.getFieldType(), vars);
+        value = dataConfig.getConstructType().construct(dataConfig.getFieldType(), vars);
       }
     }
     return Optional.ofNullable(value);
@@ -69,8 +70,8 @@ public class Data<V> {
 
   public ImmutableList<V> getCellValues() {
     // TODO
-    return FluentIterable.from(valueCells).transform(StandardCell::getValue)
-        .transform(dataConfig::cast).toList();
+    return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
+        .collect(ImmutableList.toImmutableList());
   }
 
   // TODO
