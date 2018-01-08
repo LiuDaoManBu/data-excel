@@ -23,8 +23,11 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  WHOLE_NUMBER(DECIMAL, byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
-      long.class, Long.class, BigInteger.class) {
+  WHOLE_NUMBER(Stream
+      .concat(DECIMAL.types.stream(),
+          Stream.of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
+              long.class, Long.class, BigInteger.class).map(TypeToken::of))
+      .collect(ImmutableSet.toImmutableSet())) {
     @Override
     public boolean test(Object value) {
       try {
@@ -35,7 +38,7 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  NUMBER(DECIMAL.canCastTypes().stream()) {
+  NUMBER(DECIMAL.types) {
     @Override
     public boolean test(Object value) {
       return DECIMAL.test(value) || WHOLE_NUMBER.test(value);
@@ -63,19 +66,21 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  POSITIVE_WHOLE_NUMBER(POSITIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)) {
+  POSITIVE_WHOLE_NUMBER(POSITIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)
+      .collect(ImmutableSet.toImmutableSet())) {
     @Override
     public boolean test(Object value) {
       return POSITIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
     }
   },
-  NEGATIVE_WHOLE_NUMBER(NEGATIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)) {
+  NEGATIVE_WHOLE_NUMBER(NEGATIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)
+      .collect(ImmutableSet.toImmutableSet())) {
     @Override
     public boolean test(Object value) {
       return NEGATIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
     }
   },
-  NATURAL_NUMBER(POSITIVE_WHOLE_NUMBER.types.stream()) {
+  NATURAL_NUMBER(POSITIVE_WHOLE_NUMBER.types) {
     @Override
     public boolean test(Object value) {
       try {
@@ -86,13 +91,15 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  POSITIVE_DECIMAL(POSITIVE_NUMBER.types.stream().filter(DECIMAL.types::contains)) {
+  POSITIVE_DECIMAL(POSITIVE_NUMBER.types.stream().filter(DECIMAL.types::contains)
+      .collect(ImmutableSet.toImmutableSet())) {
     @Override
     public boolean test(Object value) {
       return DECIMAL.test(value) && POSITIVE_NUMBER.test(value);
     }
   },
-  NEGATIVE_DECIMAL(NEGATIVE_NUMBER.types.stream().filter(DECIMAL.types::contains)) {
+  NEGATIVE_DECIMAL(NEGATIVE_NUMBER.types.stream().filter(DECIMAL.types::contains)
+      .collect(ImmutableSet.toImmutableSet())) {
     @Override
     public boolean test(Object value) {
       return DECIMAL.test(value) && NEGATIVE_NUMBER.test(value);
@@ -116,18 +123,12 @@ public enum BaseDataType implements DataType {
           .map(TypeToken::of).collect(ImmutableSet.toImmutableSet());
   private final ImmutableCollection<TypeToken<?>> types;
 
-  private BaseDataType(Stream<TypeToken<?>> types) {
-    this.types = types.collect(ImmutableSet.toImmutableSet());
+  private BaseDataType(ImmutableCollection<TypeToken<?>> types) {
+    this.types = types;
   }
 
   private BaseDataType(Class<?>... types) {
-    this(Stream.of(types).map(TypeToken::of));
-  }
-
-  private BaseDataType(DataType dataType, Class<?>... types) {
-    this.types =
-        Stream.concat(Stream.of(types).map(TypeToken::of), dataType.canCastTypes().stream())
-            .collect(ImmutableSet.toImmutableSet());
+    this(Stream.of(types).map(TypeToken::of).collect(ImmutableSet.toImmutableSet()));
   }
 
   @Override
