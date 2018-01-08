@@ -86,12 +86,11 @@ class B<T> extends A {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    test();
   }
 
   public static void testGeneric() {
-    ComparableMatcher<Integer> matcher = new ComparableMatcher<Integer>(BaseDataType.DECIMAL);
-    System.out.println(matcher.getType());
+    ComparableMatcher<Integer> matcher = new ComparableMatcher<Integer>();
+    System.out.println(matcher);
   }
 
   public static void testInvokeAbleGenericType() throws Exception {
