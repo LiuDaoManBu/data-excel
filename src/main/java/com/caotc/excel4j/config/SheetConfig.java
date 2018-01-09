@@ -9,7 +9,6 @@ public class SheetConfig {
     public SheetConfig builder() {
       return new SheetConfig();
     }
-
   }
 
   private SheetConfig() {

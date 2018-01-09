@@ -6,6 +6,9 @@ import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
+  public static interface Builder<T>{
+    
+  }
   Matcher<T> add(Predicate<T> predicate);
 
   <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform);

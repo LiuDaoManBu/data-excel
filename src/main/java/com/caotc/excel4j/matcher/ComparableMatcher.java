@@ -7,7 +7,13 @@ import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
 
 public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
-
+  public static class Builder<T extends Comparable<T>> extends BaseMatcher.Builder<T>{
+    
+    public ComparableMatcher<T> build(){
+      return new ComparableMatcher<T>();
+    }
+    
+  }
   public ComparableMatcher(Type type, Matcher<T> parent, List<Predicate<T>> list) {
     super(type, parent, list);
   }

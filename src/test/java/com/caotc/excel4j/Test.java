@@ -9,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.config.WorkbookConfig;
+import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.ComparableMatcher;
 import com.caotc.excel4j.matcher.data.constant.BaseDataType;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
@@ -83,11 +86,24 @@ class B<T> extends A {
 
 }
 
+class C{
+  private Map<String,Integer> map;
+
+  public Map<String, Integer> getMap() {
+    return map;
+  }
+
+  public void setMap(Map<String, Integer> map) {
+    this.map = map;
+  }
+
+
+}
 
 public class Test {
   public static void main(String[] args) throws Exception {
   }
-
+  
   public static void testGeneric() {
     ComparableMatcher<Integer> matcher = new ComparableMatcher<Integer>();
     System.out.println(matcher);
