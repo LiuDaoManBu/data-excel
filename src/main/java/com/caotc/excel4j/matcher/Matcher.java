@@ -7,7 +7,7 @@ import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
   public static interface Builder<T>{
-    
+    BaseMatcher<T> build();
   }
   Matcher<T> add(Predicate<T> predicate);
 

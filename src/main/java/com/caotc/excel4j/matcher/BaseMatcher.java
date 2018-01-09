@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 
 public class BaseMatcher<T> implements Matcher<T> {
   public static class Builder<T> implements Matcher.Builder<T> {
+    private Type type;
     private Boolean nonNull;
     private Boolean isNull;
     private List<String> scripts;
@@ -23,10 +24,9 @@ public class BaseMatcher<T> implements Matcher<T> {
     private Map<String, Matcher.Builder<?>> MethodNameToMatchers;
     private Map<Field, Matcher.Builder<?>> fieldToMatchers;
     private Map<Function<T, ?>, Matcher.Builder<?>> MethodToMatchers;
-    private List<Predicate<T>> list;
-    
+
+    @Override
     public BaseMatcher<T> build() {
-      
       return new BaseMatcher<T>(this);
     }
 
@@ -95,19 +95,20 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
-    public List<Predicate<T>> getList() {
-      return list;
+    public Type getType() {
+      return type;
     }
 
-    public Builder<T> setList(List<Predicate<T>> list) {
-      this.list = list;
+    public Builder<T> setType(Type type) {
+      this.type = type;
       return this;
     }
 
   }
 
-  private static final Type DEFAULT_TYPE=Type.AND;
-  
+  private static final Type DEFAULT_TYPE = Type.AND;
+  public static final String SCRIPT_VALUE_KEY = "value";
+
   private final Type type;
   private final Matcher<T> parent;
   private final List<Predicate<T>> list;
@@ -132,10 +133,23 @@ public class BaseMatcher<T> implements Matcher<T> {
   }
 
   public BaseMatcher(Builder<T> builder) {
-    this();
-    
+    this(Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE));
+    if (Objects.nonNull(builder.isNull) && builder.isNull) {
+      add(Objects::isNull);
+    }
+    if (Objects.nonNull(builder.nonNull) && builder.nonNull) {
+      add(Objects::nonNull);
+    }
+    if (Objects.nonNull(builder.scripts)) {
+      builder.scripts.stream().map(ScriptEngine::compile).map(expression -> {
+        Predicate<T> predicate = value -> (Boolean)expression
+            .execute(ImmutableMap.<String, Object>builder().put(SCRIPT_VALUE_KEY, value).build());
+        return predicate;
+      }).forEach(this::add);
+    }
+    //TODO fieldNameToMatchers等复杂逻辑待考虑支持
   }
-  
+
   @Override
   public boolean test(T t) {
     return type.apply(list).test(t);
@@ -194,4 +208,15 @@ public class BaseMatcher<T> implements Matcher<T> {
     return endJunction(Type.OR);
   }
 
+  public Type getType() {
+    return type;
+  }
+
+  public Matcher<T> getParent() {
+    return parent;
+  }
+
+  public List<Predicate<T>> getList() {
+    return list;
+  }
 }
