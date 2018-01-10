@@ -8,8 +8,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class WorkbookConfig {
   public static class Builder {
-    private List<SheetConfig.Builder> sheetConfigs;
-    private WorkbookMatcher matcher;
+    private List<SheetConfig.Builder> sheetConfigBuilders;
+    private WorkbookMatcher.Builder matcherBuilder;
     private ParserConfig parserConfig;
 
     public WorkbookConfig builder() {
@@ -17,21 +17,12 @@ public class WorkbookConfig {
       return new WorkbookConfig(this);
     }
 
-    public List<SheetConfig.Builder> getSheetConfigs() {
-      return sheetConfigs;
+    public WorkbookMatcher.Builder getMatcherBuilder() {
+      return matcherBuilder;
     }
 
-    public Builder setSheetConfigs(List<SheetConfig.Builder> sheetConfigs) {
-      this.sheetConfigs = sheetConfigs;
-      return this;
-    }
-
-    public WorkbookMatcher getMatcher() {
-      return matcher;
-    }
-
-    public Builder setMatcher(WorkbookMatcher matcher) {
-      this.matcher = matcher;
+    public Builder setMatcherBuilder(WorkbookMatcher.Builder matcherBuilder) {
+      this.matcherBuilder = matcherBuilder;
       return this;
     }
 
@@ -50,10 +41,23 @@ public class WorkbookConfig {
   private final ParserConfig parserConfig;
 
   private WorkbookConfig(Builder builder) {
-    this.sheetConfigs = builder.sheetConfigs.stream().map(SheetConfig.Builder::builder)
-        .collect(ImmutableSet.toImmutableSet());
-    this.matcher = builder.matcher;
+    this.sheetConfigs = builder.sheetConfigBuilders.stream()
+        .peek(sheetConfigBuilder -> sheetConfigBuilder.setWorkbookConfig(this))
+        .map(SheetConfig.Builder::builder).collect(ImmutableSet.toImmutableSet());
+    this.matcher = builder.matcherBuilder.build();
     this.parserConfig = builder.parserConfig;
   }
-  
+
+  public ImmutableCollection<SheetConfig> getSheetConfigs() {
+    return sheetConfigs;
+  }
+
+  public WorkbookMatcher getMatcher() {
+    return matcher;
+  }
+
+  public ParserConfig getParserConfig() {
+    return parserConfig;
+  }
+
 }

@@ -1,16 +1,21 @@
 package com.caotc.excel4j.config;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import com.caotc.excel4j.constant.Direction;
-import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
+import com.google.common.graph.SuccessorsFunction;
+import com.google.common.graph.Traverser;
 
 public class TableConfig {
   public static class Builder {
+    private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
+    // TODO Table没有Matcher?
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
-    private Collection<MenuConfig<?>> menuConfigs;
     private ParserConfig parserConfig;
 
     public TableConfig builder() {
@@ -45,12 +50,12 @@ public class TableConfig {
       return this;
     }
 
-    public Collection<MenuConfig<?>> getMenuConfigs() {
-      return menuConfigs;
+    public List<MenuConfig.Builder<?>> getTopMenuConfigBuilders() {
+      return topMenuConfigBuilders;
     }
 
-    public Builder setMenuConfigs(Collection<MenuConfig<?>> menuConfigs) {
-      this.menuConfigs = menuConfigs;
+    public Builder setTopMenuConfigBuilders(List<MenuConfig.Builder<?>> topMenuConfigBuilders) {
+      this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }
 
@@ -65,28 +70,44 @@ public class TableConfig {
 
   }
 
+  private static final Traverser<MenuConfig<?>> MENU_CONFIG_TRAVERSER =
+      Traverser.forTree(new SuccessorsFunction<MenuConfig<?>>() {
+        @Override
+        public Iterable<? extends MenuConfig<?>> successors(MenuConfig<?> node) {
+          return node.getChildrenMenuConfigs();
+        }
+      });
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
-  private final Collection<MenuConfig<?>> menuConfigs;
-  private final Collection<MenuConfig<?>> topMenuConfigs;
+  private final ImmutableCollection<MenuConfig<?>> topMenuConfigs;
   private final ParserConfig parserConfig;
+
+  private final ImmutableCollection<MenuConfig<?>> menuConfigs;
 
   public TableConfig(Builder builder) {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
-    menuConfigs = builder.menuConfigs;
 
-    topMenuConfigs = Collections2.filter(menuConfigs, MenuConfig::isTopMenu);
+
+    // topMenuConfigs = Collections2.filter(menuConfigs, MenuConfig::isTopMenu);
+    topMenuConfigs = builder.topMenuConfigBuilders.stream()
+        .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
+        .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     parserConfig = builder.parserConfig;
+
+    // menuConfigs =
+    // builder.menuConfigBuilders.stream().map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
+    menuConfigs = topMenuConfigs.stream().map(MENU_CONFIG_TRAVERSER::breadthFirst)
+        .flatMap(Streams::stream).collect(ImmutableSet.toImmutableSet());
   }
 
   public SheetConfig getSheetConfig() {
     return sheetConfig;
   }
 
-  public Collection<MenuConfig<?>> getTopMenuConfigs() {
+  public ImmutableCollection<MenuConfig<?>> getTopMenuConfigs() {
     return topMenuConfigs;
   }
 
@@ -98,7 +119,7 @@ public class TableConfig {
     return unFixedMenuDirection;
   }
 
-  public Collection<MenuConfig<?>> getMenuConfigs() {
+  public ImmutableCollection<MenuConfig<?>> getMenuConfigs() {
     return menuConfigs;
   }
 

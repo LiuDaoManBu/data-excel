@@ -1,8 +1,6 @@
 package com.caotc.excel4j.matcher;
 
-import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -17,13 +15,16 @@ import com.google.common.collect.Lists;
 public class BaseMatcher<T> implements Matcher<T> {
   public static class Builder<T> implements Matcher.Builder<T> {
     private Type type;
+    private Matcher<T> parent;
     private Boolean nonNull;
     private Boolean isNull;
     private List<String> scripts;
-    private Map<String, Matcher.Builder<?>> fieldNameToMatchers;
-    private Map<String, Matcher.Builder<?>> MethodNameToMatchers;
-    private Map<Field, Matcher.Builder<?>> fieldToMatchers;
-    private Map<Function<T, ?>, Matcher.Builder<?>> MethodToMatchers;
+    private List<Builder<T>> predicateBuilders;
+    // TODO fieldNameToMatchers等复杂逻辑待考虑支持
+    // private Map<String, Matcher.Builder<?>> fieldNameToMatchers;
+    // private Map<String, Matcher.Builder<?>> MethodNameToMatchers;
+    // private Map<Field, Matcher.Builder<?>> fieldToMatchers;
+    // private Map<Function<T, ?>, Matcher.Builder<?>> MethodToMatchers;
 
     @Override
     public BaseMatcher<T> build() {
@@ -48,43 +49,44 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
-    public Map<String, Matcher.Builder<?>> getFieldNameToMatchers() {
-      return fieldNameToMatchers;
-    }
-
-    public Builder<T> setFieldNameToMatchers(Map<String, Matcher.Builder<?>> fieldNameToMatchers) {
-      this.fieldNameToMatchers = fieldNameToMatchers;
-      return this;
-    }
-
-    public Map<String, Matcher.Builder<?>> getMethodNameToMatchers() {
-      return MethodNameToMatchers;
-    }
-
-    public Builder<T> setMethodNameToMatchers(
-        Map<String, Matcher.Builder<?>> methodNameToMatchers) {
-      MethodNameToMatchers = methodNameToMatchers;
-      return this;
-    }
-
-    public Map<Field, Matcher.Builder<?>> getFieldToMatchers() {
-      return fieldToMatchers;
-    }
-
-    public Builder<T> setFieldToMatchers(Map<Field, Matcher.Builder<?>> fieldToMatchers) {
-      this.fieldToMatchers = fieldToMatchers;
-      return this;
-    }
-
-    public Map<Function<T, ?>, Matcher.Builder<?>> getMethodToMatchers() {
-      return MethodToMatchers;
-    }
-
-    public Builder<T> setMethodToMatchers(
-        Map<Function<T, ?>, Matcher.Builder<?>> methodToMatchers) {
-      MethodToMatchers = methodToMatchers;
-      return this;
-    }
+    // public Map<String, Matcher.Builder<?>> getFieldNameToMatchers() {
+    // return fieldNameToMatchers;
+    // }
+    //
+    // public Builder<T> setFieldNameToMatchers(Map<String, Matcher.Builder<?>> fieldNameToMatchers)
+    // {
+    // this.fieldNameToMatchers = fieldNameToMatchers;
+    // return this;
+    // }
+    //
+    // public Map<String, Matcher.Builder<?>> getMethodNameToMatchers() {
+    // return MethodNameToMatchers;
+    // }
+    //
+    // public Builder<T> setMethodNameToMatchers(
+    // Map<String, Matcher.Builder<?>> methodNameToMatchers) {
+    // MethodNameToMatchers = methodNameToMatchers;
+    // return this;
+    // }
+    //
+    // public Map<Field, Matcher.Builder<?>> getFieldToMatchers() {
+    // return fieldToMatchers;
+    // }
+    //
+    // public Builder<T> setFieldToMatchers(Map<Field, Matcher.Builder<?>> fieldToMatchers) {
+    // this.fieldToMatchers = fieldToMatchers;
+    // return this;
+    // }
+    //
+    // public Map<Function<T, ?>, Matcher.Builder<?>> getMethodToMatchers() {
+    // return MethodToMatchers;
+    // }
+    //
+    // public Builder<T> setMethodToMatchers(
+    // Map<Function<T, ?>, Matcher.Builder<?>> methodToMatchers) {
+    // MethodToMatchers = methodToMatchers;
+    // return this;
+    // }
 
     public List<String> getScripts() {
       return scripts;
@@ -104,6 +106,24 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
+    public List<Builder<T>> getPredicateBuilders() {
+      return predicateBuilders;
+    }
+
+    public Builder<T> setPredicateBuilders(List<Builder<T>> predicateBuilders) {
+      this.predicateBuilders = predicateBuilders;
+      return this;
+    }
+
+    public Matcher<T> getParent() {
+      return parent;
+    }
+
+    public Builder<T> setParent(Matcher<T> parent) {
+      this.parent = parent;
+      return this;
+    }
+
   }
 
   private static final Type DEFAULT_TYPE = Type.AND;
@@ -111,7 +131,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   private final Type type;
   private final Matcher<T> parent;
-  private final List<Predicate<T>> list;
+  private final List<Predicate<T>> predicates;
 
   public BaseMatcher() {
     this(DEFAULT_TYPE);
@@ -125,11 +145,11 @@ public class BaseMatcher<T> implements Matcher<T> {
     this(type, parent, Lists.newArrayList());
   }
 
-  public BaseMatcher(Type type, Matcher<T> parent, List<Predicate<T>> list) {
+  public BaseMatcher(Type type, Matcher<T> parent, List<Predicate<T>> predicates) {
     super();
     this.type = type;
     this.parent = parent;
-    this.list = list;
+    this.predicates = predicates;
   }
 
   public BaseMatcher(Builder<T> builder) {
@@ -142,22 +162,25 @@ public class BaseMatcher<T> implements Matcher<T> {
     }
     if (Objects.nonNull(builder.scripts)) {
       builder.scripts.stream().map(ScriptEngine::compile).map(expression -> {
-        Predicate<T> predicate = value -> (Boolean)expression
+        Predicate<T> predicate = value -> (Boolean) expression
             .execute(ImmutableMap.<String, Object>builder().put(SCRIPT_VALUE_KEY, value).build());
         return predicate;
       }).forEach(this::add);
     }
-    //TODO fieldNameToMatchers等复杂逻辑待考虑支持
+    if (Objects.nonNull(builder.predicateBuilders)) {
+      builder.predicateBuilders.stream().peek(predicateBuilder -> predicateBuilder.setParent(this))
+          .map(Builder::build).forEach(this::add);
+    }
   }
 
   @Override
   public boolean test(T t) {
-    return type.apply(list).test(t);
+    return type.apply(predicates).test(t);
   }
 
   @Override
   public Matcher<T> add(Predicate<T> predicate) {
-    list.add(predicate);
+    predicates.add(predicate);
     return this;
   }
 
@@ -216,7 +239,8 @@ public class BaseMatcher<T> implements Matcher<T> {
     return parent;
   }
 
-  public List<Predicate<T>> getList() {
-    return list;
+  public List<Predicate<T>> getPredicates() {
+    return predicates;
   }
+
 }

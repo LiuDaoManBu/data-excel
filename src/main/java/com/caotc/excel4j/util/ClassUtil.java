@@ -16,8 +16,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
-
+public class ClassUtil {
   private static final ImmutableCollection<Class<?>> COLLECTORS =
       ImmutableSet.of(Iterable.class, Map.class, Multimap.class, Table.class);
 
@@ -32,9 +31,8 @@ public class ClassUtil extends org.apache.commons.lang3.ClassUtils {
   }
 
   public static ImmutableCollection<Field> getAllFields(TypeToken<?> token) {
-    return token.getTypes().classes().rawTypes().stream()
-        .map(Class::getDeclaredFields).flatMap(Arrays::stream)
-        .collect(ImmutableSet.toImmutableSet());
+    return token.getTypes().classes().rawTypes().stream().map(Class::getDeclaredFields)
+        .flatMap(Arrays::stream).collect(ImmutableSet.toImmutableSet());
   }
 
   public static ImmutableMultimap<String, Field> getNameToFields(Class<?> type) {

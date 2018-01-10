@@ -1,6 +1,7 @@
 package com.caotc.excel4j.matcher;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
@@ -8,7 +9,48 @@ import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
 
 public class StringMatcher extends BaseMatcher<String> {
+  public static class Builder extends BaseMatcher.Builder<String> {
+    public static class Expression{
+      private StringMatcherType MatcherType;
+      private String predicateValue;
+      public StringMatcherType getMatcherType() {
+        return MatcherType;
+      }
+      public void setMatcherType(StringMatcherType matcherType) {
+        MatcherType = matcherType;
+      }
+      public String getPredicateValue() {
+        return predicateValue;
+      }
+      public void setPredicateValue(String predicateValue) {
+        this.predicateValue = predicateValue;
+      }
+      
+    }
+    private List<Expression> expressions;
+    
+    @Override
+    public StringMatcher build() {
+      return new StringMatcher(this);
+    }
 
+    public List<Expression> getExpressions() {
+      return expressions;
+    }
+
+    public Builder setExpressions(List<Expression> expressions) {
+      this.expressions = expressions;
+      return this;
+    }
+  }
+  
+  public StringMatcher(Builder builder) {
+    super(builder);
+    if(Objects.nonNull(builder.expressions)) {
+      builder.expressions.stream().forEach(expression->add(expression.MatcherType,expression.predicateValue));
+    }
+  }
+  
   public StringMatcher(Type type, Matcher<String> parent, List<Predicate<String>> list) {
     super(type, parent, list);
   }

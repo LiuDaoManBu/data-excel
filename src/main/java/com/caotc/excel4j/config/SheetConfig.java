@@ -2,16 +2,87 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
-import com.caotc.excel4j.matcher.usermodel.WorkbookMatcher;
+import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
 
 public class SheetConfig {
   public static class Builder {
+    private List<TableConfig.Builder> tableConfigBuilders;
+    private WorkbookConfig workbookConfig;
+    private SheetMatcher.Builder matcherBuilder;
+    private ParserConfig parserConfig;
+
     public SheetConfig builder() {
-      return new SheetConfig();
+      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
+      return new SheetConfig(this);
     }
+
+    public List<TableConfig.Builder> getTableConfigBuilders() {
+      return tableConfigBuilders;
+    }
+
+    public Builder setTableConfigBuilders(List<TableConfig.Builder> tableConfigBuilders) {
+      this.tableConfigBuilders = tableConfigBuilders;
+      return this;
+    }
+
+    public WorkbookConfig getWorkbookConfig() {
+      return workbookConfig;
+    }
+
+    public Builder setWorkbookConfig(WorkbookConfig workbookConfig) {
+      this.workbookConfig = workbookConfig;
+      return this;
+    }
+
+    public SheetMatcher.Builder getMatcherBuilder() {
+      return matcherBuilder;
+    }
+
+    public Builder setMatcherBuilder(SheetMatcher.Builder matcherBuilder) {
+      this.matcherBuilder = matcherBuilder;
+      return this;
+    }
+
+    public ParserConfig getParserConfig() {
+      return parserConfig;
+    }
+
+    public Builder setParserConfig(ParserConfig parserConfig) {
+      this.parserConfig = parserConfig;
+      return this;
+    }
+
   }
 
-  private SheetConfig() {
+  private final ImmutableCollection<TableConfig> tableConfigs;
+  private final WorkbookConfig workbookConfig;
+  private final SheetMatcher matcher;
+  private final ParserConfig parserConfig;
 
+  public SheetConfig(Builder builder) {
+    this.tableConfigs = builder.tableConfigBuilders.stream()
+        .peek(tableConfigBuilder -> tableConfigBuilder.setSheetConfig(this))
+        .map(TableConfig.Builder::builder).collect(ImmutableSet.toImmutableSet());
+    this.workbookConfig = builder.workbookConfig;
+    this.matcher = builder.matcherBuilder.build();
+    this.parserConfig = builder.parserConfig;
+  }
+
+  public ImmutableCollection<TableConfig> getTableConfigs() {
+    return tableConfigs;
+  }
+
+  public WorkbookConfig getWorkbookConfig() {
+    return workbookConfig;
+  }
+
+  public SheetMatcher getMatcher() {
+    return matcher;
+  }
+
+  public ParserConfig getParserConfig() {
+    return parserConfig;
   }
 }

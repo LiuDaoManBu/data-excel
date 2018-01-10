@@ -6,13 +6,13 @@ import com.caotc.excel4j.matcher.constant.Type;
 import com.google.common.reflect.TypeToken;
 
 class Data {
-  private Type type;
+  private Class<?> type;
 
-  public Type getType() {
+  public Class<?> getType() {
     return type;
   }
 
-  public void setType(Type type) {
+  public void setType(Class<?> type) {
     this.type = type;
   }
 
@@ -26,17 +26,18 @@ class Data {
 
 public class TestJson {
   public static void main(String[] args) {
-    testGenericType();
+    testClass();
   }
 
-  public static void testEnum() {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("type", "OR");
-    Data data = jsonObject.toJavaObject(Data.class);
-    System.out.println(data);
+  public static void testClass() {
+    Data data = new Data();
+    data.setType(String.class);
+    JSONObject jsonObject=(JSONObject) JSONObject.toJSON(data);
+    System.out.println(jsonObject);
+    System.out.println(jsonObject.toJavaObject(Data.class));
   }
 
-  private static void testGenericType() {
+  public static void testGenericType() {
     JSONObject typeToValuesJson = new JSONObject();
     typeToValuesJson.put("LT", 1);
 //    typeToValuesJson.put("LE", 9.9);
@@ -45,12 +46,5 @@ public class TestJson {
 //    typeToValuesJson.put("NE", "8.8");
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("typeToValues", typeToValuesJson);
-    ComparableMatcher.Builder<Integer> builder =
-        jsonObject.toJavaObject(new TypeToken<ComparableMatcher.Builder<Integer>>(){}.getType());
-    System.out.println(builder.getTypeToValues());
-    builder.getTypeToValues().forEach((type,value)->{
-      System.out.println(type);
-      System.out.println(value.compareTo(5));
-    });
   }
 }

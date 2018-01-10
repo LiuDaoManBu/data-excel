@@ -1,7 +1,7 @@
 package com.caotc.excel4j.matcher;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
@@ -9,28 +9,47 @@ import com.caotc.excel4j.matcher.constant.Type;
 
 public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
   public static class Builder<T extends Comparable<T>> extends BaseMatcher.Builder<T> {
-    private Map<ComparableMatcherType,Comparable<T>> typeToValues;
-    
+    public static class Expression<T extends Comparable<T>>{
+      private ComparableMatcherType MatcherType;
+      private T predicateValue;
+      public ComparableMatcherType getMatcherType() {
+        return MatcherType;
+      }
+      public void setMatcherType(ComparableMatcherType matcherType) {
+        MatcherType = matcherType;
+      }
+      public T getPredicateValue() {
+        return predicateValue;
+      }
+      public void setPredicateValue(T predicateValue) {
+        this.predicateValue = predicateValue;
+      }
+    }
+    private List<Expression<T>> expressions;
     
     @Override
     public ComparableMatcher<T> build() {
-      BaseMatcher<T> matcher = super.build();
-      return new ComparableMatcher<T>(matcher.getType(), matcher.getParent(), matcher.getList());
+      return new ComparableMatcher<T>(this);
     }
 
-
-    public Map<ComparableMatcherType, Comparable<T>> getTypeToValues() {
-      return typeToValues;
+    public List<Expression<T>> getExpressions() {
+      return expressions;
     }
 
-
-    public Builder<T> setTypeToValues(Map<ComparableMatcherType, Comparable<T>> typeToValues) {
-      this.typeToValues = typeToValues;
+    public Builder<T> setExpressions(List<Expression<T>> expressions) {
+      this.expressions = expressions;
       return this;
     }
 
   }
 
+  public ComparableMatcher(Builder<T> builder) {
+    super(builder);
+    if(Objects.nonNull(builder.expressions)) {
+      builder.expressions.stream().forEach(expression->add(expression.MatcherType,expression.predicateValue));
+    }
+  }
+  
   public ComparableMatcher(Type type, Matcher<T> parent, List<Predicate<T>> list) {
     super(type, parent, list);
   }

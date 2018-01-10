@@ -1,6 +1,6 @@
 package com.caotc.excel4j.matcher.constant;
 
-public enum StringMatcherType {
+public enum StringMatcherType{
   EQUALS {
     @Override
     public boolean apply(String value, String predicateValue) {
