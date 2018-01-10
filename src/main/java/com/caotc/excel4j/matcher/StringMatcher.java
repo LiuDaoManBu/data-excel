@@ -44,7 +44,7 @@ public class StringMatcher extends BaseMatcher<String> {
     }
   }
   
-  public StringMatcher(Builder builder) {
+  private StringMatcher(Builder builder) {
     super(builder);
     if(Objects.nonNull(builder.expressions)) {
       builder.expressions.stream().forEach(expression->add(expression.MatcherType,expression.predicateValue));

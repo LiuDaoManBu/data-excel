@@ -152,7 +152,7 @@ public class BaseMatcher<T> implements Matcher<T> {
     this.predicates = predicates;
   }
 
-  public BaseMatcher(Builder<T> builder) {
+  protected BaseMatcher(Builder<T> builder) {
     this(Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE));
     if (Objects.nonNull(builder.isNull) && builder.isNull) {
       add(Objects::isNull);

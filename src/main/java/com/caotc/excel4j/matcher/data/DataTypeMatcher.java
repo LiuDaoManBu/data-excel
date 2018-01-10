@@ -63,7 +63,7 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
   
   private final DataType dataType;
 
-  public DataTypeMatcher(Builder builder) {
+  private DataTypeMatcher(Builder builder) {
     super(builder);
     this.dataType=builder.dataType;
 //    if (Objects.nonNull(builder.nameExpressions)) {

@@ -64,7 +64,7 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
   }
 
   private final DataType dataType;
-  public StandardCellMatcher(Builder builder) {
+  private StandardCellMatcher(Builder builder) {
     super(builder);
     this.dataType=builder.dataType;
     if (Objects.nonNull(builder.nameExpressions)) {

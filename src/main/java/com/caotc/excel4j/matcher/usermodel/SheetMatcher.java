@@ -32,7 +32,7 @@ public class SheetMatcher extends BaseMatcher<Sheet> {
     
   }
 
-  public SheetMatcher(Builder builder) {
+  private SheetMatcher(Builder builder) {
     super(builder);
     if (Objects.nonNull(builder.nameExpressions)) {
       builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),

@@ -61,7 +61,7 @@ public class SheetConfig {
   private final SheetMatcher matcher;
   private final ParserConfig parserConfig;
 
-  public SheetConfig(Builder builder) {
+  private SheetConfig(Builder builder) {
     this.tableConfigs = builder.tableConfigBuilders.stream()
         .peek(tableConfigBuilder -> tableConfigBuilder.setSheetConfig(this))
         .map(TableConfig.Builder::builder).collect(ImmutableSet.toImmutableSet());

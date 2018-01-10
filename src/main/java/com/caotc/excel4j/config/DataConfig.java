@@ -136,7 +136,7 @@ public class DataConfig<V> {
   //TODO 自由升降维?
   private final boolean beList;
 
-  public DataConfig(Builder<V> builder) {
+  private DataConfig(Builder<V> builder) {
     this.menuConfig=builder.menuConfig;
     this.field=builder.field;
     this.dataType=builder.dataType;

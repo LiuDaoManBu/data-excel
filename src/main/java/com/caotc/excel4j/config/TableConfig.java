@@ -85,7 +85,7 @@ public class TableConfig {
 
   private final ImmutableCollection<MenuConfig<?>> menuConfigs;
 
-  public TableConfig(Builder builder) {
+  private TableConfig(Builder builder) {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;

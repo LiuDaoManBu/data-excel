@@ -162,7 +162,7 @@ public class MenuConfig<V> {
   private final DataConfig<V> dataConfig;
   private final ParserConfig parserConfig;
 
-  public MenuConfig(Builder<V> builder) {
+  private MenuConfig(Builder<V> builder) {
     tableConfig = builder.tableConfig;
     menuMatcher = builder.matcherBuilder.build();
     distance = builder.distance;
