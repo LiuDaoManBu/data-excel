@@ -16,11 +16,12 @@ public class BaseMatcher<T> implements Matcher<T> {
   public static class Builder<T> implements Matcher.Builder<T> {
     private Type type;
     private Matcher<T> parent;
-    private String tip;
+    private String message;
+    private Function<T, String> messageFunction;
     private Boolean nonNull;
     private Boolean isNull;
     private List<String> scripts;
-    private List<Builder<T>> predicateBuilders;
+    private List<Builder<T>> matcherBuilders;
     // TODO fieldNameToMatchers等复杂逻辑待考虑支持
     // private Map<String, Matcher.Builder<?>> fieldNameToMatchers;
     // private Map<String, Matcher.Builder<?>> MethodNameToMatchers;
@@ -29,7 +30,8 @@ public class BaseMatcher<T> implements Matcher<T> {
 
     @Override
     public BaseMatcher<T> build() {
-      type=Optional.ofNullable(type).orElse(DEFAULT_TYPE);
+      type = Optional.ofNullable(type).orElse(DEFAULT_TYPE);
+      messageFunction = Optional.ofNullable(messageFunction).orElse(value -> message);
       return new BaseMatcher<T>(this);
     }
 
@@ -108,13 +110,12 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
-    public List<Builder<T>> getPredicateBuilders() {
-      return predicateBuilders;
+    public List<Builder<T>> getMatcherBuilders() {
+      return matcherBuilders;
     }
 
-    public Builder<T> setPredicateBuilders(List<Builder<T>> predicateBuilders) {
-      this.predicateBuilders = predicateBuilders;
-      return this;
+    public void setMatcherBuilders(List<Builder<T>> matcherBuilders) {
+      this.matcherBuilders = matcherBuilders;
     }
 
     public Matcher<T> getParent() {
@@ -126,30 +127,39 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
-    public String getTip() {
-      return tip;
+    public String getMessage() {
+      return message;
     }
 
-    public Builder<T> setTip(String tip) {
-      this.tip = tip;
+    public Builder<T> setMessage(String message) {
+      this.message = message;
+      return this;
+    }
+
+    public Function<T, String> getMessageFunction() {
+      return messageFunction;
+    }
+
+    public Builder<T> setMessageFunction(Function<T, String> messageFunction) {
+      this.messageFunction = messageFunction;
       return this;
     }
 
   }
 
-  private static final Type DEFAULT_TYPE = Type.AND;
+  public static final Type DEFAULT_TYPE = Type.AND;
   public static final String SCRIPT_VALUE_KEY = "value";
 
   private final Type type;
   private final Matcher<T> parent;
   private final List<Predicate<T>> predicates;
-  private final String tip;
+  private final Function<T, String> messageFunction;
 
   protected BaseMatcher(Builder<T> builder) {
     this.type = builder.type;
-    this.parent=builder.parent;
-    this.predicates=Lists.newArrayList();
-    this.tip=builder.tip;
+    this.parent = builder.parent;
+    this.predicates = Lists.newArrayList();
+    this.messageFunction = builder.messageFunction;
     if (Objects.nonNull(builder.isNull) && builder.isNull) {
       add(Objects::isNull);
     }
@@ -163,8 +173,8 @@ public class BaseMatcher<T> implements Matcher<T> {
         return predicate;
       }).forEach(this::add);
     }
-    if (Objects.nonNull(builder.predicateBuilders)) {
-      builder.predicateBuilders.stream().peek(predicateBuilder -> predicateBuilder.setParent(this))
+    if (Objects.nonNull(builder.matcherBuilders)) {
+      builder.matcherBuilders.stream().peek(predicateBuilder -> predicateBuilder.setParent(this))
           .map(Builder::build).forEach(this::add);
     }
   }
@@ -227,6 +237,10 @@ public class BaseMatcher<T> implements Matcher<T> {
     return endJunction(Type.OR);
   }
 
+  public String getMessage(T value) {
+    return messageFunction.apply(value);
+  }
+  
   public Type getType() {
     return type;
   }
@@ -239,8 +253,7 @@ public class BaseMatcher<T> implements Matcher<T> {
     return predicates;
   }
 
-  public String getTip() {
-    return tip;
+  public Function<T, String> getMessageFunction() {
+    return messageFunction;
   }
-
 }

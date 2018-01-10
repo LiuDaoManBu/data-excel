@@ -4,15 +4,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 public class SheetError {
   private Sheet sheet;
-  private String errorMessage;
+  private String message;
 
-  public SheetError(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-  public SheetError(Sheet sheet, String errorMessage) {
+  public SheetError(Sheet sheet, String message) {
+    super();
     this.sheet = sheet;
-    this.errorMessage = errorMessage;
+    this.message = message;
   }
 
   public Sheet getSheet() {
@@ -23,11 +20,11 @@ public class SheetError {
     this.sheet = sheet;
   }
 
-  public String getErrorMessage() {
-    return errorMessage;
+  public String getMessage() {
+    return message;
   }
 
-  public void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
+  public void setMessage(String message) {
+    this.message = message;
   }
 }

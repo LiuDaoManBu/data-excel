@@ -2,8 +2,12 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
+import com.caotc.excel4j.parse.error.SheetError;
+import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class SheetConfig {
@@ -59,7 +63,7 @@ public class SheetConfig {
   public static Builder builder() {
     return new Builder();
   }
-  
+
   private final ImmutableCollection<TableConfig> tableConfigs;
   private final WorkbookConfig workbookConfig;
   private final SheetMatcher matcher;
@@ -72,6 +76,16 @@ public class SheetConfig {
     this.workbookConfig = builder.workbookConfig;
     this.matcher = builder.matcherBuilder.build();
     this.parserConfig = builder.parserConfig;
+  }
+
+ public SheetParseResult.Builder parse(Sheet sheet) {
+    SheetParseResult.Builder builder = SheetParseResult.builder().setSheet(sheet).setConfig(this);
+    if (matcher.test(sheet)) {
+      builder.setTableBuilders(tableBuilders);
+    } else {
+      builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
+    }
+    return builder;
   }
 
   public ImmutableCollection<TableConfig> getTableConfigs() {

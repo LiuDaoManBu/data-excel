@@ -4,30 +4,28 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class WorkbookError {
   private Workbook workbook;
-  private String errorMessage;
+  private String message;
 
-  public WorkbookError(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-  public WorkbookError(Workbook workbook, String errorMessage) {
+  public WorkbookError(Workbook workbook, String message) {
+    super();
     this.workbook = workbook;
-    this.errorMessage = errorMessage;
+    this.message = message;
   }
 
-  public Workbook getSheet() {
+  public Workbook getWorkbook() {
     return workbook;
   }
 
-  public void setSheet(Workbook workbook) {
+  public void setWorkbook(Workbook workbook) {
     this.workbook = workbook;
   }
 
-  public String getErrorMessage() {
-    return errorMessage;
+  public String getMessage() {
+    return message;
   }
 
-  public void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
+  public void setMessage(String message) {
+    this.message = message;
   }
+
 }

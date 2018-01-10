@@ -1,63 +1,112 @@
 package com.caotc.excel4j.parse.result;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.parse.error.SheetError;
+import com.caotc.excel4j.parse.result.WorkbookParseResult.Builder;
+import com.google.common.collect.ImmutableList;
 
 public class SheetParseResult {
-  public static SheetParseResult parse() {
-    return new SheetParseResult();
+  public static class Builder {
+    private WorkbookParseResult workbookParseResult;
+    private Sheet sheet;
+    private SheetConfig config;
+    private List<SheetError> errors;
+    private List<Table.Builder> tableBuilders;
+
+    public SheetParseResult build() {
+      errors = Optional.ofNullable(errors).orElseGet(ImmutableList::of);
+      return new SheetParseResult(this);
+    }
+
+    public WorkbookParseResult getWorkbookParseResult() {
+      return workbookParseResult;
+    }
+
+    public Builder setWorkbookParseResult(WorkbookParseResult workbookParseResult) {
+      this.workbookParseResult = workbookParseResult;
+      return this;
+    }
+
+    public Sheet getSheet() {
+      return sheet;
+    }
+
+    public Builder setSheet(Sheet sheet) {
+      this.sheet = sheet;
+      return this;
+    }
+
+    public SheetConfig getConfig() {
+      return config;
+    }
+
+    public Builder setConfig(SheetConfig config) {
+      this.config = config;
+      return this;
+    }
+
+    public List<SheetError> getErrors() {
+      return errors;
+    }
+
+    public Builder setErrors(List<SheetError> errors) {
+      this.errors = errors;
+      return this;
+    }
+
+    public List<Table.Builder> getTableBuilders() {
+      return tableBuilders;
+    }
+
+    public Builder setTableBuilders(List<Table.Builder> tableBuilders) {
+      this.tableBuilders = tableBuilders;
+      return this;
+    }
+
+  }
+
+  public static Builder builder() {
+    return new Builder();
   }
   
-  private Sheet sheet;
-  private SheetConfig sheetConfig;
-  private List<SheetError> sheetErrors;
-  private List<Table> tables;
-  private WorkbookParseResult workbookParseResult;
+  private final WorkbookParseResult workbookParseResult;
+  private final Sheet sheet;
+  private final SheetConfig config;
+  private final ImmutableList<SheetError> errors;
+  private final ImmutableList<Table> tables;
 
-  public SheetParseResult(Sheet sheet, SheetConfig sheetConfig) {
-    this.sheet = sheet;
-    this.sheetConfig = sheetConfig;
-  }
-
-  public boolean hasError() {
-    return !sheetErrors.isEmpty();
-  }
-
-  public SheetError getFirstError() {
-    return sheetErrors.get(0);
-  }
-
-  public boolean addError(SheetError sheetError) {
-    if (!sheetErrors.contains(sheetError)) {
-      return sheetErrors.add(sheetError);
-    }
-    return Boolean.FALSE;
-  }
-
-  public SheetError addError(String errorMessage) {
-    SheetError error = new SheetError(errorMessage);
-    addError(error);
-    return error;
-  }
-
-  public List<SheetError> getErrors() {
-    return sheetErrors;
-  }
-
-  public void setErrors(List<SheetError> errors) {
-    this.sheetErrors = errors;
+  public SheetParseResult(Builder builder) {
+    this.workbookParseResult = builder.workbookParseResult;
+    this.sheet = builder.sheet;
+    this.config = builder.config;
+    this.errors = builder.errors.stream().collect(ImmutableList.toImmutableList());
+    this.tables =
+        builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
+            .map(Table.Builder::build).collect(ImmutableList.toImmutableList());
   }
 
   public Sheet getSheet() {
     return sheet;
   }
 
-  public void setSheet(Sheet sheet) {
-    this.sheet = sheet;
+  public SheetConfig getConfig() {
+    return config;
   }
 
+  public ImmutableList<SheetError> getErrors() {
+    return errors;
+  }
+
+  public ImmutableList<Table> getTables() {
+    return tables;
+  }
+
+  public WorkbookParseResult getWorkbookParseResult() {
+    return workbookParseResult;
+  }
 }
