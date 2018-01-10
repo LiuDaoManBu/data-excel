@@ -44,6 +44,10 @@ public class StringMatcher extends BaseMatcher<String> {
     }
   }
   
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private StringMatcher(Builder builder) {
     super(builder);
     if(Objects.nonNull(builder.expressions)) {

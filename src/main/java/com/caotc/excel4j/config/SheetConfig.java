@@ -56,6 +56,10 @@ public class SheetConfig {
 
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private final ImmutableCollection<TableConfig> tableConfigs;
   private final WorkbookConfig workbookConfig;
   private final SheetMatcher matcher;

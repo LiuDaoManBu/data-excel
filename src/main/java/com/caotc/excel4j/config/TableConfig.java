@@ -9,6 +9,7 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
+//TODO classType?
 public class TableConfig {
   public static class Builder {
     private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
@@ -77,6 +78,11 @@ public class TableConfig {
           return node.getChildrenMenuConfigs();
         }
       });
+  
+  public static <V> Builder builder() {
+    return new Builder();
+  }
+  
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;

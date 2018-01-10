@@ -124,6 +124,11 @@ public class DataConfig<V> {
     }
     
   }
+  
+  public static <V> Builder<V> builder(){
+    return new Builder<>();
+  }
+  
   private final MenuConfig<V> menuConfig;
   private final Field field;
   private final DataType dataType;

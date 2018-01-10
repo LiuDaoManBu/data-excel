@@ -5,8 +5,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.matcher.BaseMatcher;
-import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.ComparableMatcher.Builder.Expression;
+import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.constant.Type;
 
 public class WorkbookMatcher extends BaseMatcher<Workbook> {
@@ -28,6 +28,10 @@ public class WorkbookMatcher extends BaseMatcher<Workbook> {
     }
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private WorkbookMatcher(Builder builder) {
     super(builder);
     if (Objects.nonNull(builder.sheetSizeExpressions)) {

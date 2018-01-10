@@ -2,7 +2,9 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.matcher.usermodel.WorkbookMatcher;
+import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 
@@ -36,6 +38,10 @@ public class WorkbookConfig {
     }
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private final ImmutableCollection<SheetConfig> sheetConfigs;
   private final WorkbookMatcher matcher;
   private final ParserConfig parserConfig;
@@ -48,6 +54,13 @@ public class WorkbookConfig {
     this.parserConfig = builder.parserConfig;
   }
 
+  public WorkbookParseResult parse(Workbook workbook) {
+    if(matcher.test(workbook)) {
+      
+    }
+    return new WorkbookParseResult(workbook,this,null,null);
+  }
+  
   public ImmutableCollection<SheetConfig> getSheetConfigs() {
     return sheetConfigs;
   }

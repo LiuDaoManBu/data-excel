@@ -43,6 +43,10 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
 
   }
 
+  public static <T extends Comparable<T>> Builder<T> builder() {
+    return new Builder<>();
+  }
+  
   public ComparableMatcher(Builder<T> builder) {
     super(builder);
     if(Objects.nonNull(builder.expressions)) {

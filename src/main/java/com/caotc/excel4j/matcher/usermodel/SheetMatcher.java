@@ -32,6 +32,10 @@ public class SheetMatcher extends BaseMatcher<Sheet> {
     
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private SheetMatcher(Builder builder) {
     super(builder);
     if (Objects.nonNull(builder.nameExpressions)) {

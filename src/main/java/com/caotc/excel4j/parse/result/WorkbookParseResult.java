@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList;
 
 public class WorkbookParseResult {
   public static WorkbookParseResult parse(Workbook workbook, WorkbookConfig workbookConfig) {
-    return new WorkbookParseResult(workbook, workbookConfig);
+    return workbookConfig.parse(workbook);
   }
 
   private final Workbook workbook;
@@ -16,13 +16,14 @@ public class WorkbookParseResult {
   private final ImmutableList<WorkbookError> workbookErrors;
   private final ImmutableList<SheetParseResult> sheetParseResults;
 
-  public WorkbookParseResult(Workbook workbook, WorkbookConfig workbookConfig) {
+  public WorkbookParseResult(Workbook workbook, WorkbookConfig workbookConfig,
+      ImmutableList<WorkbookError> workbookErrors,
+      ImmutableList<SheetParseResult> sheetParseResults) {
     super();
     this.workbook = workbook;
     this.workbookConfig = workbookConfig;
-    // TODO
-    workbookErrors = null;
-    sheetParseResults = null;
+    this.workbookErrors = workbookErrors;
+    this.sheetParseResults = sheetParseResults;
   }
 
   public Workbook getWorkbook() {

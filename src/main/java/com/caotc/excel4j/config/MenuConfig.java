@@ -19,6 +19,9 @@ import com.google.common.reflect.TypeToken;
 
 public class MenuConfig<V> {
   public static class Builder<V> {
+    private static final int DEFAULT_DISTANCE = 1;
+    private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
+    
     private TableConfig tableConfig;
     private MenuConfig<?> parentMenuConfig;
     private DataConfig.Builder<V> dataConfigBuilder;
@@ -34,10 +37,12 @@ public class MenuConfig<V> {
     private ParserConfig parserConfig;
 
     public MenuConfig<V> build() {
-      distance=Optional.ofNullable(distance).orElse(1);
+      distance=Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
+      menuNecessity=Optional.ofNullable(menuNecessity).orElse(DEFAULT_MENU_NECESSITY);
+      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
+      
       direction = Optional.ofNullable(direction).orElse(parentMenuConfig.direction);
       tableConfig = Optional.ofNullable(tableConfig).orElse(parentMenuConfig.tableConfig);
-      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
       // TODO 提示语
       Preconditions.checkState(Objects.nonNull(tableConfig));
       Preconditions.checkNotNull(matcherBuilder);
@@ -142,11 +147,8 @@ public class MenuConfig<V> {
 
   }
 
-  private static final int DEFAULT_DISTANCE = 1;
-  private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
-
   public static <V> Builder<V> builder() {
-    return new Builder<V>().setDistance(DEFAULT_DISTANCE).setMenuNecessity(DEFAULT_MENU_NECESSITY);
+    return new Builder<>();
   }
 
   private final TableConfig tableConfig;

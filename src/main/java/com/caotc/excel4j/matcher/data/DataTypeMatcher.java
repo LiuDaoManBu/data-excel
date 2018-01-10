@@ -61,6 +61,10 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
     
   }
   
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private final DataType dataType;
 
   private DataTypeMatcher(Builder builder) {

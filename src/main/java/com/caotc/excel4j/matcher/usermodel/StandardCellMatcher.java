@@ -63,6 +63,10 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
     
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+  
   private final DataType dataType;
   private StandardCellMatcher(Builder builder) {
     super(builder);
