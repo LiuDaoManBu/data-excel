@@ -8,11 +8,9 @@ import java.util.function.Predicate;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.CellType;
 import com.caotc.excel4j.matcher.BaseMatcher;
-import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.StringMatcher.Builder.Expression;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
-import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.constant.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.caotc.excel4j.parse.result.StandardCell;
@@ -75,27 +73,6 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
       builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
           expression.getPredicateValue(), standardCell->dataType.cast(standardCell.getValue(), String.class)));
     }
-  }
-
-  public StandardCellMatcher(Type type, Matcher<StandardCell> parent,
-      List<Predicate<StandardCell>> list, DataType dataType) {
-    super(type, parent, list);
-    this.dataType = dataType;
-  }
-
-  public StandardCellMatcher(Type type, Matcher<StandardCell> parent, DataType dataType) {
-    super(type, parent);
-    this.dataType = dataType;
-  }
-
-  public StandardCellMatcher(Type type, DataType dataType) {
-    super(type);
-    this.dataType = dataType;
-  }
-
-  public StandardCellMatcher(DataType dataType) {
-    super();
-    this.dataType = dataType;
   }
 
   public <T> StandardCellMatcher addDataPredicate(Predicate<Object> predicate) {

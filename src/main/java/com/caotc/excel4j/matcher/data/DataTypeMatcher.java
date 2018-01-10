@@ -1,14 +1,11 @@
 package com.caotc.excel4j.matcher.data;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.BaseMatcher;
-import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
-import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.constant.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.google.common.base.Preconditions;
@@ -76,27 +73,6 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
 //    }
   }
   
-  public DataTypeMatcher(DataType dataType) {
-    super();
-    this.dataType = dataType;
-  }
-
-  public DataTypeMatcher(Type type, DataType dataType) {
-    super(type);
-    this.dataType = dataType;
-  }
-
-  public DataTypeMatcher(Type type, Matcher<Object> parent, DataType dataType) {
-    super(type, parent);
-    this.dataType = dataType;
-  }
-
-  public DataTypeMatcher(Type type, Matcher<Object> parent, List<Predicate<Object>> list,
-      DataType dataType) {
-    super(type, parent, list);
-    this.dataType = dataType;
-  }
-
   @Override
   public boolean support(Object value) {
     return dataType.test(value);

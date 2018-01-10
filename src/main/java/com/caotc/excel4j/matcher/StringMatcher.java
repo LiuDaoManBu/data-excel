@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
-import com.caotc.excel4j.matcher.constant.Type;
 
 public class StringMatcher extends BaseMatcher<String> {
   public static class Builder extends BaseMatcher.Builder<String> {
@@ -53,22 +52,6 @@ public class StringMatcher extends BaseMatcher<String> {
     if(Objects.nonNull(builder.expressions)) {
       builder.expressions.stream().forEach(expression->add(expression.MatcherType,expression.predicateValue));
     }
-  }
-  
-  public StringMatcher(Type type, Matcher<String> parent, List<Predicate<String>> list) {
-    super(type, parent, list);
-  }
-
-  public StringMatcher(Type type, Matcher<String> parent) {
-    super(type, parent);
-  }
-
-  public StringMatcher(Type type) {
-    super(type);
-  }
-
-  public StringMatcher() {
-    super();
   }
 
   public StringMatcher add(StringMatcherType type, String predicateValue) {

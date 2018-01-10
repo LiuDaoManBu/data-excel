@@ -19,9 +19,6 @@ import com.google.common.reflect.TypeToken;
 
 public class MenuConfig<V> {
   public static class Builder<V> {
-    private static final int DEFAULT_DISTANCE = 1;
-    private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
-    
     private TableConfig tableConfig;
     private MenuConfig<?> parentMenuConfig;
     private DataConfig.Builder<V> dataConfigBuilder;
@@ -147,6 +144,9 @@ public class MenuConfig<V> {
 
   }
 
+  private static final int DEFAULT_DISTANCE = 1;
+  private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
+  
   public static <V> Builder<V> builder() {
     return new Builder<>();
   }

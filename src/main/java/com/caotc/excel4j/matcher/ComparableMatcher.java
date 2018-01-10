@@ -3,9 +3,7 @@ package com.caotc.excel4j.matcher;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
-import com.caotc.excel4j.matcher.constant.Type;
 
 public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
   public static class Builder<T extends Comparable<T>> extends BaseMatcher.Builder<T> {
@@ -47,27 +45,11 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
     return new Builder<>();
   }
   
-  public ComparableMatcher(Builder<T> builder) {
+  private ComparableMatcher(Builder<T> builder) {
     super(builder);
     if(Objects.nonNull(builder.expressions)) {
       builder.expressions.stream().forEach(expression->add(expression.MatcherType,expression.predicateValue));
     }
-  }
-  
-  public ComparableMatcher(Type type, Matcher<T> parent, List<Predicate<T>> list) {
-    super(type, parent, list);
-  }
-
-  public ComparableMatcher(Type type, Matcher<T> parent) {
-    super(type, parent);
-  }
-
-  public ComparableMatcher(Type type) {
-    super(type);
-  }
-
-  public ComparableMatcher() {
-    super();
   }
 
   public ComparableMatcher<T> add(ComparableMatcherType type, T predicateValue) {

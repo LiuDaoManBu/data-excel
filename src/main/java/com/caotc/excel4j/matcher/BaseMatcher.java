@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import com.caotc.excel4j.config.WorkbookConfig.Builder;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
@@ -17,6 +16,7 @@ public class BaseMatcher<T> implements Matcher<T> {
   public static class Builder<T> implements Matcher.Builder<T> {
     private Type type;
     private Matcher<T> parent;
+    private String tip;
     private Boolean nonNull;
     private Boolean isNull;
     private List<String> scripts;
@@ -29,6 +29,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
     @Override
     public BaseMatcher<T> build() {
+      type=Optional.ofNullable(type).orElse(DEFAULT_TYPE);
       return new BaseMatcher<T>(this);
     }
 
@@ -125,6 +126,15 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
+    public String getTip() {
+      return tip;
+    }
+
+    public Builder<T> setTip(String tip) {
+      this.tip = tip;
+      return this;
+    }
+
   }
 
   private static final Type DEFAULT_TYPE = Type.AND;
@@ -133,28 +143,13 @@ public class BaseMatcher<T> implements Matcher<T> {
   private final Type type;
   private final Matcher<T> parent;
   private final List<Predicate<T>> predicates;
-
-  public BaseMatcher() {
-    this(DEFAULT_TYPE);
-  }
-
-  public BaseMatcher(Type type) {
-    this(type, null);
-  }
-
-  public BaseMatcher(Type type, Matcher<T> parent) {
-    this(type, parent, Lists.newArrayList());
-  }
-
-  public BaseMatcher(Type type, Matcher<T> parent, List<Predicate<T>> predicates) {
-    super();
-    this.type = type;
-    this.parent = parent;
-    this.predicates = predicates;
-  }
+  private final String tip;
 
   protected BaseMatcher(Builder<T> builder) {
-    this(Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE));
+    this.type = builder.type;
+    this.parent=builder.parent;
+    this.predicates=Lists.newArrayList();
+    this.tip=builder.tip;
     if (Objects.nonNull(builder.isNull) && builder.isNull) {
       add(Objects::isNull);
     }
@@ -203,7 +198,7 @@ public class BaseMatcher<T> implements Matcher<T> {
   }
 
   public Matcher<T> stratJunction(Type type) {
-    Matcher<T> matcher = new BaseMatcher<T>(type, this);
+    Matcher<T> matcher = new Builder<T>().setType(type).setParent(this).build();
     add(matcher);
     return matcher;
   }
@@ -242,6 +237,10 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   public List<Predicate<T>> getPredicates() {
     return predicates;
+  }
+
+  public String getTip() {
+    return tip;
   }
 
 }
