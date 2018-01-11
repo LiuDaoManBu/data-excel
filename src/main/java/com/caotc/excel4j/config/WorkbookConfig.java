@@ -68,7 +68,7 @@ public class WorkbookConfig {
     if (matcher.test(workbook)) {
       ImmutableList<Sheet> sheets = IntStream.range(0, workbook.getNumberOfSheets())
           .mapToObj(workbook::getSheetAt).collect(ImmutableList.toImmutableList());
-      // TODO Error设计不合理?getMessage nullable?
+      // TODO Error设计不合理?getMessage Nullable?
       builder.setErrors(sheetConfigs.stream()
           .filter(config -> sheets.stream().noneMatch(config.getMatcher()::test))
           .map(config -> new WorkbookError(workbook, config.getMatcher().getMessage(null)))

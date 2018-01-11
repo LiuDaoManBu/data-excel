@@ -9,6 +9,7 @@ import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.script.ScriptEngine;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
@@ -256,4 +257,10 @@ public class BaseMatcher<T> implements Matcher<T> {
   public Function<T, String> getMessageFunction() {
     return messageFunction;
   }
+
+  @Override
+  public Optional<String> match(T value) {
+    return null;
+  }
+  
 }

@@ -2,7 +2,10 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.matcher.usermodel.TableMatcher;
+import com.caotc.excel4j.parse.result.Table;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
@@ -14,7 +17,7 @@ public class TableConfig {
   public static class Builder {
     private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
-    // TODO Table没有Matcher?
+    private TableMatcher.Builder matcherBuilder;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
     private ParserConfig parserConfig;
@@ -69,6 +72,15 @@ public class TableConfig {
       return this;
     }
 
+    public TableMatcher.Builder getMatcherBuilder() {
+      return matcherBuilder;
+    }
+
+    public Builder setMatcherBuilder(TableMatcher.Builder matcherBuilder) {
+      this.matcherBuilder = matcherBuilder;
+      return this;
+    }
+
   }
 
   private static final Traverser<MenuConfig<?>> MENU_CONFIG_TRAVERSER =
@@ -87,6 +99,7 @@ public class TableConfig {
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
   private final ImmutableCollection<MenuConfig<?>> topMenuConfigs;
+  private final TableMatcher matcher;
   private final ParserConfig parserConfig;
 
   private final ImmutableCollection<MenuConfig<?>> menuConfigs;
@@ -95,8 +108,8 @@ public class TableConfig {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
-
-
+    matcher=builder.matcherBuilder.build();
+    
     // topMenuConfigs = Collections2.filter(menuConfigs, MenuConfig::isTopMenu);
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
@@ -109,6 +122,17 @@ public class TableConfig {
         .flatMap(Streams::stream).collect(ImmutableSet.toImmutableSet());
   }
 
+  public Table.Builder parse(Sheet sheet) {
+    Table.Builder builder = Table.builder().setTableConfig(this);
+    
+//    if (matcher.test(sheet)) {
+//      builder.setTableBuilders(tableBuilders);
+//    } else {
+//      builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
+//    }
+    return builder;
+  }
+  
   public SheetConfig getSheetConfig() {
     return sheetConfig;
   }
@@ -131,6 +155,10 @@ public class TableConfig {
 
   public ParserConfig getParserConfig() {
     return parserConfig;
+  }
+
+  public TableMatcher getMatcher() {
+    return matcher;
   }
 
 }

@@ -78,10 +78,11 @@ public class SheetConfig {
     this.parserConfig = builder.parserConfig;
   }
 
- public SheetParseResult.Builder parse(Sheet sheet) {
+  public SheetParseResult.Builder parse(Sheet sheet) {
     SheetParseResult.Builder builder = SheetParseResult.builder().setSheet(sheet).setConfig(this);
     if (matcher.test(sheet)) {
-      builder.setTableBuilders(tableBuilders);
+      builder.setTableBuilders(tableConfigs.stream().map(config -> config.parse(sheet))
+          .collect(ImmutableList.toImmutableList()));
     } else {
       builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
     }

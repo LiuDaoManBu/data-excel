@@ -1,5 +1,7 @@
 package com.caotc.excel4j.matcher;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
@@ -7,7 +9,7 @@ import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
   public static interface Builder<T>{
-    BaseMatcher<T> build();
+    Matcher<T> build();
   }
   Matcher<T> add(Predicate<T> predicate);
 
@@ -25,4 +27,12 @@ public interface Matcher<T> extends Predicate<T> {
   Matcher<T> endAnd();
 
   Matcher<T> endOr();
+  
+  Optional<String> match(T value);
+  
+  Function<T, String> getMessageFunction();
+  
+  String getMessage(T value);
+  
+  List<Predicate<T>> getPredicates();
 }

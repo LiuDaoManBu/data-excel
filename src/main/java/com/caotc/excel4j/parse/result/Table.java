@@ -23,6 +23,7 @@ public class Table {
   public static class Builder {
     private TableConfig tableConfig;
     private SheetParseResult sheetParseResult;
+    private List<TableError> errors;
 
     public Table build() {
       return new Table(this);
@@ -46,17 +47,32 @@ public class Table {
       return this;
     }
 
-  }
+    public List<TableError> getErrors() {
+      return errors;
+    }
 
+    public Builder setErrors(List<TableError> errors) {
+      this.errors = errors;
+      return this;
+    }
+  }
+  
+  private static final Traverser<Menu<?>> MENU_TRAVERSER=Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
+    @Override
+    public Iterable<? extends Menu<?>> successors(Menu<?> node) {
+      return node.getChildrenMenus();
+    }
+  });
+  
   public static Builder builder() {
     return new Builder();
   }
 
   private final TableConfig tableConfig;
-  private final List<TableError> errors;
+  private final ImmutableList<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu<?>> topMenus;
-  private final Traverser<Menu<?>> menuTraverser;
+  
   // private final ImmutableCollection<Menu> menus;
   // private final ImmutableCollection<Menu> dataMenus;
   // private final ImmutableCollection<Menu> fixedDataMenus;
@@ -67,22 +83,17 @@ public class Table {
 
   public Table(Builder builder) {
     tableConfig = builder.tableConfig;
-    // TODO
-    errors = null;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus();
-    menuTraverser = Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
-      @Override
-      public Iterable<? extends Menu<?>> successors(Menu<?> node) {
-        return node.getChildrenMenus();
-      }
-    });
     // dataMenus = Collections2.filter(menus, Menu::isDataMenu);
     // fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
     // unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
     // mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
     // mustMenus = Collections2.filter(menus, Menu::isMustMenu);
     // notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
+    // TODO
+    new TableError(this,tableConfig.getMatcher().getMessage(this));
+    errors = ImmutableList.of();
   }
 
   private ImmutableCollection<Menu<?>> loadTopMenus() {
@@ -187,7 +198,7 @@ public class Table {
   }
 
   public ImmutableList<Menu<?>> getMenus() {
-    return topMenus.stream().map(menuTraverser::breadthFirst).flatMap(Streams::stream)
+    return topMenus.stream().map(MENU_TRAVERSER::breadthFirst).flatMap(Streams::stream)
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -222,7 +233,7 @@ public class Table {
     return tableConfig;
   }
 
-  public List<TableError> getErrors() {
+  public ImmutableList<TableError> getErrors() {
     return errors;
   }
 
