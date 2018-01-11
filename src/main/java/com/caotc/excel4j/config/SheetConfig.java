@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.parse.error.SheetError;
+import com.caotc.excel4j.parse.error.WorkbookError;
 import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -18,7 +19,6 @@ public class SheetConfig {
     private ParserConfig parserConfig;
 
     public SheetConfig builder() {
-      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
       return new SheetConfig(this);
     }
 
@@ -80,15 +80,17 @@ public class SheetConfig {
 
   public SheetParseResult.Builder parse(Sheet sheet) {
     SheetParseResult.Builder builder = SheetParseResult.builder().setSheet(sheet).setConfig(this);
-    if (matcher.test(sheet)) {
-      builder.setTableBuilders(tableConfigs.stream().map(config -> config.parse(sheet))
-          .collect(ImmutableList.toImmutableList()));
-    } else {
-      builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
-    }
+    builder.setTableBuilders(tableConfigs.stream().map(config -> config.parse(sheet))
+        .collect(ImmutableList.toImmutableList()));
+    // TODO sheetMatcher是BookErro,TableMatcher是TableError,Sheet没有error?
+    // builder.setErrors();
     return builder;
   }
 
+  public ParserConfig getEffectiveParserConfig() {
+    return Optional.ofNullable(parserConfig).orElse(workbookConfig.getEffectiveParserConfig());
+  }
+  
   public ImmutableCollection<TableConfig> getTableConfigs() {
     return tableConfigs;
   }

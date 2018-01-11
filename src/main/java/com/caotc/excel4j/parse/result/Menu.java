@@ -3,15 +3,15 @@ package com.caotc.excel4j.parse.result;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.function.Function;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.parse.error.MenuError;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
@@ -23,13 +23,11 @@ public class Menu<V> {
     private Menu<?> parentMenu;
 
     public Menu<V> build() {
-      Preconditions.checkNotNull(cell);
-      Preconditions.checkArgument(table != null || parentMenu != null);
-      Preconditions.checkArgument(menuConfig != null || parentMenu != null);
+      table = Optional.ofNullable(table).orElse(parentMenu.table);
 
-      if (parentMenu != null && table == null) {
-        table = parentMenu.table;
-      }
+      // TODO tip
+      Preconditions.checkNotNull(cell);
+      Preconditions.checkNotNull(table);
       return new Menu<V>(this);
     }
 
@@ -71,13 +69,16 @@ public class Menu<V> {
 
   }
 
+  private static final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+      config -> config + "don't have any matches cell";
+
   public static <V> Builder<V> builder() {
     return new Builder<V>();
   }
 
   private final StandardCell cell;
   private final MenuConfig<V> menuConfig;
-  private final ImmutableList<MenuError> menuErrors;
+  private final ImmutableList<MenuError<V>> errors;
   private final Table table;
   private final Menu<?> parentMenu;
   private final ImmutableList<Menu<?>> childrenMenus;
@@ -87,17 +88,24 @@ public class Menu<V> {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
     // TODO
-    menuErrors = null;
     table = builder.table;
     parentMenu = builder.parentMenu;
 
-    childrenMenus = loadChildrenMenus();
-    data = new Data<V>(this,
-        childrenMenus.isEmpty() ? menuConfig.getDataConfig().getLoadType().getDataCells(this)
-            : ImmutableList.of());
+    childrenMenus =
+        loadChildrenMenus().stream().map(Builder::build).collect(ImmutableList.toImmutableList());
+    data = new Data<V>(this);
+
+    ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
+        childrenMenus.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
+
+    // TODO dataError? is MenuError?
+    errors = menuConfig.getChildrenMenuConfigs().stream()
+        .filter(config -> !matchesMenuConfigs.contains(config))
+        .map(config -> new MenuError<V>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+        .collect(ImmutableList.toImmutableList());
   }
 
-  private <T> ImmutableList<Menu<?>> loadChildrenMenus() {
+  private <T> ImmutableList<Builder<?>> loadChildrenMenus() {
     ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrenMenuConfigs();
 
     List<StandardCell> menuCells =
@@ -106,15 +114,14 @@ public class Menu<V> {
       Iterable<MenuConfig<?>> configs =
           Iterables.filter(childrenConfigs, config -> config.matches(cell));
       Preconditions.checkState(Iterables.size(configs) <= 1);
-      Menu<?> menu = null;
+      Builder builder = null;
       if (!Iterables.isEmpty(configs)) {
-        Builder builder = Menu.builder();
+        builder = Menu.builder();
         builder.setCell(cell);
         builder.setMenuConfig(Iterables.getOnlyElement(configs));
         builder.setParentMenu(this);
-        menu = builder.build();
       }
-      return Optional.ofNullable(menu);
+      return Optional.ofNullable(builder);
     }).filter(Optional::isPresent).map(Optional::get).collect(ImmutableList.toImmutableList());
   }
 
@@ -261,14 +268,6 @@ public class Menu<V> {
     return menuConfig.isNotMustMenu();
   }
 
-  public boolean matches(Object value) {
-    return menuConfig.matches(value);
-  }
-
-  public boolean support(Object value) {
-    return menuConfig.support(value);
-  }
-
   public V cast(Object value) {
     return menuConfig.cast(value);
   }
@@ -317,6 +316,10 @@ public class Menu<V> {
 
   public Data<V> getData() {
     return data;
+  }
+
+  public ImmutableList<MenuError<V>> getErrors() {
+    return errors;
   }
 
 }

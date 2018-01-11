@@ -21,7 +21,6 @@ public class WorkbookConfig {
     private ParserConfig parserConfig;
 
     public WorkbookConfig builder() {
-      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
       return new WorkbookConfig(this);
     }
 
@@ -44,7 +43,8 @@ public class WorkbookConfig {
     }
   }
 
-  private static final String SHEET_CONFIG_NO_MATCH_MESSAGE = "";
+  private static final Function<SheetConfig, String> SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+      config -> config + "don't have any matches sheet";
 
   public static Builder builder() {
     return new Builder();
@@ -65,24 +65,32 @@ public class WorkbookConfig {
   public WorkbookParseResult parse(Workbook workbook) {
     WorkbookParseResult.Builder builder =
         WorkbookParseResult.builder().setWorkbook(workbook).setConfig(this);
-    if (matcher.test(workbook)) {
+    ImmutableList.Builder<WorkbookError> errors = ImmutableList.builder();
+    Optional<WorkbookError> optional =
+        matcher.match(workbook).map(message -> new WorkbookError(workbook, message));
+    optional.ifPresent(errors::add);
+    if (!optional.isPresent()) {
       ImmutableList<Sheet> sheets = IntStream.range(0, workbook.getNumberOfSheets())
           .mapToObj(workbook::getSheetAt).collect(ImmutableList.toImmutableList());
-      // TODO Error设计不合理?getMessage Nullable?
-      builder.setErrors(sheetConfigs.stream()
-          .filter(config -> sheets.stream().noneMatch(config.getMatcher()::test))
-          .map(config -> new WorkbookError(workbook, config.getMatcher().getMessage(null)))
-          .collect(ImmutableList.toImmutableList()));
+      // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
+      sheetConfigs.stream().filter(config -> sheets.stream().noneMatch(config.getMatcher()::test))
+          .map(config -> new WorkbookError(workbook,
+              SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+          .forEach(errors::add);
+
+
       // TODO sheet被多个matcher匹配的情况?
       builder.setSheetParseResultBuilders(sheetConfigs.stream()
           .filter(config -> sheets.stream().anyMatch(config.getMatcher()::test))
           .map(config -> sheets.stream().filter(config.getMatcher()::test).map(config::parse))
           .flatMap(Function.identity()).collect(ImmutableList.toImmutableList()));
-    } else {
-      builder
-          .setErrors(ImmutableList.of(new WorkbookError(workbook, matcher.getMessage(workbook))));
     }
+    builder.setErrors(errors.build());
     return builder.build();
+  }
+
+  public ParserConfig getEffectiveParserConfig() {
+    return Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
   }
 
   public ImmutableCollection<SheetConfig> getSheetConfigs() {

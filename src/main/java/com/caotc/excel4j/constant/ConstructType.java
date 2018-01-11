@@ -20,9 +20,10 @@ import com.google.common.reflect.TypeToken;
 public enum ConstructType {
   OBJECT {
     @Override
-    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues) {
+    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues,
+        ParserConfig parserConfig) {
       ImmutableMultimap<String, Field> nameToFields = ClassUtil.getNameToFields(type);
-      T target = ParserConfig.GLOBAL.newInstance(type).get();
+      T target = parserConfig.newInstance(type).get();
       nameToValues.forEach((name, value) -> {
         nameToFields.get(name).forEach(field -> {
           field.setAccessible(true);
@@ -42,7 +43,8 @@ public enum ConstructType {
   },
   ITERABLE {
     @Override
-    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues) {
+    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues,
+        ParserConfig parserConfig) {
       Preconditions.checkArgument(ClassUtil.isArrayOrIterable(type));
       // TODO value为Iterable或Array
       Preconditions
@@ -60,9 +62,9 @@ public enum ConstructType {
       });
 
       TypeToken<?> genericType = ClassUtil.getComponentOrGenericType(type);
-      ConstructType genericConstructType = ParserConfig.GLOBAL.getConstructType(genericType);
-      Stream<?> targets =
-          params.stream().map(param -> genericConstructType.construct(genericType, param));
+      ConstructType genericConstructType = parserConfig.getConstructType(genericType);
+      Stream<?> targets = params.stream()
+          .map(param -> genericConstructType.construct(genericType, param, parserConfig));
       if (type.isArray()) {
         // TODO T为String[]等时,Object[]无法cast为String[]
         return (T) targets.toArray();
@@ -84,5 +86,6 @@ public enum ConstructType {
     return (T[]) value;
   }
 
-  public abstract <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues);
+  public abstract <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues,
+      ParserConfig parserConfig);
 }

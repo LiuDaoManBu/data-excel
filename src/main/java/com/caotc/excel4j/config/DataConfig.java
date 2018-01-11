@@ -22,21 +22,21 @@ public class DataConfig<V> {
     private Field field;
     private BaseDataType baseDataType;
     private DataType dataType;
-    //TODO interface?
+    // TODO interface?
     private DataTypeMatcher.Builder matcherBuilder;
     private TypeToken<V> fieldType;
     private String fieldName;
     private ConstructType constructType;
     private LoadType loadType;
     private Integer dataNumber;
-    //TODO 自由升降维?
+    // TODO 自由升降维?
     private Boolean beList;
-    
-    public DataConfig<V> build(){
-      dataType=Optional.ofNullable(dataType).orElse(baseDataType);
-      beList=Optional.ofNullable(beList).orElse(Boolean.FALSE);
+
+    public DataConfig<V> build() {
+      dataType = Optional.ofNullable(dataType).orElse(baseDataType);
+      beList = Optional.ofNullable(beList).orElse(Boolean.FALSE);
       matcherBuilder.setDataType(dataType);
-      //TODO 提示语
+      // TODO 提示语
       Preconditions.checkState(Objects.nonNull(menuConfig));
       Preconditions.checkState(Objects.nonNull(dataType));
       return new DataConfig<V>(this);
@@ -122,13 +122,13 @@ public class DataConfig<V> {
       this.beList = beList;
       return this;
     }
-    
+
   }
-  
-  public static <V> Builder<V> builder(){
+
+  public static <V> Builder<V> builder() {
     return new Builder<>();
   }
-  
+
   private final MenuConfig<V> menuConfig;
   private final Field field;
   private final DataType dataType;
@@ -138,33 +138,25 @@ public class DataConfig<V> {
   private final ConstructType constructType;
   private final LoadType loadType;
   private final Integer dataNumber;
-  //TODO 自由升降维?
+  // TODO 自由升降维?
   private final boolean beList;
 
   private DataConfig(Builder<V> builder) {
-    this.menuConfig=builder.menuConfig;
-    this.field=builder.field;
-    this.dataType=builder.dataType;
-    this.dataMatcher=builder.matcherBuilder.build();
-    this.fieldType=builder.fieldType;
-    this.fieldName=builder.fieldName;
-    this.constructType=builder.constructType;
-    this.loadType=builder.loadType;
-    this.dataNumber=builder.dataNumber;
-    this.beList=builder.beList;
+    this.menuConfig = builder.menuConfig;
+    this.field = builder.field;
+    this.dataType = builder.dataType;
+    this.dataMatcher = builder.matcherBuilder.build();
+    this.fieldType = builder.fieldType;
+    this.fieldName = builder.fieldName;
+    this.constructType = builder.constructType;
+    this.loadType = builder.loadType;
+    this.dataNumber = builder.dataNumber;
+    this.beList = builder.beList;
   }
-  
+
   @SuppressWarnings("unchecked")
   public V cast(Object value) {
     return (V) dataType.cast(value, fieldType.getRawType());
-  }
-  
-  public boolean support(Object value) {
-    return dataMatcher.support(value);
-  }
-
-  public boolean matches(Object value) {
-    return dataMatcher.test(value);
   }
 
   public <T> boolean canCast(Class<T> clazz) {
@@ -226,5 +218,5 @@ public class DataConfig<V> {
   public boolean isBeList() {
     return beList;
   }
-  
+
 }

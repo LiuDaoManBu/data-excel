@@ -34,10 +34,9 @@ public class MenuConfig<V> {
     private ParserConfig parserConfig;
 
     public MenuConfig<V> build() {
-      distance=Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
-      menuNecessity=Optional.ofNullable(menuNecessity).orElse(DEFAULT_MENU_NECESSITY);
-      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
-      
+      distance = Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
+      menuNecessity = Optional.ofNullable(menuNecessity).orElse(DEFAULT_MENU_NECESSITY);
+
       direction = Optional.ofNullable(direction).orElse(parentMenuConfig.direction);
       tableConfig = Optional.ofNullable(tableConfig).orElse(parentMenuConfig.tableConfig);
       // TODO 提示语
@@ -46,8 +45,8 @@ public class MenuConfig<V> {
       Preconditions.checkNotNull(menuNecessity);
       Preconditions.checkState(Objects.nonNull(direction));
       Preconditions.checkNotNull(menuType);
-      Preconditions.checkState(
-          !(CollectionUtils.isNotEmpty(childrenMenuConfigBuilders) && Objects.nonNull(dataConfigBuilder)));
+      Preconditions.checkState(!(CollectionUtils.isNotEmpty(childrenMenuConfigBuilders)
+          && Objects.nonNull(dataConfigBuilder)));
       return new MenuConfig<V>(this);
     }
 
@@ -146,7 +145,7 @@ public class MenuConfig<V> {
 
   private static final int DEFAULT_DISTANCE = 1;
   private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
-  
+
   public static <V> Builder<V> builder() {
     return new Builder<>();
   }
@@ -215,18 +214,15 @@ public class MenuConfig<V> {
     return isDataMenu() && LoadType.MIXED.equals(dataConfig.getLoadType());
   }
 
+  public ParserConfig getEffectiveParserConfig() {
+    return Optional.ofNullable(parserConfig).orElse(Optional.ofNullable(parentMenuConfig)
+        .map(MenuConfig::getParserConfig).orElse(tableConfig.getEffectiveParserConfig()));
+  }
+
   // delegate methods start
 
   public boolean matches(StandardCell cell) {
     return menuMatcher.test(cell);
-  }
-
-  public boolean matches(Object value) {
-    return dataConfig.matches(value);
-  }
-
-  public boolean support(Object value) {
-    return dataConfig.support(value);
   }
 
   public V cast(Object value) {

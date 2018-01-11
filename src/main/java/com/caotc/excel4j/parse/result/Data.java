@@ -5,23 +5,27 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.parse.error.DataError;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 public class Data<V> {
   private final Menu<V> menu;
   private final DataConfig<V> dataConfig;
-  private final ImmutableList<DataError> dataErrors;
+  private final ImmutableList<DataError<V>> errors;
   private final ImmutableList<StandardCell> valueCells;
 
-  public Data(Menu<V> menu, ImmutableList<StandardCell> valueCells) {
+  public Data(Menu<V> menu) {
     super();
     this.menu = menu;
-    // TODO
-    dataErrors = null;
     this.dataConfig = menu.getMenuConfig().getDataConfig();
-    this.valueCells = valueCells;
+    this.valueCells =
+        menu.getChildrenMenus().isEmpty() ? dataConfig.getLoadType().getDataCells(menu)
+            : ImmutableList.of();
+
+    // TODO is DataError?
+    errors = valueCells.stream().map(StandardCell::getValue).map(dataConfig.getDataMatcher()::match)
+        .filter(Optional::isPresent).map(Optional::get)
+        .map(message -> new DataError<V>(this, message)).collect(ImmutableList.toImmutableList());
   }
 
   // TODO
@@ -62,7 +66,8 @@ public class Data<V> {
         childrens.stream().filter(m -> !m.isDataMenu()).forEach(m -> {
           vars.put((String) m.getFieldName().get(), menu.getData().getValue());
         });
-        value = dataConfig.getConstructType().construct(dataConfig.getFieldType(), vars);
+        value = dataConfig.getConstructType().construct(dataConfig.getFieldType(), vars,
+            menu.getMenuConfig().getEffectiveParserConfig());
       }
     }
     return Optional.ofNullable(value);
@@ -91,5 +96,8 @@ public class Data<V> {
     return valueCells;
   }
 
+  public ImmutableList<DataError<V>> getErrors() {
+    return errors;
+  }
 
 }

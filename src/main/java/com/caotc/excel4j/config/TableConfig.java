@@ -12,7 +12,7 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
-//TODO classType?
+// TODO classType?
 public class TableConfig {
   public static class Builder {
     private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
@@ -23,7 +23,6 @@ public class TableConfig {
     private ParserConfig parserConfig;
 
     public TableConfig builder() {
-      parserConfig = Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
       return new TableConfig(this);
     }
 
@@ -90,11 +89,11 @@ public class TableConfig {
           return node.getChildrenMenuConfigs();
         }
       });
-  
+
   public static <V> Builder builder() {
     return new Builder();
   }
-  
+
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
@@ -108,8 +107,8 @@ public class TableConfig {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
-    matcher=builder.matcherBuilder.build();
-    
+    matcher = builder.matcherBuilder.build();
+
     // topMenuConfigs = Collections2.filter(menuConfigs, MenuConfig::isTopMenu);
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
@@ -124,15 +123,19 @@ public class TableConfig {
 
   public Table.Builder parse(Sheet sheet) {
     Table.Builder builder = Table.builder().setTableConfig(this);
-    
-//    if (matcher.test(sheet)) {
-//      builder.setTableBuilders(tableBuilders);
-//    } else {
-//      builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
-//    }
+
+    // if (matcher.test(sheet)) {
+    // builder.setTableBuilders(tableBuilders);
+    // } else {
+    // builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
+    // }
     return builder;
   }
-  
+
+  public ParserConfig getEffectiveParserConfig() {
+    return Optional.ofNullable(parserConfig).orElse(sheetConfig.getEffectiveParserConfig());
+  }
+
   public SheetConfig getSheetConfig() {
     return sheetConfig;
   }

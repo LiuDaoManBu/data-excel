@@ -1,8 +1,8 @@
 package com.caotc.excel4j.parse.result;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -56,14 +56,18 @@ public class Table {
       return this;
     }
   }
-  
-  private static final Traverser<Menu<?>> MENU_TRAVERSER=Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
-    @Override
-    public Iterable<? extends Menu<?>> successors(Menu<?> node) {
-      return node.getChildrenMenus();
-    }
-  });
-  
+
+  private static final Traverser<Menu<?>> MENU_TRAVERSER =
+      Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
+        @Override
+        public Iterable<? extends Menu<?>> successors(Menu<?> node) {
+          return node.getChildrenMenus();
+        }
+      });
+
+  private static final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+      config -> config + "don't have any matches cell";
+
   public static Builder builder() {
     return new Builder();
   }
@@ -72,7 +76,7 @@ public class Table {
   private final ImmutableList<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu<?>> topMenus;
-  
+
   // private final ImmutableCollection<Menu> menus;
   // private final ImmutableCollection<Menu> dataMenus;
   // private final ImmutableCollection<Menu> fixedDataMenus;
@@ -84,35 +88,47 @@ public class Table {
   public Table(Builder builder) {
     tableConfig = builder.tableConfig;
     sheetParseResult = builder.sheetParseResult;
-    topMenus = loadTopMenus();
+    topMenus =
+        loadTopMenus().stream().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
     // dataMenus = Collections2.filter(menus, Menu::isDataMenu);
     // fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
     // unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
     // mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
     // mustMenus = Collections2.filter(menus, Menu::isMustMenu);
     // notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
-    // TODO
-    new TableError(this,tableConfig.getMatcher().getMessage(this));
-    errors = ImmutableList.of();
+
+    // new TableError(this, tableConfig.getMatcher().getMessageFunction().apply(this));
+    // TODO 顺序问题?
+    ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
+        topMenus.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
+
+    errors = tableConfig.getTopMenuConfigs().stream()
+        .filter(config -> !matchesMenuConfigs.contains(config))
+        .map(config -> new TableError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+        .collect(ImmutableList.toImmutableList());
   }
 
-  private ImmutableCollection<Menu<?>> loadTopMenus() {
-    com.google.common.collect.ImmutableSet.Builder<Menu<?>> builder = ImmutableSet.builder();
+  private ImmutableCollection<Menu.Builder<?>> loadTopMenus() {
+    com.google.common.collect.ImmutableSet.Builder<Menu.Builder<?>> builder =
+        ImmutableSet.builder();
 
-    Collection<MenuConfig<?>> menuConfigs = tableConfig.getTopMenuConfigs();
+    ImmutableCollection<MenuConfig<?>> menuConfigs = tableConfig.getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
+    // TODO 改写stream,效率优化
     for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
       Row row = sheet.getRow(rowIndex);
       for (int columnIndex = row.getFirstCellNum(); columnIndex < row
           .getLastCellNum(); columnIndex++) {
+        // TODO 获取cell模式正确?
         StandardCell cell =
             StandardCell.valueOf(row.getCell(columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK));
-        com.google.common.base.Optional<MenuConfig<?>> optional =
-            Iterables.tryFind(menuConfigs, menuConfig -> menuConfig.getMenuMatcher().test(cell));
+        // TODO 重复匹配问题
+        Optional<MenuConfig<?>> optional = menuConfigs.stream()
+            .filter(menuConfig -> menuConfig.getMenuMatcher().test(cell)).findAny();
         if (optional.isPresent()) {
-          com.caotc.excel4j.parse.result.Menu.Builder topMenuBuilder = Menu.builder();
-          builder.add(
-              topMenuBuilder.setCell(cell).setMenuConfig(optional.get()).setTable(this).build());
+          // TODO safe
+          Menu.Builder topMenuBuilder = Menu.builder();
+          builder.add(topMenuBuilder.setCell(cell).setMenuConfig(optional.get()).setTable(this));
         }
       }
     }

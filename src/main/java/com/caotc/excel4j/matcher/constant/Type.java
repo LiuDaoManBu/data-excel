@@ -15,13 +15,14 @@ public enum Type {
 
     @Override
     public <T> Optional<String> apply(Matcher<T> matcher, T value) {
+      //TODO 消灭instanceof?
       return matcher.getPredicates().stream().filter(predicate -> !predicate.test(value))
           .findFirst()
           .map(predicate -> predicate instanceof Matcher
               && Objects.nonNull(((Matcher<T>) predicate).getMessageFunction())
                   ? (Matcher<T>) predicate
                   : matcher)
-          .map(m -> m.getMessage(value));
+          .map(m -> m.getMessageFunction().apply(value));
     }
   },
   OR {
@@ -33,7 +34,7 @@ public enum Type {
     @Override
     public <T> Optional<String> apply(Matcher<T> matcher, T value) {
       return matcher.getPredicates().stream().noneMatch(p -> p.test(value))
-          ? Optional.ofNullable(matcher.getMessage(value))
+          ? Optional.ofNullable(matcher.getMessageFunction().apply(value))
           : Optional.empty();
     }
   };

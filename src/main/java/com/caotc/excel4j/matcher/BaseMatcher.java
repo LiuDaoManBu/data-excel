@@ -238,10 +238,6 @@ public class BaseMatcher<T> implements Matcher<T> {
     return endJunction(Type.OR);
   }
 
-  public String getMessage(T value) {
-    return messageFunction.apply(value);
-  }
-  
   public Type getType() {
     return type;
   }
@@ -260,7 +256,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public Optional<String> match(T value) {
-    return null;
+    return type.apply(this, value);
   }
   
 }

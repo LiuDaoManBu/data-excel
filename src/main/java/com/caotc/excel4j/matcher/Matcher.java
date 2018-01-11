@@ -8,9 +8,10 @@ import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
-  public static interface Builder<T>{
+  public static interface Builder<T> {
     Matcher<T> build();
   }
+
   Matcher<T> add(Predicate<T> predicate);
 
   <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform);
@@ -27,12 +28,10 @@ public interface Matcher<T> extends Predicate<T> {
   Matcher<T> endAnd();
 
   Matcher<T> endOr();
-  
+
   Optional<String> match(T value);
-  
+
   Function<T, String> getMessageFunction();
-  
-  String getMessage(T value);
-  
+
   List<Predicate<T>> getPredicates();
 }
