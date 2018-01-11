@@ -224,7 +224,7 @@ public class Menu<V> {
   }
 
   public boolean hasChildrenMenu(StandardCell cell) {
-    return Iterables.any(childrenMenus, childrenMenu -> childrenMenu.getCell().equals(cell));
+    return childrenMenus.stream().anyMatch(childrenMenu -> childrenMenu.getCell().equals(cell));
   }
 
   public String getName() {

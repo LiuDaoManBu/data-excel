@@ -7,24 +7,29 @@ import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 
 public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
   public static class Builder<T extends Comparable<T>> extends BaseMatcher.Builder<T> {
-    public static class Expression<T extends Comparable<T>>{
+    public static class Expression<T extends Comparable<T>> {
       private ComparableMatcherType MatcherType;
       private T predicateValue;
+
       public ComparableMatcherType getMatcherType() {
         return MatcherType;
       }
+
       public void setMatcherType(ComparableMatcherType matcherType) {
         MatcherType = matcherType;
       }
+
       public T getPredicateValue() {
         return predicateValue;
       }
+
       public void setPredicateValue(T predicateValue) {
         this.predicateValue = predicateValue;
       }
     }
+
     private List<Expression<T>> expressions;
-    
+
     @Override
     public ComparableMatcher<T> build() {
       return new ComparableMatcher<T>(this);
@@ -44,11 +49,12 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
   public static <T extends Comparable<T>> Builder<T> builder() {
     return new Builder<>();
   }
-  
+
   private ComparableMatcher(Builder<T> builder) {
     super(builder);
-    if(Objects.nonNull(builder.expressions)) {
-      builder.expressions.stream().forEach(expression->add(expression.MatcherType,expression.predicateValue));
+    if (Objects.nonNull(builder.expressions)) {
+      builder.expressions.stream()
+          .forEach(expression -> add(expression.MatcherType, expression.predicateValue));
     }
   }
 

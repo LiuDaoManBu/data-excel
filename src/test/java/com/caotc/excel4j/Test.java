@@ -86,8 +86,9 @@ class B<T> extends A {
 
 }
 
-class C{
-  private Map<String,Integer> map;
+
+class C {
+  private Map<String, Integer> map;
 
   public Map<String, Integer> getMap() {
     return map;
@@ -100,12 +101,12 @@ class C{
 
 }
 
+
 public class Test {
-  public static void main(String[] args) throws Exception {
-  }
-  
+  public static void main(String[] args) throws Exception {}
+
   public static void testGeneric() {
-    ComparableMatcher<Integer> matcher = new ComparableMatcher<Integer>();
+    ComparableMatcher<Integer> matcher = ComparableMatcher.<Integer>builder().build();
     System.out.println(matcher);
   }
 

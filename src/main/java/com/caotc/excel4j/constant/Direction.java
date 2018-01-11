@@ -1,19 +1,15 @@
 package com.caotc.excel4j.constant;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressBase;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public enum Direction {
   TOP {
@@ -55,7 +51,7 @@ public enum Direction {
   LEFT {
     @Override
     public boolean isBorderCell(StandardCell cell) {
-      return Iterables.any(cell.getRows(), row -> cell.containsColumn(row.getFirstCellNum()));
+      return cell.getRows().stream().anyMatch(row -> cell.containsColumn(row.getFirstCellNum()));
     }
 
     @Override
@@ -73,7 +69,7 @@ public enum Direction {
   RIGHT {
     @Override
     public boolean isBorderCell(StandardCell cell) {
-      return Iterables.any(cell.getRows(), row -> cell.containsColumn(row.getLastCellNum()));
+      return cell.getRows().stream().anyMatch(row -> cell.containsColumn(row.getLastCellNum()));
     }
 
     @Override
@@ -100,54 +96,50 @@ public enum Direction {
     return getAddress(address, DEFAULT_DISTANCE);
   }
 
-  public List<StandardCell> next(StandardCell original) {
+  public ImmutableList<StandardCell> next(StandardCell original) {
     Preconditions.checkNotNull(original);
 
     if (isBorderCell(original)) {
-      return Collections.emptyList();
+      return ImmutableList.of();
     }
 
     CellRangeAddress address = nextAddress(original);
 
-    List<StandardCell> cells = Lists.newLinkedList();
+    ImmutableList.Builder<StandardCell> cells = ImmutableList.builder();
     for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
       for (int columnIndex = address.getFirstColumn(); columnIndex <= address
           .getLastColumn(); columnIndex++) {
-        StandardCell cell = StandardCell
-            .valueOf(ExcelUtil.getCellByIndex(original.getSheet(), rowIndex, columnIndex));
-        if (!cells.contains(cell)) {
-          cells.add(cell);
+        Cell cell = ExcelUtil.getCellByIndex(original.getSheet(), rowIndex, columnIndex);
+        StandardCell standardCell = StandardCell.valueOf(cell);
+        if (standardCell.getValueCell().equals(cell)) {
+          cells.add(standardCell);
         }
       }
     }
-    return cells;
+    return cells.build();
   }
 
-  public List<StandardCell> get(StandardCell cell, int distance) {
+  public ImmutableList<StandardCell> get(StandardCell cell, int distance) {// TODO distance不准确
     Preconditions.checkNotNull(cell);
     Preconditions.checkArgument(distance > 0);
 
-    List<StandardCell> cells = Lists.newArrayList(cell);
+    ImmutableList<StandardCell> cells = ImmutableList.of(cell);
     for (int i = 0; i < distance; i++) {
       cells = cells.stream().map(this::next).flatMap(Collection::stream)
-          .collect(Collectors.toCollection(LinkedList::new));
+          .collect(ImmutableList.toImmutableList());
     }
     return cells;
   }
 
   public Optional<StandardCell> nextCell(StandardCell cell) {
     Preconditions.checkNotNull(cell);
-    List<StandardCell> cells = next(cell);
-    return CollectionUtils.isEmpty(cells) ? Optional.empty()
-        : Optional.of(Iterables.getOnlyElement(cells));
+    return Optional.of(next(cell)).filter(t -> !t.isEmpty()).map(Iterables::getOnlyElement);
   }
 
   public Optional<StandardCell> getCell(StandardCell cell, int distance) {
     Preconditions.checkNotNull(cell);
     Preconditions.checkArgument(distance > 0);
 
-    List<StandardCell> cells = get(cell, distance);
-    return CollectionUtils.isEmpty(cells) ? Optional.empty()
-        : Optional.of(Iterables.getOnlyElement(cells));
+    return Optional.of(next(cell)).filter(t -> !t.isEmpty()).map(Iterables::getOnlyElement);
   }
 }

@@ -1,9 +1,9 @@
 package com.caotc.excel4j.parse.result;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.EnumSet;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -22,7 +22,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import com.google.common.collect.Iterables;
 
 public class StandardCell extends CellRangeAddress implements Cell {
   private static final int ONE = 1;
@@ -75,36 +74,36 @@ public class StandardCell extends CellRangeAddress implements Cell {
     return getNumberOfCells() > ONE;
   }
 
-  public ImmutableCollection<Row> getRows(){
-    Builder<Row> builder=ImmutableSet.builder();
-    for(int rowIndex=getFirstRow();rowIndex<=getLastRow();rowIndex++) {
+  public ImmutableCollection<Row> getRows() {
+    Builder<Row> builder = ImmutableSet.builder();
+    for (int rowIndex = getFirstRow(); rowIndex <= getLastRow(); rowIndex++) {
       builder.add(sheet.getRow(rowIndex));
     }
     return builder.build();
   }
-  
+
   public boolean isTopBorderCell() {
     return isBorderCell(Direction.TOP);
   }
-  
+
   public boolean isBottomBorderCell() {
     return isBorderCell(Direction.BOTTOM);
   }
-  
+
   public boolean isLeftBorderCell() {
     return isBorderCell(Direction.LEFT);
   }
-  
+
   public boolean isRightBorderCell() {
     return isBorderCell(Direction.RIGHT);
   }
-  
+
   public boolean isBorderCell(Direction direction) {
     return direction.isBorderCell(this);
   }
-  
+
   public boolean isBorderCell() {
-    return Iterables.any(EnumSet.allOf(Direction.class), this::isBorderCell);
+    return Arrays.stream(Direction.values()).anyMatch(this::isBorderCell);
   }
 
   // delegate Cell methods start

@@ -210,7 +210,7 @@ public class Table {
   }
 
   public Optional<Menu<?>> getMenu(String menuName) {
-    return Iterables.tryFind(getMenus(), menu -> menu.getName().equals(menuName)).toJavaUtil();
+    return getMenus().stream().filter(menu -> menu.getName().equals(menuName)).findAny();
   }
 
   public ImmutableList<Menu<?>> getMenus() {

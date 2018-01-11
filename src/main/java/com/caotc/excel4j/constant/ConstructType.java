@@ -48,7 +48,8 @@ public enum ConstructType {
       Preconditions.checkArgument(ClassUtil.isArrayOrIterable(type));
       // TODO value为Iterable或Array
       Preconditions
-          .checkArgument(Iterables.all(nameToValues.values(), value -> value instanceof List));
+          .checkArgument(nameToValues.values().stream().allMatch(value -> value instanceof List));
+
       List<Map<String, Object>> params = Lists.newLinkedList();
       nameToValues.forEach((name, value) -> {
         List<?> values =

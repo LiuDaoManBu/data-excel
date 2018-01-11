@@ -14,7 +14,6 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
 public class MenuConfig<V> {
@@ -199,7 +198,7 @@ public class MenuConfig<V> {
   }
 
   public boolean isDataMenu() {
-    return Iterables.isEmpty(childrenMenuConfigs);
+    return childrenMenuConfigs.isEmpty();
   }
 
   public boolean isFixedDataMenu() {
