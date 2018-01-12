@@ -51,7 +51,8 @@ public enum Direction {
   LEFT {
     @Override
     public boolean isBorderCell(StandardCell cell) {
-      return cell.getRows().stream().anyMatch(row -> cell.containsColumn(row.getFirstCellNum()));
+      return ExcelUtil.getRows(cell.getSheet(), cell.getFirstRow(), cell.getLastRow())
+          .anyMatch(row -> cell.containsColumn(row.getFirstCellNum()));
     }
 
     @Override
@@ -69,7 +70,8 @@ public enum Direction {
   RIGHT {
     @Override
     public boolean isBorderCell(StandardCell cell) {
-      return cell.getRows().stream().anyMatch(row -> cell.containsColumn(row.getLastCellNum()));
+      return ExcelUtil.getRows(cell.getSheet(), cell.getFirstRow(), cell.getLastRow())
+          .anyMatch(row -> cell.containsColumn(row.getLastCellNum()));
     }
 
     @Override
@@ -119,7 +121,7 @@ public enum Direction {
     return cells.build();
   }
 
-  public ImmutableList<StandardCell> get(StandardCell cell, int distance) {// TODO distance不准确
+  public ImmutableList<StandardCell> get(StandardCell cell, int distance) {// TODO distance名称不准确
     Preconditions.checkNotNull(cell);
     Preconditions.checkArgument(distance > 0);
 

@@ -2,7 +2,6 @@ package com.caotc.excel4j.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -28,11 +28,7 @@ import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
@@ -44,6 +40,9 @@ public class ExcelUtil {
                   : cell.getNumericCellValue())
           .put(CellType.STRING, Cell::getStringCellValue)
           .put(CellType.BOOLEAN, Cell::getBooleanCellValue).build();
+
+  public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
+      MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
   // TODO 转移到Menu类中?
   // public static boolean isDataCell(Cell cell,Menu menu,Collection<Menu> menus){
@@ -189,7 +188,7 @@ public class ExcelUtil {
   }
 
   public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {
-    return getCellByIndex(sheet, rowIndex, columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK);
+    return getCellByIndex(sheet, rowIndex, columnIndex, DEFAULT_MISSING_CELL_POLICY);
   }
 
   public static boolean isMergedRegion(@Nullable Cell cell) {
@@ -221,28 +220,12 @@ public class ExcelUtil {
    */
   public static Optional<CellRangeAddress> getMergedRegion(@Nullable Sheet sheet, int rowIndex,
       int columnIndex) {
-    return Optional.ofNullable(sheet).map(ExcelUtil::getMergedRegions).orElse(ImmutableList.of())
-        .stream().filter(address -> address.isInRange(rowIndex, columnIndex)).findAny();
+    return getMergedRegions(sheet).filter(address -> address.isInRange(rowIndex, columnIndex))
+        .findAny();
   }
 
   public static Optional<StandardCell> toStandardCell(@Nullable Cell cell) {
     return Optional.ofNullable(cell).map(StandardCell::valueOf);
-  }
-
-  public static ImmutableCollection<Cell> getCells(Sheet sheet, CellRangeAddress cellRangeAddress) {
-    if (sheet == null || cellRangeAddress == null) {
-      return ImmutableSet.of();
-    }
-    
-    List<Cell> cells = Lists.newLinkedList();
-    for (int rowIndex = cellRangeAddress.getFirstRow(); rowIndex <= cellRangeAddress
-        .getLastRow(); rowIndex++) {
-      for (int columnIndex = cellRangeAddress.getFirstColumn(); columnIndex <= cellRangeAddress
-          .getLastColumn(); columnIndex++) {
-        cells.add(getCellByIndex(sheet, rowIndex, columnIndex));
-      }
-    }
-    return cells;
   }
 
   /**
@@ -516,27 +499,83 @@ public class ExcelUtil {
       @Nullable CellRangeAddress cellAddress) {
     if (Objects.nonNull(sheet) && Objects.nonNull(cellAddress)) {
       AtomicInteger index = new AtomicInteger();
-      getMergedRegions(sheet).stream()
+      getMergedRegions(sheet)
           .collect(ImmutableMap.toImmutableMap(Function.identity(), t -> index.incrementAndGet()))
           .entrySet().stream().filter(entry -> cellAddress.equals(entry.getKey())).findAny()
           .ifPresent(entry -> sheet.removeMergedRegion(entry.getValue()));
     }
   }
 
-  public static ImmutableList<Sheet> getSheets(Workbook workbook) {
-    return IntStream.range(0, workbook.getNumberOfSheets()).mapToObj(workbook::getSheetAt)
-        .collect(ImmutableList.toImmutableList());
+  public static Stream<Sheet> getSheets(@Nullable Workbook workbook) {
+    return Optional.ofNullable(workbook).map(t -> IntStream.range(0, t.getNumberOfSheets()))
+        .orElse(IntStream.empty()).mapToObj(workbook::getSheetAt);
   }
-  
-  public static ImmutableList<Row> getSheets(Sheet sheet) {
-    return IntStream.range(0, workbook.getNumberOfSheets()).mapToObj(workbook::getSheetAt)
-        .collect(ImmutableList.toImmutableList());
+
+  public static Stream<Row> getRows(@Nullable Sheet sheet) {
+    // TODO sheet.getTopRow()? closed?
+    return Optional.ofNullable(sheet)
+        .map(t -> getRows(sheet, sheet.getFirstRowNum(), sheet.getLastRowNum())).get();
   }
-  
-  public static ImmutableList<CellRangeAddress> getMergedRegions(@Nullable Sheet sheet) {
-    return Optional
-        .ofNullable(sheet).map(t -> IntStream.range(0, t.getNumMergedRegions())
-            .mapToObj(sheet::getMergedRegion).collect(ImmutableList.toImmutableList()))
-        .orElse(ImmutableList.of());
+
+  public static Stream<Row> getRows(@Nullable Sheet sheet, int firstRowIndex, int lastRowIndex) {
+    // TODO sheet.getTopRow()? closed
+    return Optional.ofNullable(sheet).map(t -> IntStream.range(firstRowIndex, lastRowIndex))
+        .orElse(IntStream.empty()).mapToObj(sheet::getRow);
+  }
+
+  public static Stream<CellRangeAddress> getMergedRegions(@Nullable Sheet sheet) {
+    return Optional.ofNullable(sheet).map(t -> IntStream.range(0, t.getNumMergedRegions()))
+        .orElse(IntStream.empty()).mapToObj(sheet::getMergedRegion);
+  }
+
+  public static Stream<Cell> getCells(@Nullable Sheet sheet) {
+    return getCells(sheet);
+  }
+
+  public static Stream<Cell> getCells(@Nullable Sheet sheet, @Nullable MissingCellPolicy policy) {
+    // TODO sheet.getTopRow()? closed
+    MissingCellPolicy effectivePolicy =
+        Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
+    return getRows(sheet).flatMap(row -> getCells(row, effectivePolicy));
+  }
+
+  public static Stream<Cell> getCells(@Nullable Sheet sheet,
+      @Nullable CellRangeAddress cellRangeAddress) {
+    return getCells(sheet, cellRangeAddress, DEFAULT_MISSING_CELL_POLICY);
+  }
+
+  public static Stream<Cell> getCells(@Nullable Sheet sheet,
+      @Nullable CellRangeAddress cellRangeAddress, @Nullable MissingCellPolicy policy) {
+    if (Objects.isNull(sheet) || Objects.isNull(cellRangeAddress)) {
+      return Stream.empty();
+    }
+
+    MissingCellPolicy effectivePolicy =
+        Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
+    return IntStream.rangeClosed(cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow())
+        .mapToObj(sheet::getRow).flatMap(row -> getCells(row, effectivePolicy))
+        .filter(cellRangeAddress::isInRange);
+  }
+
+  public static Stream<Cell> getCells(@Nullable Row row) {
+    return getCells(row, DEFAULT_MISSING_CELL_POLICY);
+  }
+
+  public static Stream<Cell> getCells(@Nullable Row row, @Nullable MissingCellPolicy policy) {
+    return Optional.ofNullable(row)
+        .map(t -> getCells(t, t.getFirstCellNum(), t.getLastCellNum(), policy)).get();
+  }
+
+  public static Stream<Cell> getCells(@Nullable Row row, int firstColumnIndex,
+      int lastColumnIndex) {
+    return getCells(row, firstColumnIndex, lastColumnIndex, DEFAULT_MISSING_CELL_POLICY);
+  }
+
+  public static Stream<Cell> getCells(@Nullable Row row, int firstColumnIndex, int lastColumnIndex,
+      @Nullable MissingCellPolicy policy) {
+    MissingCellPolicy effectivePolicy =
+        Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
+    return Optional.ofNullable(row).map(t -> IntStream.range(firstColumnIndex, lastColumnIndex))
+        .orElse(IntStream.empty()).mapToObj(i -> row.getCell(i, effectivePolicy));
   }
 }

@@ -69,9 +69,9 @@ public class WorkbookConfig {
         matcher.match(workbook).map(message -> new WorkbookError(workbook, message));
     optional.ifPresent(errors::add);
     if (!optional.isPresent()) {
-      ImmutableList<Sheet> sheets = ExcelUtil.getSheets(workbook);
       // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
-      sheetConfigs.stream().filter(config -> sheets.stream().noneMatch(config.getMatcher()::test))
+      sheetConfigs.stream()
+          .filter(config -> ExcelUtil.getSheets(workbook).noneMatch(config.getMatcher()::test))
           .map(config -> new WorkbookError(workbook,
               SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
           .forEach(errors::add);
@@ -79,8 +79,9 @@ public class WorkbookConfig {
 
       // TODO sheet被多个matcher匹配的情况?
       builder.setSheetParseResultBuilders(sheetConfigs.stream()
-          .filter(config -> sheets.stream().anyMatch(config.getMatcher()::test))
-          .map(config -> sheets.stream().filter(config.getMatcher()::test).map(config::parse))
+          .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
+          .map(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
+              .map(config::parse))
           .flatMap(Function.identity()).collect(ImmutableList.toImmutableList()));
     }
     builder.setErrors(errors.build());

@@ -21,7 +21,6 @@ import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 
 public class StandardCell extends CellRangeAddress implements Cell {
   private static final int ONE = 1;
@@ -53,7 +52,7 @@ public class StandardCell extends CellRangeAddress implements Cell {
     this.sheet = sheet;
     // TODO 是否需要出于安全性考虑复写一份私有方法在本类?
     this.valueCell = ExcelUtil.getCellByIndex(sheet, getFirstRow(), getFirstColumn());
-    this.cells = ExcelUtil.getCells(sheet, this);
+    this.cells = ExcelUtil.getCells(sheet, this).collect(ImmutableSet.toImmutableSet());
   }
 
   public Object getValue() {
@@ -62,14 +61,6 @@ public class StandardCell extends CellRangeAddress implements Cell {
 
   public boolean isMergedRegion() {
     return getNumberOfCells() > ONE;
-  }
-
-  public ImmutableCollection<Row> getRows() {
-    Builder<Row> builder = ImmutableSet.builder();
-    for (int rowIndex = getFirstRow(); rowIndex <= getLastRow(); rowIndex++) {
-      builder.add(sheet.getRow(rowIndex));
-    }
-    return builder.build();
   }
 
   public boolean isTopBorderCell() {
