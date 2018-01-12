@@ -1,10 +1,8 @@
 package com.caotc.excel4j.util;
 
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -177,18 +175,17 @@ public class ExcelUtil {
   // return javaDatas;
   // }
 
-  public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex,
-      MissingCellPolicy policy) {
-    Row row = sheet.getRow(rowIndex);
-    if (row == null) {
-      row = sheet.createRow(rowIndex);
-    }
-
-    return row.getCell(columnIndex, policy);
+  @Nullable
+  public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {
+    return getCell(sheet, rowIndex, columnIndex, DEFAULT_MISSING_CELL_POLICY);
   }
 
-  public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {
-    return getCellByIndex(sheet, rowIndex, columnIndex, DEFAULT_MISSING_CELL_POLICY);
+  @Nullable
+  public static Cell getCell(@Nullable Sheet sheet, int rowIndex, int columnIndex,
+      @Nullable MissingCellPolicy policy) {
+    return Optional.ofNullable(sheet).map(t -> t.getRow(rowIndex)).map(row -> row
+        .getCell(columnIndex, Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY)))
+        .orElse(null);
   }
 
   public static boolean isMergedRegion(@Nullable Cell cell) {
@@ -236,86 +233,98 @@ public class ExcelUtil {
    * @param sheet 工作簿
    * @return 是否含有合并单元格
    */
-  public static boolean hasMergedRegion(Sheet sheet) {
-    return sheet.getNumMergedRegions() > 0;
+  public static boolean hasMergedRegion(@Nullable Sheet sheet) {
+    return Optional.ofNullable(sheet).map(Sheet::getNumMergedRegions).map(n -> n > 0).orElse(false);
   }
 
-  public static void setDataFromEntity(Sheet sheet, List<?> datas, Map<String, SheetConfig> map,
-      SimpleDateFormat sdf) {
-    // if(datas!=null && !datas.isEmpty()){
-    // for(Entry<String,SheetConfig> entry:map.entrySet()){
-    // Field field=null;
-    // try {
-    // field=datas.get(0).getClass().getDeclaredField(entry.getKey());
-    // if(field!=null){
-    // field.setAccessible(true);
-    // SheetConfig config=entry.getValue();
-    // if(config.isDataFlag()){
-    // if(config.isSingleDataFlag()){
-    // Cell menuCell=getCellByMenuName(sheet, config.getMenuNameMatcher().getMatchString());
-    // if(menuCell!=null){
-    // Cell dataCell=config.getDirection().nextCell(menuCell);
-    // if(dataCell!=null){
-    // Object value=field.get(datas.get(0));
-    // setCellValue(dataCell,value,sdf);
-    // }
-    // }
-    // }else{
-    // Cell menuCell=getCellByMenuName(sheet, config.getMenuNameMatcher().getMatchString());
-    // if(menuCell!=null){
-    // CellStyle cellStyle=config.getDirection().nextCell(menuCell).getCellStyle();
-    // Cell dataCell=null;
-    // for(int i=0;i<datas.size();i++){
-    // dataCell=config.getDirection().nextCell(menuCell);
-    // Object value=field.get(datas.get(i));
-    // setCellValue(dataCell,value,sdf);
-    // dataCell.setCellStyle(cellStyle);
-    // }
-    // }
-    // }
-    // }
-    // field.setAccessible(false);
-    // }
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // }
-    // }
-  }
+  // public static void setDataFromEntity(Sheet sheet, List<?> datas, Map<String, SheetConfig> map,
+  // SimpleDateFormat sdf) {
+  // if(datas!=null && !datas.isEmpty()){
+  // for(Entry<String,SheetConfig> entry:map.entrySet()){
+  // Field field=null;
+  // try {
+  // field=datas.get(0).getClass().getDeclaredField(entry.getKey());
+  // if(field!=null){
+  // field.setAccessible(true);
+  // SheetConfig config=entry.getValue();
+  // if(config.isDataFlag()){
+  // if(config.isSingleDataFlag()){
+  // Cell menuCell=getCellByMenuName(sheet, config.getMenuNameMatcher().getMatchString());
+  // if(menuCell!=null){
+  // Cell dataCell=config.getDirection().nextCell(menuCell);
+  // if(dataCell!=null){
+  // Object value=field.get(datas.get(0));
+  // setCellValue(dataCell,value,sdf);
+  // }
+  // }
+  // }else{
+  // Cell menuCell=getCellByMenuName(sheet, config.getMenuNameMatcher().getMatchString());
+  // if(menuCell!=null){
+  // CellStyle cellStyle=config.getDirection().nextCell(menuCell).getCellStyle();
+  // Cell dataCell=null;
+  // for(int i=0;i<datas.size();i++){
+  // dataCell=config.getDirection().nextCell(menuCell);
+  // Object value=field.get(datas.get(i));
+  // setCellValue(dataCell,value,sdf);
+  // dataCell.setCellStyle(cellStyle);
+  // }
+  // }
+  // }
+  // }
+  // field.setAccessible(false);
+  // }
+  // } catch (Exception e) {
+  // e.printStackTrace();
+  // }
+  // }
+  // }
+  // }
 
-  public static void setDataFromMap(Sheet sheet, Collection<Map<String, Object>> datas,
-      Collection<SheetConfig> menuConfigs, SimpleDateFormat sdf) {
-    // if(datas!=null && !datas.isEmpty()){
-    // ParseResult parseResult=parseMenu(sheet, menuConfigs);
-    // for(Menu menu:parseResult.getFixedMenus()){
-    // Cell dataCell=menu.getDataCell(1);
-    // setCellValue(dataCell,datas.iterator().next().get(menu.getMenuConfig().getFieldName()),sdf);
-    // }
-    // int i=1;
-    // for(Map<String,Object> data:datas){
-    // for(Menu menu:parseResult.getNoFixedMenus()){
-    // CellStyle cellStyle=menu.getDataCell(1).getCellStyle();
-    // Cell dataCell=menu.getDataCell(i);
-    // dataCell.setCellStyle(cellStyle);
-    // setCellValue(dataCell,data.get(menu.getCheckMenuConfig().getFieldName()),sdf);
-    // }
-    // i++;
-    // }
-    // }
-  }
+  // public static void setDataFromMap(Sheet sheet, Collection<Map<String, Object>> datas,
+  // Collection<SheetConfig> menuConfigs, SimpleDateFormat sdf) {
+  // if(datas!=null && !datas.isEmpty()){
+  // ParseResult parseResult=parseMenu(sheet, menuConfigs);
+  // for(Menu menu:parseResult.getFixedMenus()){
+  // Cell dataCell=menu.getDataCell(1);
+  // setCellValue(dataCell,datas.iterator().next().get(menu.getMenuConfig().getFieldName()),sdf);
+  // }
+  // int i=1;
+  // for(Map<String,Object> data:datas){
+  // for(Menu menu:parseResult.getNoFixedMenus()){
+  // CellStyle cellStyle=menu.getDataCell(1).getCellStyle();
+  // Cell dataCell=menu.getDataCell(i);
+  // dataCell.setCellStyle(cellStyle);
+  // setCellValue(dataCell,data.get(menu.getCheckMenuConfig().getFieldName()),sdf);
+  // }
+  // i++;
+  // }
+  // }
+  // }
 
-  public static void setCellValue(Cell cell, Object value, SimpleDateFormat sdf) {
-    if (value != null) {
-      if (value instanceof Date && sdf != null) {
-        cell.setCellValue(sdf.format(value));
-      } else if (value instanceof Number) {
-        cell.setCellValue(((Number) value).doubleValue());
+  // TODO 方法重写 指定cellType?
+  public static void setCellValue(@Nullable Cell cell, @Nullable Object value) {
+    Optional.ofNullable(cell).ifPresent(t -> {
+      if (Objects.isNull(value)) {
+        cell.setCellType(CellType.BLANK);
       } else {
+        if (value instanceof Boolean) {
+          cell.setCellValue((Boolean) value);
+        }
+        if (value instanceof Date) {
+          cell.setCellValue((Date) value);
+        }
+        if (value instanceof Calendar) {
+          cell.setCellValue((Calendar) value);
+        }
+        if (value instanceof Double) {
+          cell.setCellValue((Double) value);
+        }
         cell.setCellValue(value.toString());
       }
-    }
+    });
   }
 
+  // TODO 方法重写
   public static void moveCell(Collection<Cell> cells, int rowMoveNumber, int columnMoveNumber) {
     Set<CellRangeAddress> addresses = Sets.newHashSet();
     for (Cell cell : cells) {
@@ -332,6 +341,7 @@ public class ExcelUtil {
     }
   }
 
+  // TODO 方法重构
   public static void moveCell(Cell cell, int rowMoveNumber, int columnMoveNumber) {
     int rowIndex = cell.getRowIndex();
     int columnIndex = cell.getColumnIndex();
@@ -344,6 +354,7 @@ public class ExcelUtil {
     removeCell(cell);
   }
 
+  // TODO 方法重构
   public static void moveCell(Sheet sheet, CellRangeAddress address, int rowMoveNumber,
       int columnMoveNumber) {
     int firstRow = address.getFirstRow();
@@ -366,6 +377,7 @@ public class ExcelUtil {
     sheet.addMergedRegion(targetAddress);
   }
 
+  // TODO 方法重构
   public static void removeCell(@Nullable Cell cell) {
     Optional<CellRangeAddress> address = getMergedRegion(cell);
     if (address.isPresent()) {
@@ -376,6 +388,7 @@ public class ExcelUtil {
     }
   }
 
+  // TODO 方法重构
   public static void removeCell(@Nullable Sheet sheet, @Nullable CellRangeAddress address) {
     int sheetMergeCount = sheet.getNumMergedRegions();
     for (int i = sheetMergeCount - 1; i >= 0; i--) {
@@ -394,26 +407,7 @@ public class ExcelUtil {
     }
   }
 
-  // TODO 改成children?或者直接删除?
-  // public static List<String> getSubordinateMenus(Sheet sheet,String menuName){
-  // List<String> menus=Lists.newArrayList();
-  // Cell menu=getCellByMenuName(sheet,menuName);
-  // if(menu!=null){
-  // CellRangeAddress cellRangeAddress=getMergedRegion(menu);
-  // if(cellRangeAddress==null){
-  // return null;
-  // }
-  // int startColumn=cellRangeAddress.getFirstColumn();
-  // int endColumn=cellRangeAddress.getLastColumn();
-  // for(int column=startColumn;column<=endColumn;){
-  // Cell subordinateMenu=getCellByIndex(sheet,getCellBottomRowIndex(menu),column);
-  // menus.add(getStringValue(subordinateMenu));
-  // column=getCellRightColumnIndex(subordinateMenu);
-  // }
-  // }
-  // return menus;
-  // }
-
+  // TODO 方法重构 定义为StandardCell方法?
   public static void setCellStyle(Cell cell, CellStyle style) {
     Optional<CellRangeAddress> optional = getMergedRegion(cell);
     if (optional.isPresent()) {
@@ -430,6 +424,7 @@ public class ExcelUtil {
     }
   }
 
+  // TODO 方法重构
   public static void copyCell(Cell srcCell, Cell targetCell, boolean copyValueFlag) {
     // 样式
     targetCell.setCellStyle(srcCell.getCellStyle());

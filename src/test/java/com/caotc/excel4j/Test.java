@@ -106,6 +106,7 @@ class C {
 public class Test {
   public static void main(String[] args) throws Exception {
     System.out.println(Calendar.getInstance().getTime());
+    System.out.println(null instanceof String);
   }
 
   public static void testGeneric() {
