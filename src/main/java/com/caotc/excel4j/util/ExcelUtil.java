@@ -7,8 +7,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.IntStream;
+import javax.annotation.Nullable;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -22,12 +26,25 @@ import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.parse.result.SheetParseResult;
+import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
 public class ExcelUtil {
+  private static final ImmutableMap<CellType, Function<Cell, Object>> CELL_TYPE_TO_VALUE_FUNCTIONS =
+      ImmutableMap.<CellType, Function<Cell, Object>>builder()
+          .put(CellType.NUMERIC,
+              cell -> DateUtil.isCellDateFormatted(cell) ? cell.getDateCellValue()
+                  : cell.getNumericCellValue())
+          .put(CellType.STRING, Cell::getStringCellValue)
+          .put(CellType.BOOLEAN, Cell::getBooleanCellValue).build();
+
   // TODO 转移到Menu类中?
   // public static boolean isDataCell(Cell cell,Menu menu,Collection<Menu> menus){
   // if(cell==null){
@@ -175,8 +192,8 @@ public class ExcelUtil {
     return getCellByIndex(sheet, rowIndex, columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK);
   }
 
-  public static boolean isMergedRegion(Cell cell) {
-    return getMergedRegion(cell) == null;
+  public static boolean isMergedRegion(@Nullable Cell cell) {
+    return getMergedRegion(cell).isPresent();
   }
 
   /**
@@ -187,11 +204,9 @@ public class ExcelUtil {
    * @param cell 单元格
    * @return 该合并单元格对象，不是则为null
    */
-  public static CellRangeAddress getMergedRegion(Cell cell) {
-    if (cell == null) {
-      return null;
-    }
-    return getMergedRegion(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex());
+  public static Optional<CellRangeAddress> getMergedRegion(@Nullable Cell cell) {
+    return Optional.ofNullable(cell)
+        .map(t -> getMergedRegion(t.getSheet(), t.getRowIndex(), t.getColumnIndex())).get();
   }
 
   /**
@@ -204,23 +219,21 @@ public class ExcelUtil {
    * @param columnIndex 列下标
    * @return 该合并单元格对象，不是则为null
    */
-  public static CellRangeAddress getMergedRegion(Sheet sheet, int rowIndex, int columnIndex) {
-    if (sheet != null) {
-      int sheetMergeCount = sheet.getNumMergedRegions();
-      for (int i = 0; i < sheetMergeCount; i++) {
-        CellRangeAddress range = sheet.getMergedRegion(i);
-        if (range.isInRange(rowIndex, columnIndex)) {
-          return range;
-        }
-      }
-    }
-    return null;
+  public static Optional<CellRangeAddress> getMergedRegion(@Nullable Sheet sheet, int rowIndex,
+      int columnIndex) {
+    return Optional.ofNullable(sheet).map(ExcelUtil::getMergedRegions).orElse(ImmutableList.of())
+        .stream().filter(address -> address.isInRange(rowIndex, columnIndex)).findAny();
   }
 
-  public static Collection<Cell> getCells(Sheet sheet, CellRangeAddress cellRangeAddress) {
+  public static Optional<StandardCell> toStandardCell(@Nullable Cell cell) {
+    return Optional.ofNullable(cell).map(StandardCell::valueOf);
+  }
+
+  public static ImmutableCollection<Cell> getCells(Sheet sheet, CellRangeAddress cellRangeAddress) {
     if (sheet == null || cellRangeAddress == null) {
-      return Collections.emptyList();
+      return ImmutableSet.of();
     }
+    
     List<Cell> cells = Lists.newLinkedList();
     for (int rowIndex = cellRangeAddress.getFirstRow(); rowIndex <= cellRangeAddress
         .getLastRow(); rowIndex++) {
@@ -240,7 +253,7 @@ public class ExcelUtil {
    * @param sheet 工作簿
    * @return 是否含有合并单元格
    */
-  public static boolean hasMerged(Sheet sheet) {
+  public static boolean hasMergedRegion(Sheet sheet) {
     return sheet.getNumMergedRegions() > 0;
   }
 
@@ -320,38 +333,12 @@ public class ExcelUtil {
     }
   }
 
-  public static int getCellLeftColumnIndex(Cell cell) {
-    CellRangeAddress cellRangeAddress = getMergedRegion(cell);
-    int columnIndex =
-        cellRangeAddress == null ? cell.getColumnIndex() : cellRangeAddress.getFirstColumn();
-    return columnIndex - 1;
-  }
-
-  public static int getCellRightColumnIndex(Cell cell) {
-    CellRangeAddress cellRangeAddress = getMergedRegion(cell);
-    int columnIndex =
-        cellRangeAddress == null ? cell.getColumnIndex() : cellRangeAddress.getLastColumn();
-    return columnIndex + 1;
-  }
-
-  public static int getCellTopRowIndex(Cell cell) {
-    CellRangeAddress cellRangeAddress = getMergedRegion(cell);
-    int rowIndex = cellRangeAddress == null ? cell.getRowIndex() : cellRangeAddress.getFirstRow();
-    return rowIndex - 1;
-  }
-
-  public static int getCellBottomRowIndex(Cell cell) {
-    CellRangeAddress cellRangeAddress = getMergedRegion(cell);
-    int rowIndex = cellRangeAddress == null ? cell.getRowIndex() : cellRangeAddress.getLastRow();
-    return rowIndex + 1;
-  }
-
   public static void moveCell(Collection<Cell> cells, int rowMoveNumber, int columnMoveNumber) {
     Set<CellRangeAddress> addresses = Sets.newHashSet();
     for (Cell cell : cells) {
-      CellRangeAddress address = getMergedRegion(cell);
-      if (address != null) {
-        addresses.add(address);
+      Optional<CellRangeAddress> address = getMergedRegion(cell);
+      if (address.isPresent()) {
+        addresses.add(address.get());
       } else {
         moveCell(cell, rowMoveNumber, columnMoveNumber);
       }
@@ -396,17 +383,17 @@ public class ExcelUtil {
     sheet.addMergedRegion(targetAddress);
   }
 
-  public static void removeCell(Cell cell) {
-    CellRangeAddress address = getMergedRegion(cell);
-    if (address != null) {
-      removeCell(cell.getSheet(), address);
+  public static void removeCell(@Nullable Cell cell) {
+    Optional<CellRangeAddress> address = getMergedRegion(cell);
+    if (address.isPresent()) {
+      removeCell(cell.getSheet(), address.get());
     } else {
       cell.getRow()
           .removeCell(getCellByIndex(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()));
     }
   }
 
-  public static void removeCell(Sheet sheet, CellRangeAddress address) {
+  public static void removeCell(@Nullable Sheet sheet, @Nullable CellRangeAddress address) {
     int sheetMergeCount = sheet.getNumMergedRegions();
     for (int i = sheetMergeCount - 1; i >= 0; i--) {
       CellRangeAddress range = sheet.getMergedRegion(i);
@@ -445,10 +432,9 @@ public class ExcelUtil {
   // }
 
   public static void setCellStyle(Cell cell, CellStyle style) {
-    CellRangeAddress address = getMergedRegion(cell);
-    if (address == null) {
-      cell.setCellStyle(style);
-    } else {
+    Optional<CellRangeAddress> optional = getMergedRegion(cell);
+    if (optional.isPresent()) {
+      CellRangeAddress address = optional.get();
       for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
         for (int columnIndex = address.getFirstColumn(); columnIndex <= address
             .getLastColumn(); columnIndex++) {
@@ -456,6 +442,8 @@ public class ExcelUtil {
           c.setCellStyle(style);
         }
       }
+    } else {
+      cell.setCellStyle(style);
     }
   }
 
@@ -491,60 +479,23 @@ public class ExcelUtil {
     }
   }
 
-  public static boolean isDateCell(Cell cell) {
-    return BaseDataType.DATE_TIME.test(getValue(cell));
+  public static boolean isDateCell(@Nullable Cell cell) {
+    return Optional.ofNullable(cell).map(ExcelUtil::getValue).map(BaseDataType.DATE_TIME::test)
+        .orElse(false);
   }
 
-  public static Date getDate(Cell cell) {
-    // TODO require not null? not a DateCell?
-    if (Objects.isNull(cell) || CellType.BLANK.equals(cell.getCellTypeEnum())) {
-      return null;
-    }
-    return BaseDataType.DATE_TIME.cast(getValue(cell), Date.class);
+  @Nullable
+  public static Date getDate(@Nullable Cell cell) {
+    // TODO not a DateCell throw?
+    return Optional.ofNullable(cell).map(ExcelUtil::getValue)
+        .map(value -> BaseDataType.DATE_TIME.cast(value, Date.class)).orElse(null);
   }
 
-  public static Cell getFirstCell(Sheet sheet, CellRangeAddress mergedRegion) {
-    if (sheet == null || mergedRegion == null) {
-      return null;
-    }
-    return getCellByIndex(sheet, mergedRegion.getFirstRow(), mergedRegion.getFirstColumn());
-  }
-
-  public static Cell getFirstCell(Cell cell) {
-    if (isMergedRegion(cell)) {
-      return getFirstCell(cell.getSheet(), getMergedRegion(cell));
-    }
-    return cell;
-  }
-
-  public static Object getValue(Cell cell) {
-    // TODO require null
-    if (Objects.isNull(cell)) {
-      return null;
-    }
-
-    CellType cellType = cell.getCellTypeEnum();
-    if (CellType.FORMULA.equals(cellType)) {
-      cellType = cell.getCachedFormulaResultTypeEnum();
-    }
-
-    switch (cellType) {
-      case NUMERIC:
-        if (DateUtil.isCellDateFormatted(cell)) {
-          return cell.getDateCellValue();
-        } else {
-          return cell.getNumericCellValue();
-        }
-      case STRING:
-        return cell.getStringCellValue();
-      case BOOLEAN:
-        return cell.getBooleanCellValue();
-      // TODO 由于getErrorCellValue()方法获得的是excel中的数字类型的错误码,似乎没有实际意义,暂定仍返回null
-      case ERROR:
-      default:
-        throw new IllegalArgumentException(
-            "the CellType " + cellType + " of " + cell + " is not support");
-    }
+  @Nullable
+  public static Object getValue(@Nullable Cell cell) {
+    return Optional.ofNullable(cell).map(Cell::getCellTypeEnum)
+        .map(type -> CellType.FORMULA.equals(type) ? cell.getCachedFormulaResultTypeEnum() : type)
+        .map(CELL_TYPE_TO_VALUE_FUNCTIONS::get).map(function -> function.apply(cell)).orElse(null);
   }
 
   /**
@@ -555,28 +506,37 @@ public class ExcelUtil {
    * @param cell 单元格
    * @return 单元格内容的字符串
    */
-  public static String getStringValue(Cell cell) {
+  public static String getStringValue(@Nullable Cell cell) {
     // TODO 根据返回类型不同选择不同DataType?
-    return BaseDataType.STRING.cast(getValue(cell), String.class);
+    return Optional.ofNullable(cell).map(ExcelUtil::getValue)
+        .map(value -> BaseDataType.STRING.cast(value, String.class)).orElse(null);
   }
 
-  public static void removeMergedRegion(Sheet sheet, CellRangeAddress cellAddress) {
-    IntStream.range(0, sheet.getNumMergedRegions());
-    int sheetMergeCount = sheet.getNumMergedRegions();
-    for (int i = 0; i < sheetMergeCount; i++) {
-      CellRangeAddress range = sheet.getMergedRegion(i);
-      int firstColumnIndex = range.getFirstColumn();
-      int lastColumnIndex = range.getLastColumn();
-      int firstRowIndex = range.getFirstRow();
-      int lastRowIndex = range.getLastRow();
-      if (cellAddress != null) {
-        if ((cellAddress.getFirstColumn() == firstColumnIndex)
-            && cellAddress.getLastColumn() == lastColumnIndex
-            && cellAddress.getFirstRow() == firstRowIndex
-            && cellAddress.getLastRow() == lastRowIndex) {
-          sheet.removeMergedRegion(i);
-        }
-      }
+  public static void removeMergedRegion(@Nullable Sheet sheet,
+      @Nullable CellRangeAddress cellAddress) {
+    if (Objects.nonNull(sheet) && Objects.nonNull(cellAddress)) {
+      AtomicInteger index = new AtomicInteger();
+      getMergedRegions(sheet).stream()
+          .collect(ImmutableMap.toImmutableMap(Function.identity(), t -> index.incrementAndGet()))
+          .entrySet().stream().filter(entry -> cellAddress.equals(entry.getKey())).findAny()
+          .ifPresent(entry -> sheet.removeMergedRegion(entry.getValue()));
     }
+  }
+
+  public static ImmutableList<Sheet> getSheets(Workbook workbook) {
+    return IntStream.range(0, workbook.getNumberOfSheets()).mapToObj(workbook::getSheetAt)
+        .collect(ImmutableList.toImmutableList());
+  }
+  
+  public static ImmutableList<Row> getSheets(Sheet sheet) {
+    return IntStream.range(0, workbook.getNumberOfSheets()).mapToObj(workbook::getSheetAt)
+        .collect(ImmutableList.toImmutableList());
+  }
+  
+  public static ImmutableList<CellRangeAddress> getMergedRegions(@Nullable Sheet sheet) {
+    return Optional
+        .ofNullable(sheet).map(t -> IntStream.range(0, t.getNumMergedRegions())
+            .mapToObj(sheet::getMergedRegion).collect(ImmutableList.toImmutableList()))
+        .orElse(ImmutableList.of());
   }
 }

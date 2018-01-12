@@ -27,42 +27,32 @@ public class StandardCell extends CellRangeAddress implements Cell {
   private static final int ONE = 1;
 
   public static StandardCell valueOf(Sheet sheet, CellRangeAddress cellRangeAddress) {
-    if (sheet == null || cellRangeAddress == null) {
-      return null;
-    }
+    // TODO tip
+    Preconditions.checkNotNull(sheet);
+    Preconditions.checkNotNull(cellRangeAddress);
     return new StandardCell(sheet, cellRangeAddress);
   }
 
   public static StandardCell valueOf(Cell cell) {
-    if (cell == null) {
-      return null;
-    }
-
-    if (ExcelUtil.isMergedRegion(cell)) {
-      return valueOf(cell.getSheet(), ExcelUtil.getMergedRegion(cell));
-    }
-    return new StandardCell(cell);
+    // TODO tip
+    Preconditions.checkNotNull(cell);
+    return ExcelUtil.getMergedRegion(cell)
+        .map(address -> new StandardCell(cell.getSheet(), address))
+        .orElse(new StandardCell(cell.getSheet(), new CellRangeAddress(cell.getRowIndex(),
+            cell.getRowIndex(), cell.getColumnIndex(), cell.getColumnIndex())));
   }
 
   private final Sheet sheet;
   private final Cell valueCell;
-  private final Collection<Cell> cells;
+  private final ImmutableCollection<Cell> cells;
 
   private StandardCell(Sheet sheet, CellRangeAddress cellRangeAddress) {
     super(cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow(),
         cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
-    Preconditions.checkNotNull(sheet);
+
     this.sheet = sheet;
     // TODO 是否需要出于安全性考虑复写一份私有方法在本类?
-    this.valueCell = ExcelUtil.getFirstCell(sheet, this);
-    this.cells = ExcelUtil.getCells(sheet, this);
-  }
-
-  private StandardCell(Cell cell) {
-    super(cell.getRowIndex(), cell.getRowIndex(), cell.getColumnIndex(), cell.getColumnIndex());
-    this.sheet = cell.getSheet();
-    this.valueCell = cell;
-    // TODO 是否需要出于安全性考虑复写一份私有方法在本类?
+    this.valueCell = ExcelUtil.getCellByIndex(sheet, getFirstRow(), getFirstColumn());
     this.cells = ExcelUtil.getCells(sheet, this);
   }
 
@@ -277,42 +267,5 @@ public class StandardCell extends CellRangeAddress implements Cell {
 
   public Collection<Cell> getCells() {
     return cells;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + ((cells == null) ? 0 : cells.hashCode());
-    result = prime * result + ((sheet == null) ? 0 : sheet.hashCode());
-    result = prime * result + ((valueCell == null) ? 0 : valueCell.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (!super.equals(obj))
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    StandardCell other = (StandardCell) obj;
-    if (cells == null) {
-      if (other.cells != null)
-        return false;
-    } else if (!cells.equals(other.cells))
-      return false;
-    if (sheet == null) {
-      if (other.sheet != null)
-        return false;
-    } else if (!sheet.equals(other.sheet))
-      return false;
-    if (valueCell == null) {
-      if (other.valueCell != null)
-        return false;
-    } else if (!valueCell.equals(other.valueCell))
-      return false;
-    return true;
   }
 }

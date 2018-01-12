@@ -3,12 +3,12 @@ package com.caotc.excel4j.config;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.matcher.usermodel.WorkbookMatcher;
 import com.caotc.excel4j.parse.error.WorkbookError;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
+import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -69,7 +69,7 @@ public class WorkbookConfig {
         matcher.match(workbook).map(message -> new WorkbookError(workbook, message));
     optional.ifPresent(errors::add);
     if (!optional.isPresent()) {
-      ImmutableList<Sheet> sheets = getSheets(workbook);
+      ImmutableList<Sheet> sheets = ExcelUtil.getSheets(workbook);
       // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
       sheetConfigs.stream().filter(config -> sheets.stream().noneMatch(config.getMatcher()::test))
           .map(config -> new WorkbookError(workbook,
@@ -85,11 +85,6 @@ public class WorkbookConfig {
     }
     builder.setErrors(errors.build());
     return builder.build();
-  }
-
-  private ImmutableList<Sheet> getSheets(Workbook workbook) {
-    return IntStream.range(0, workbook.getNumberOfSheets()).mapToObj(workbook::getSheetAt)
-        .collect(ImmutableList.toImmutableList());
   }
 
   public ParserConfig getEffectiveParserConfig() {
