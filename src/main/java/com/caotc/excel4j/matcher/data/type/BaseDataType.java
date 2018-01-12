@@ -1,8 +1,7 @@
-package com.caotc.excel4j.matcher.data.constant;
+package com.caotc.excel4j.matcher.data.type;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.caotc.excel4j.matcher.data.type.DataType;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;

@@ -11,7 +11,7 @@ import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.StringMatcher.Builder.Expression;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
-import com.caotc.excel4j.matcher.data.constant.BaseDataType;
+import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;

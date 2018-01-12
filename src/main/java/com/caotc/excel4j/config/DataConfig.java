@@ -7,7 +7,7 @@ import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.data.DataTypeMatcher;
-import com.caotc.excel4j.matcher.data.constant.BaseDataType;
+import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;

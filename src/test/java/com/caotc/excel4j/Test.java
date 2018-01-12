@@ -12,7 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.ComparableMatcher;
-import com.caotc.excel4j.matcher.data.constant.BaseDataType;
+import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;

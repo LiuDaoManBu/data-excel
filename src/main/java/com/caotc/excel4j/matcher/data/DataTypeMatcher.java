@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
-import com.caotc.excel4j.matcher.data.constant.BaseDataType;
+import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
