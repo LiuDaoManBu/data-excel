@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
-import com.caotc.excel4j.parse.error.SheetError;
-import com.caotc.excel4j.parse.error.WorkbookError;
 import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;

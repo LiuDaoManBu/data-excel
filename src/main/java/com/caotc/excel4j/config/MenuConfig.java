@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.commons.collections4.CollectionUtils;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuNecessity;
@@ -14,6 +13,7 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 
 public class MenuConfig<V> {
@@ -44,8 +44,8 @@ public class MenuConfig<V> {
       Preconditions.checkNotNull(menuNecessity);
       Preconditions.checkState(Objects.nonNull(direction));
       Preconditions.checkNotNull(menuType);
-      Preconditions.checkState(!(CollectionUtils.isNotEmpty(childrenMenuConfigBuilders)
-          && Objects.nonNull(dataConfigBuilder)));
+      Preconditions.checkState(
+          !(!Iterables.isEmpty(childrenMenuConfigBuilders) && Objects.nonNull(dataConfigBuilder)));
       return new MenuConfig<V>(this);
     }
 
@@ -220,7 +220,7 @@ public class MenuConfig<V> {
 
   // delegate methods start
 
-  public boolean matches(StandardCell cell) {
+  public boolean test(StandardCell cell) {
     return menuMatcher.test(cell);
   }
 

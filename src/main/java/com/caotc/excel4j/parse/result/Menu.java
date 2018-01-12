@@ -73,7 +73,7 @@ public class Menu<V> {
       config -> config + "don't have any matches cell";
 
   public static <V> Builder<V> builder() {
-    return new Builder<V>();
+    return new Builder<>();
   }
 
   private final StandardCell cell;
@@ -87,7 +87,6 @@ public class Menu<V> {
   public Menu(Builder<V> builder) {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
-    // TODO
     table = builder.table;
     parentMenu = builder.parentMenu;
 
@@ -108,21 +107,14 @@ public class Menu<V> {
   private <T> ImmutableList<Builder<?>> loadChildrenMenus() {
     ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrenMenuConfigs();
 
-    List<StandardCell> menuCells =
+    ImmutableList<StandardCell> menuCells =
         menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
     return menuCells.stream().map(cell -> {
-      Iterable<MenuConfig<?>> configs =
-          Iterables.filter(childrenConfigs, config -> config.matches(cell));
-      Preconditions.checkState(Iterables.size(configs) <= 1);
-      Builder builder = null;
-      if (!Iterables.isEmpty(configs)) {
-        builder = Menu.builder();
-        builder.setCell(cell);
-        builder.setMenuConfig(Iterables.getOnlyElement(configs));
-        builder.setParentMenu(this);
-      }
-      return Optional.ofNullable(builder);
-    }).filter(Optional::isPresent).map(Optional::get).collect(ImmutableList.toImmutableList());
+      Builder builder = builder().setCell(cell).setParentMenu(this);
+      MenuConfig<?> config = Iterables.getOnlyElement(childrenConfigs.stream()
+          .filter(c -> c.test(cell)).collect(ImmutableSet.toImmutableSet()));
+      return builder.setMenuConfig(config);
+    }).collect(ImmutableList.toImmutableList());
   }
 
   public void checkDataCell(StandardCell dataCell) {
