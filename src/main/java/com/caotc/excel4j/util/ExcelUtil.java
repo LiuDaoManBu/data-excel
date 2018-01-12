@@ -1,15 +1,14 @@
 package com.caotc.excel4j.util;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
+import java.util.stream.IntStream;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -21,107 +20,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
+import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.parse.result.SheetParseResult;
+import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
 public class ExcelUtil {
-  private static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-  // 正数的正则表达式
-  public static final String POSITIVE_NUMBER = "((([1-9]\\d*)|(0))(\\.\\d+)?)";
-  // 数字的正则表达式
-  public static final String NUMBER = "(-?(([1-9]\\d*)|(0))(\\.\\d+)?)";
-  // 小于一的正小数的正则表达式
-  public static final String LESS_ONE_DECIMAL_REGEX = "(0.\\d+)";
-  // 小于等于一的正小数的正则表达式
-  public static final String LESS_OR_EQUAL_ONE_DECIMAL = "((0.\\d+)|1)";
-  // 汉字英文数字的正则表达式
-  public static final String CHINESE_OR_ENGLISH_OR_NUMBER = "([\u0391-\uFFE5]|[A-Za-z]|\\d)";
-  // 汉字的正则表达式
-  public static final String CHINESE = "([\u0391-\uFFE5])";
-  // 汉字英语的正则表达式
-  public static final String CHINESE_OR_ENGLISH = "([\u0391-\uFFE5]|[A-Za-z])";
-  // 自然数的正则表达式
-  public static final String POSITIVE_INTEGER = "(\\d)";
-  // 电话号码的正则表达式
-  public static final String PHONE_NUMBER = "(((\\d{3,4})|\\d{3,4}-)?\\d{7,8})";
-  // 多级菜单名的分隔符
-  public static final String MENU_SEPARATOR = "_";
-  // 英文数字的正则表达式
-  public static final String ENGLISH_OR_NUMBER = "([A-Za-z]|\\d)";
-  // 时间的正则表达式
-  public static final String TIME =
-      "(^((?:19|20)\\d\\d)(-|/)(0[1-9]|1[012])(-|/)(0[1-9]|[12][0-9]|3[01])$)";
-
-  public static final String RPT1_REGISTER_TIME =
-      "(^((?:19|20)\\d\\d)(-|/)([1-9]|0[1-9]|1[012])(-|/)([1-9]|0[1-9]|[12][0-9]|3[01])$)";
-
-  // 正则表达式与对应的提示语
-  public static Map<String, String> REGEX_AND_TIP_MAP = new HashMap<String, String>();
-  static {
-    REGEX_AND_TIP_MAP.put(POSITIVE_NUMBER, "正数");
-    REGEX_AND_TIP_MAP.put(LESS_ONE_DECIMAL_REGEX, "小于一的正小数或者百分比");
-    REGEX_AND_TIP_MAP.put(LESS_OR_EQUAL_ONE_DECIMAL, "小于等于一的正小数或者百分比");
-    REGEX_AND_TIP_MAP.put(CHINESE_OR_ENGLISH_OR_NUMBER, "汉字英文数字");
-    REGEX_AND_TIP_MAP.put(CHINESE, "汉字");
-    REGEX_AND_TIP_MAP.put(CHINESE_OR_ENGLISH, "汉字英文");
-    REGEX_AND_TIP_MAP.put(POSITIVE_INTEGER, "自然数");
-    REGEX_AND_TIP_MAP.put(NUMBER, "数字");
-    REGEX_AND_TIP_MAP.put(PHONE_NUMBER,
-        "电话号码的格式应为“XXXX-XXXXXXX”，“XXXX-XXXXXXXX”，“XXX-XXXXXXX”，“XXX-XXXXXXXX”，“XXXXXXX”，“XXXXXXXX”");
-    REGEX_AND_TIP_MAP.put(ENGLISH_OR_NUMBER, "英文数字");
-    REGEX_AND_TIP_MAP.put(TIME, "日期格式为YYYY-MM-dd或YYYY/MM/dd");
-    REGEX_AND_TIP_MAP.put(RPT1_REGISTER_TIME, "日期格式为YYYY/MM/dd或YYYY/MM/d或YYYY/M/dd或YYYY/M/d");
-  }
-
-  private static final SimpleDateFormat SDF1 = new SimpleDateFormat("yyyy/MM/dd");
-  private static final SimpleDateFormat SDF2 = new SimpleDateFormat("yyyy-MM-dd");
-
-  /**
-   * 根据行坐标和列坐标获取单元格内的内容，并以字符串的形式返回
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param sheet 工作簿
-   * @param rowIndex 行坐标
-   * @param columnIndex 列坐标
-   * @return 单元格内容的字符串，无该单元格返回null
-   */
-  public static String getStringCellValue(Sheet sheet, int rowIndex, int columnIndex) {
-    Cell cell = sheet.getRow(rowIndex).getCell(columnIndex);
-    return getStringValue(cell);
-  }
-
-  public static void parseWorkbook(Workbook workbook, WorkbookConfig workbookConfig) {
-
-  }
-
-  public static void parseSheet(Sheet sheet, SheetConfig sheetConfig) {
-
-  }
-
-  /**
-   * 检查传入的excel对象中是否有该名字的工作簿以及是否有有效内容
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param workbook excel对象
-   * @param sheetName 工作簿名字
-   * @return 错误信息字符串，没有则为null
-   */
-  public static String checkSheet(Workbook workbook, String sheetName) {
-    Sheet sheet = workbook.getSheet(sheetName);
-    if (sheet == null) {
-      return "不存在名为" + sheetName + "的工作簿";
-    }
-    int firstRowNum = sheet.getFirstRowNum();
-    int lastRowNum = sheet.getLastRowNum();
-    if ((lastRowNum - 1) < firstRowNum) {
-      return sheetName + "工作簿不存在有效数据";
-    }
-    return null;
-  }
   // TODO 转移到Menu类中?
   // public static boolean isDataCell(Cell cell,Menu menu,Collection<Menu> menus){
   // if(cell==null){
@@ -158,15 +64,13 @@ public class ExcelUtil {
   // return true;
   // }
 
-  public static SheetParseResult parseMenu(Sheet sheet, SheetConfig sheetConfig) {
-    SheetParseResult result = new SheetParseResult(sheet, sheetConfig);
-    return result;
+  public static WorkbookParseResult parse(Workbook workbook, WorkbookConfig config) {
+    return config.parse(workbook);
   }
 
-  public static SheetParseResult parse(Sheet sheet, SheetConfig sheetConfig) {
-    SheetParseResult result = parseMenu(sheet, sheetConfig);
-    result.parseDatas();
-    return result;
+  // TODO can?
+  public static SheetParseResult parse(Sheet sheet, SheetConfig config) {
+    return config.parse(sheet).build();
   }
 
   /**
@@ -588,44 +492,15 @@ public class ExcelUtil {
   }
 
   public static boolean isDateCell(Cell cell) {
-    if (cell == null || CellType.BLANK == cell.getCellTypeEnum()) {
-      return Boolean.TRUE;
-    }
-    if (CellType.NUMERIC == cell.getCellTypeEnum()) {
-      return DateUtil.isCellDateFormatted(cell);
-    }
-    if (CellType.STRING == cell.getCellTypeEnum()) {
-      String dateString = ExcelUtil.getStringValue(cell);
-      if (StringUtils.isBlank(dateString)) {
-        return Boolean.TRUE;
-      } else {
-        return dateString.matches(RPT1_REGISTER_TIME);
-      }
-    }
-    return Boolean.FALSE;
+    return BaseDataType.DATE_TIME.test(getValue(cell));
   }
 
   public static Date getDate(Cell cell) {
-    if (cell == null || CellType.BLANK == cell.getCellTypeEnum()) {
+    // TODO require not null? not a DateCell?
+    if (Objects.isNull(cell) || CellType.BLANK.equals(cell.getCellTypeEnum())) {
       return null;
     }
-    if (CellType.NUMERIC == cell.getCellTypeEnum() && DateUtil.isCellDateFormatted(cell)) {
-      return DateUtil.getJavaDate(cell.getNumericCellValue());
-    }
-    if (CellType.STRING == cell.getCellTypeEnum()) {
-      String dateString = ExcelUtil.getStringValue(cell);
-      try {
-        if (dateString.contains("/")) {
-          return SDF1.parse(dateString);
-        }
-        if (dateString.contains("-")) {
-          return SDF2.parse(dateString);
-        }
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
-    }
-    return null;
+    return BaseDataType.DATE_TIME.cast(getValue(cell), Date.class);
   }
 
   public static Cell getFirstCell(Sheet sheet, CellRangeAddress mergedRegion) {
@@ -643,36 +518,33 @@ public class ExcelUtil {
   }
 
   public static Object getValue(Cell cell) {
-    if (cell == null) {
+    // TODO require null
+    if (Objects.isNull(cell)) {
       return null;
     }
+
     CellType cellType = cell.getCellTypeEnum();
-    if (CellType.FORMULA == cellType) {
+    if (CellType.FORMULA.equals(cellType)) {
       cellType = cell.getCachedFormulaResultTypeEnum();
     }
 
-    Object value = null;
     switch (cellType) {
       case NUMERIC:
         if (DateUtil.isCellDateFormatted(cell)) {
-          value = cell.getDateCellValue();
+          return cell.getDateCellValue();
         } else {
-          value = cell.getNumericCellValue();
+          return cell.getNumericCellValue();
         }
-        break;
       case STRING:
-        value = cell.getStringCellValue();
-        break;
+        return cell.getStringCellValue();
       case BOOLEAN:
-        value = cell.getBooleanCellValue();
-        break;
+        return cell.getBooleanCellValue();
       // TODO 由于getErrorCellValue()方法获得的是excel中的数字类型的错误码,似乎没有实际意义,暂定仍返回null
       case ERROR:
       default:
         throw new IllegalArgumentException(
             "the CellType " + cellType + " of " + cell + " is not support");
     }
-    return value;
   }
 
   /**
@@ -684,23 +556,12 @@ public class ExcelUtil {
    * @return 单元格内容的字符串
    */
   public static String getStringValue(Cell cell) {
-    Object value = getValue(cell);
-    String result = null;
-    if (value != null) {
-      if (value instanceof Date) {
-        result = DEFAULT_DATE_FORMAT.format(value);
-      }
-      if (value instanceof Double || value instanceof Boolean) {
-        result = String.valueOf(value);
-      }
-      if (value instanceof String) {
-        result = (String) value;
-      }
-    }
-    return result;
+    // TODO 根据返回类型不同选择不同DataType?
+    return BaseDataType.STRING.cast(getValue(cell), String.class);
   }
 
   public static void removeMergedRegion(Sheet sheet, CellRangeAddress cellAddress) {
+    IntStream.range(0, sheet.getNumMergedRegions());
     int sheetMergeCount = sheet.getNumMergedRegions();
     for (int i = 0; i < sheetMergeCount; i++) {
       CellRangeAddress range = sheet.getMergedRegion(i);

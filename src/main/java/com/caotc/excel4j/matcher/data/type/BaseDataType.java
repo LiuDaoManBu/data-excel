@@ -17,7 +17,7 @@ import com.google.common.reflect.TypeToken;
 
 public enum BaseDataType implements DataType {
   // 小数
-  DECIMAL(float.class, Float.class, double.class, Double.class, BigDecimal.class) {
+  DECIMAL(float.class, Float.class, double.class, Double.class, BigDecimal.class, String.class) {
     @Override
     public boolean test(Object value) {
       try {
@@ -119,7 +119,7 @@ public enum BaseDataType implements DataType {
     }
   },
   // 日期
-  DATE(Date.class, Calendar.class, LocalDate.class) {
+  DATE(Date.class, Calendar.class, LocalDate.class, String.class) {
     @Override
     public boolean test(Object value) {
       try {
@@ -132,7 +132,7 @@ public enum BaseDataType implements DataType {
     }
   },
   // 时间
-  TIME(Date.class, Calendar.class, LocalTime.class) {
+  TIME(Date.class, Calendar.class, LocalTime.class, String.class) {
     @Override
     public boolean test(Object value) {
       try {
@@ -145,7 +145,7 @@ public enum BaseDataType implements DataType {
     }
   },
   // 日期时间
-  DATE_TIME(Date.class, Calendar.class, LocalDateTime.class) {
+  DATE_TIME(Date.class, Calendar.class, LocalDateTime.class, String.class) {
     @Override
     public boolean test(Object value) {
       try {
@@ -221,10 +221,10 @@ public enum BaseDataType implements DataType {
     }
   };
 
-  private static final String WORD_REGEX = "^\\d*$";
+  private static final String WORD_REGEX = "^(\\w|[\\u0391-\\uFFE5])*$";
   private static final String ENGLISH_OR_NUMBER_REGEX = "^[A-Za-z0-9]*$";
   private static final String ENGLISH_REGEX = "^[A-Za-z]*$";
-  private static final String CHINESE_REGEX = "";
+  private static final String CHINESE_REGEX = "^[\\u0391-\\uFFE5]*$";
   private static final String PHONE_REGEX = "^(\\d{3,4})-\\d{7,8}$";
   private static final String EMAIL_REGEX =
       "^\\w+([-+.]\\w+)*@\\w+([-.]\\\\w+)*\\.\\w+([-.]\\w+)*$";

@@ -3,6 +3,7 @@ package com.caotc.excel4j;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +105,7 @@ class C {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    System.out.println("sdfsdfsdf".matches("[A-Za-z]*"));
-    System.out.println("中文".matches("[u4e00-u9fa5]*"));
-    System.out.println("中文".matches("([u4e00-u9fa5]|\\w)*"));
+    System.out.println(Calendar.getInstance().getTime());
   }
 
   public static void testGeneric() {

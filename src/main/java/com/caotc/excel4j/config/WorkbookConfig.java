@@ -69,8 +69,7 @@ public class WorkbookConfig {
         matcher.match(workbook).map(message -> new WorkbookError(workbook, message));
     optional.ifPresent(errors::add);
     if (!optional.isPresent()) {
-      ImmutableList<Sheet> sheets = IntStream.range(0, workbook.getNumberOfSheets())
-          .mapToObj(workbook::getSheetAt).collect(ImmutableList.toImmutableList());
+      ImmutableList<Sheet> sheets = getSheets(workbook);
       // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
       sheetConfigs.stream().filter(config -> sheets.stream().noneMatch(config.getMatcher()::test))
           .map(config -> new WorkbookError(workbook,
@@ -86,6 +85,11 @@ public class WorkbookConfig {
     }
     builder.setErrors(errors.build());
     return builder.build();
+  }
+
+  private ImmutableList<Sheet> getSheets(Workbook workbook) {
+    return IntStream.range(0, workbook.getNumberOfSheets()).mapToObj(workbook::getSheetAt)
+        .collect(ImmutableList.toImmutableList());
   }
 
   public ParserConfig getEffectiveParserConfig() {
