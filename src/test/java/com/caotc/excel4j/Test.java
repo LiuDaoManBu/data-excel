@@ -103,7 +103,11 @@ class C {
 
 
 public class Test {
-  public static void main(String[] args) throws Exception {}
+  public static void main(String[] args) throws Exception {
+    System.out.println("sdfsdfsdf".matches("[A-Za-z]*"));
+    System.out.println("中文".matches("[u4e00-u9fa5]*"));
+    System.out.println("中文".matches("([u4e00-u9fa5]|\\w)*"));
+  }
 
   public static void testGeneric() {
     ComparableMatcher<Integer> matcher = ComparableMatcher.<Integer>builder().build();

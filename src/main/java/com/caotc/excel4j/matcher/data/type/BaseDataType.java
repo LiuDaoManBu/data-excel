@@ -1,17 +1,22 @@
 package com.caotc.excel4j.matcher.data.type;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.stream.Stream;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.TypeToken;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.stream.Stream;
 
 public enum BaseDataType implements DataType {
+  // 小数
   DECIMAL(float.class, Float.class, double.class, Double.class, BigDecimal.class) {
     @Override
     public boolean test(Object value) {
@@ -22,6 +27,7 @@ public enum BaseDataType implements DataType {
       }
     }
   },
+  // 整数
   WHOLE_NUMBER(Stream
       .concat(DECIMAL.types.stream(),
           Stream.of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
@@ -37,13 +43,15 @@ public enum BaseDataType implements DataType {
       }
     }
   },
+  // 数字
   NUMBER(DECIMAL.types) {
     @Override
     public boolean test(Object value) {
       return DECIMAL.test(value) || WHOLE_NUMBER.test(value);
     }
   },
-  POSITIVE_NUMBER(float.class, Float.class, double.class, Double.class, BigDecimal.class) {
+  // 正数
+  POSITIVE_NUMBER(NUMBER.types) {
     @Override
     public boolean test(Object value) {
       try {
@@ -54,7 +62,8 @@ public enum BaseDataType implements DataType {
       }
     }
   },
-  NEGATIVE_NUMBER(float.class, Float.class, double.class, Double.class, BigDecimal.class) {
+  // 负数
+  NEGATIVE_NUMBER(NUMBER.types) {
     @Override
     public boolean test(Object value) {
       try {
@@ -65,6 +74,7 @@ public enum BaseDataType implements DataType {
       }
     }
   },
+  // 正整数
   POSITIVE_WHOLE_NUMBER(POSITIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)
       .collect(ImmutableSet.toImmutableSet())) {
     @Override
@@ -72,6 +82,7 @@ public enum BaseDataType implements DataType {
       return POSITIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
     }
   },
+  // 负整数
   NEGATIVE_WHOLE_NUMBER(NEGATIVE_NUMBER.types.stream().filter(WHOLE_NUMBER.types::contains)
       .collect(ImmutableSet.toImmutableSet())) {
     @Override
@@ -79,6 +90,7 @@ public enum BaseDataType implements DataType {
       return NEGATIVE_NUMBER.test(value) && WHOLE_NUMBER.test(value);
     }
   },
+  // 自然数
   NATURAL_NUMBER(POSITIVE_WHOLE_NUMBER.types) {
     @Override
     public boolean test(Object value) {
@@ -90,6 +102,7 @@ public enum BaseDataType implements DataType {
       }
     }
   },
+  // 正小数
   POSITIVE_DECIMAL(POSITIVE_NUMBER.types.stream().filter(DECIMAL.types::contains)
       .collect(ImmutableSet.toImmutableSet())) {
     @Override
@@ -97,6 +110,7 @@ public enum BaseDataType implements DataType {
       return DECIMAL.test(value) && POSITIVE_NUMBER.test(value);
     }
   },
+  // 负小数
   NEGATIVE_DECIMAL(NEGATIVE_NUMBER.types.stream().filter(DECIMAL.types::contains)
       .collect(ImmutableSet.toImmutableSet())) {
     @Override
@@ -104,17 +118,119 @@ public enum BaseDataType implements DataType {
       return DECIMAL.test(value) && NEGATIVE_NUMBER.test(value);
     }
   },
-  DATE(Date.class, Calendar.class) {
+  // 日期
+  DATE(Date.class, Calendar.class, LocalDate.class) {
     @Override
     public boolean test(Object value) {
       try {
+        // TODO
         TypeUtils.castToDate(value);
         return Boolean.TRUE;
       } catch (JSONException e) {
         return Boolean.FALSE;
       }
     }
+  },
+  // 时间
+  TIME(Date.class, Calendar.class, LocalTime.class) {
+    @Override
+    public boolean test(Object value) {
+      try {
+        // TODO
+        TypeUtils.castToDate(value);
+        return Boolean.TRUE;
+      } catch (JSONException e) {
+        return Boolean.FALSE;
+      }
+    }
+  },
+  // 日期时间
+  DATE_TIME(Date.class, Calendar.class, LocalDateTime.class) {
+    @Override
+    public boolean test(Object value) {
+      try {
+        // TODO
+        TypeUtils.castToDate(value);
+        return Boolean.TRUE;
+      } catch (JSONException e) {
+        return Boolean.FALSE;
+      }
+    }
+  },
+  // 字符串
+  STRING(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return true;
+    }
+  },
+  // 单词 TODO include chinese?
+  WORD(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(WORD_REGEX);
+    }
+  },
+  // 英文或数字
+  ENGLISH_OR_NUMBER(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(ENGLISH_OR_NUMBER_REGEX);
+    }
+  },
+  // 英文
+  ENGLISH(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(ENGLISH_REGEX);
+    }
+  },
+  // 中文
+  CHINESE(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(CHINESE_REGEX);
+    }
+  },
+  // 邮箱
+  EMAIL(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(EMAIL_REGEX);
+    }
+  },
+  // 电话
+  PHONE(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(PHONE_REGEX);
+    }
+  },
+  // 手机号码
+  TELEPHONE(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(TELEPHONE_REGEX);
+    }
+  },
+  // 身份证号码
+  ID_CARD_NUMBER(String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.cast(t, String.class).matches(ID_CARD_NUMBER_REGEX);
+    }
   };
+
+  private static final String WORD_REGEX = "^\\d*$";
+  private static final String ENGLISH_OR_NUMBER_REGEX = "^[A-Za-z0-9]*$";
+  private static final String ENGLISH_REGEX = "^[A-Za-z]*$";
+  private static final String CHINESE_REGEX = "";
+  private static final String PHONE_REGEX = "^(\\d{3,4})-\\d{7,8}$";
+  private static final String EMAIL_REGEX =
+      "^\\w+([-+.]\\w+)*@\\w+([-.]\\\\w+)*\\.\\w+([-.]\\w+)*$";
+  private static final String TELEPHONE_REGEX =
+      "^1(3[0-9]|4[57]|5[0-35-9]|7[0135678]|8[0-9])\\d{8}$";
+  private static final String ID_CARD_NUMBER_REGEX = "(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)";
   private static final ImmutableCollection<TypeToken<?>> INT_TYPES =
       Stream
           .of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
@@ -127,7 +243,7 @@ public enum BaseDataType implements DataType {
   }
 
   private BaseDataType(Class<?>... types) {
-    this(Stream.of(types).map(TypeToken::of).collect(ImmutableSet.toImmutableSet()));
+    this.types = Arrays.stream(types).map(TypeToken::of).collect(ImmutableSet.toImmutableSet());
   }
 
   @Override
@@ -142,8 +258,7 @@ public enum BaseDataType implements DataType {
 
   @Override
   public <T> boolean canCast(TypeToken<T> type) {
-    // TODO 父子类
-    return types.contains(type);
+    return types.contains(type) || types.stream().anyMatch(type::isSubtypeOf);
   }
 
   @Override
@@ -154,7 +269,7 @@ public enum BaseDataType implements DataType {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T cast(Object value, TypeToken<T> type) {
-    // TODO
+    // TODO remove?
     if (INT_TYPES.contains(type)) {
       value = TypeUtils.castToBigDecimal(value).toBigIntegerExact();
     }

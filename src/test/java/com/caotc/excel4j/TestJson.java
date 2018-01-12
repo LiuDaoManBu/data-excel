@@ -1,9 +1,10 @@
 package com.caotc.excel4j;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Calendar;
 import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.matcher.ComparableMatcher;
-import com.caotc.excel4j.matcher.constant.Type;
-import com.google.common.reflect.TypeToken;
+import com.alibaba.fastjson.util.TypeUtils;
 
 class Data {
   private Class<?> type;
@@ -26,9 +27,14 @@ class Data {
 
 public class TestJson {
   public static void main(String[] args) {
-    testClass();
+    testCastLocalDate();
   }
 
+  public static void testCastLocalDate() {
+    System.out.println(TypeUtils.castToJavaBean(Calendar.getInstance().getTime(), LocalDate.class));
+    System.out.println(TypeUtils.castToJavaBean("2000-6-25", LocalDate.class));
+  }
+  
   public static void testClass() {
     Data data = new Data();
     data.setType(String.class);
