@@ -1,5 +1,6 @@
 package com.caotc.excel4j;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.WorkbookConfig;
+import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.ComparableMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
@@ -106,7 +108,11 @@ class C {
 public class Test {
   public static void main(String[] args) throws Exception {
     System.out.println(Calendar.getInstance().getTime());
-    System.out.println(null instanceof String);
+    Object array = new String[] {"AAA", "BBB", "CCC"};
+    // Object array = new int[] {2, 3, 1};
+    String[] strings = ConstructType.toArray(array);
+    System.out.println(Arrays.toString(strings));
+    // Array.class.cast(array);
   }
 
   public static void testGeneric() {

@@ -3,12 +3,12 @@ package com.caotc.excel4j.parse.result;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
+import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
+import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
@@ -88,8 +88,7 @@ public class Table {
   public Table(Builder builder) {
     tableConfig = builder.tableConfig;
     sheetParseResult = builder.sheetParseResult;
-    topMenus =
-        loadTopMenus().stream().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
+    topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
     // dataMenus = Collections2.filter(menus, Menu::isDataMenu);
     // fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
     // unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
@@ -108,35 +107,20 @@ public class Table {
         .collect(ImmutableList.toImmutableList());
   }
 
-  private ImmutableCollection<Menu.Builder<?>> loadTopMenus() {
-    com.google.common.collect.ImmutableSet.Builder<Menu.Builder<?>> builder =
-        ImmutableSet.builder();
-
+  private Stream<Menu.Builder<?>> loadTopMenus() {
     ImmutableCollection<MenuConfig<?>> menuConfigs = tableConfig.getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
-    // TODO 改写stream,效率优化
-    for (int rowIndex = sheet.getFirstRowNum(); rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-      Row row = sheet.getRow(rowIndex);
-      for (int columnIndex = row.getFirstCellNum(); columnIndex < row
-          .getLastCellNum(); columnIndex++) {
-        // TODO 获取cell模式正确?
-        StandardCell cell =
-            StandardCell.valueOf(row.getCell(columnIndex, MissingCellPolicy.CREATE_NULL_AS_BLANK));
-        // TODO 重复匹配问题
-        Optional<MenuConfig<?>> optional = menuConfigs.stream()
-            .filter(menuConfig -> menuConfig.getMenuMatcher().test(cell)).findAny();
-        if (optional.isPresent()) {
-          // TODO safe
-          Menu.Builder topMenuBuilder = Menu.builder();
-          builder.add(topMenuBuilder.setCell(cell).setMenuConfig(optional.get()).setTable(this));
-        }
-      }
-    }
-    return builder.build();
+    return ExcelUtil.getCells(sheet).map(StandardCell::valueOf).map(cell -> {
+      // TODO 重复匹配问题
+      Optional<MenuConfig<?>> optional = menuConfigs.stream()
+          .filter(menuConfig -> menuConfig.getMenuMatcher().test(cell)).findAny();
+      // TODO safe
+      return optional.map(t -> new Menu.Builder().setCell(cell).setMenuConfig(t).setTable(this));
+    }).filter(Optional::isPresent).map(Optional::get);
   }
 
   public <T> T get(Class<T> type) {
-    Optional<T> optional = tableConfig.getParserConfig().newInstance(type);
+    Optional<T> optional = tableConfig.getEffectiveParserConfig().newInstance(type);
     Preconditions.checkArgument(optional.isPresent());
     topMenus.forEach(menu -> menu.getData().setFieldValue(optional.get()));
     return optional.get();

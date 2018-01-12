@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import com.caotc.excel4j.config.ParserConfig;
 import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -79,10 +78,18 @@ public enum ConstructType {
 
       return (T) targets.collect(Collectors.toList());
     }
+  },
+  ARRAY {
+    @Override
+    public <T> T construct(TypeToken<T> type, Map<String, ?> nameToValues,
+        ParserConfig parserConfig) {
+      Preconditions.checkArgument(type.isArray());
+      return null;
+    }
   };
-  private static final Splitter SPLITTER = Splitter.on(".").omitEmptyStrings();
+//  private static final Splitter SPLITTER = Splitter.on(".").omitEmptyStrings();
 
-  private static <T> T[] toArray(Object value) {
+  public static <T> T[] toArray(Object value) {
     // TODO 基本类型无法cast为Object[]
     return (T[]) value;
   }

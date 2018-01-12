@@ -1,9 +1,9 @@
 package com.caotc.excel4j.parse.result;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.parse.error.MenuError;
@@ -91,7 +91,7 @@ public class Menu<V> {
     parentMenu = builder.parentMenu;
 
     childrenMenus =
-        loadChildrenMenus().stream().map(Builder::build).collect(ImmutableList.toImmutableList());
+        loadChildrenMenus().map(Builder::build).collect(ImmutableList.toImmutableList());
     data = new Data<V>(this);
 
     ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
@@ -104,17 +104,18 @@ public class Menu<V> {
         .collect(ImmutableList.toImmutableList());
   }
 
-  private <T> ImmutableList<Builder<?>> loadChildrenMenus() {
+  private <T> Stream<Builder<?>> loadChildrenMenus() {
     ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrenMenuConfigs();
 
     ImmutableList<StandardCell> menuCells =
         menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
     return menuCells.stream().map(cell -> {
       Builder builder = builder().setCell(cell).setParentMenu(this);
+      //TODO Duplicate matching?
       MenuConfig<?> config = Iterables.getOnlyElement(childrenConfigs.stream()
           .filter(c -> c.test(cell)).collect(ImmutableSet.toImmutableSet()));
       return builder.setMenuConfig(config);
-    }).collect(ImmutableList.toImmutableList());
+    });
   }
 
   public void checkDataCell(StandardCell dataCell) {

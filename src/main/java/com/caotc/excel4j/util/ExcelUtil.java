@@ -514,7 +514,7 @@ public class ExcelUtil {
 
   public static Stream<Row> getRows(@Nullable Sheet sheet, int firstRowIndex, int lastRowIndex) {
     // TODO sheet.getTopRow()? closed
-    return Optional.ofNullable(sheet).map(t -> IntStream.range(firstRowIndex, lastRowIndex))
+    return Optional.ofNullable(sheet).map(t -> IntStream.rangeClosed(firstRowIndex, lastRowIndex))
         .orElse(IntStream.empty()).mapToObj(sheet::getRow);
   }
 

@@ -15,7 +15,7 @@ public class WorkbookParseResult {
     private List<SheetParseResult.Builder> sheetParseResultBuilders;
 
     public WorkbookParseResult build() {
-      errors = Optional.ofNullable(errors).orElseGet(ImmutableList::of);
+      errors = Optional.ofNullable(errors).orElse(ImmutableList.of());
       return new WorkbookParseResult(this);
     }
 
