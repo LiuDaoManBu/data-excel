@@ -10,11 +10,9 @@ import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
@@ -77,24 +75,10 @@ public class Table {
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu<?>> topMenus;
 
-  // private final ImmutableCollection<Menu> menus;
-  // private final ImmutableCollection<Menu> dataMenus;
-  // private final ImmutableCollection<Menu> fixedDataMenus;
-  // private final ImmutableCollection<Menu> unFixedDataMenus;
-  // private final ImmutableCollection<Menu> mixedDataMenus;
-  // private final ImmutableCollection<Menu> mustMenus;
-  // private final ImmutableCollection<Menu> notMustMenus;
-
   public Table(Builder builder) {
     tableConfig = builder.tableConfig;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
-    // dataMenus = Collections2.filter(menus, Menu::isDataMenu);
-    // fixedDataMenus = Collections2.filter(dataMenus, Menu::isFixedDataMenu);
-    // unFixedDataMenus = Collections2.filter(dataMenus, Menu::isUnFixedDataMenu);
-    // mixedDataMenus = Collections2.filter(dataMenus, Menu::isMixedDataMenu);
-    // mustMenus = Collections2.filter(menus, Menu::isMustMenu);
-    // notMustMenus = Collections2.filter(menus, Menu::isNotMustMenu);
 
     // new TableError(this, tableConfig.getMatcher().getMessageFunction().apply(this));
     // TODO 顺序问题?
@@ -126,107 +110,36 @@ public class Table {
     return optional.get();
   }
 
-  // TODO
-  public ImmutableList<StandardCell> getCells(Menu<?> menu) {
-    return menu.getData().getValueCells();
+  public Optional<Menu<?>> findMenu(String menuName) {
+    return getMenus().filter(menu -> menu.getName().equals(menuName)).findAny();
   }
 
-  public ImmutableList<StandardCell> getCells(String menuName) {
-    return getCells(getMenu(menuName).orElse(null));
+  public Stream<Menu<?>> getMenus() {
+    return topMenus.stream().map(MENU_TRAVERSER::breadthFirst).flatMap(Streams::stream);
   }
 
-  public Optional<StandardCell> getCell(Menu<?> menu) {
-    return Optional.ofNullable(Iterables.getOnlyElement(getCells(menu), null));
+  public Stream<Menu<?>> getDataMenus() {
+    return getMenus().filter(Menu::isDataMenu);
   }
 
-  public Optional<StandardCell> getCell(String menuName) {
-    return getCell(getMenu(menuName).orElse(null));
+  public Stream<Menu<?>> getFixedDataMenus() {
+    return getDataMenus().filter(Menu::isFixedDataMenu);
   }
 
-  public ImmutableList<Object> getValues(Menu<?> menu) {
-    return ImmutableList.copyOf(Collections2.transform(getCells(menu), StandardCell::getValue));
+  public Stream<Menu<?>> getUnFixedDataMenus() {
+    return getDataMenus().filter(Menu::isUnFixedDataMenu);
   }
 
-  public ImmutableList<Object> getValues(String menuName) {
-    return getValues(getMenu(menuName).orElse(null));
+  public Stream<Menu<?>> getMixedDataMenus() {
+    return getDataMenus().filter(Menu::isMixedDataMenu);
   }
 
-  public <K> ImmutableList<K> getValues(Menu<?> menu, Class<K> type) {
-    return ImmutableList
-        .copyOf(Collections2.transform(getValues(menu), value -> menu.cast(value, type)));
+  public Stream<Menu<?>> getMustMenus() {
+    return getMenus().filter(Menu::isMustMenu);
   }
 
-  public <K> ImmutableList<K> getValues(String menuName, Class<K> type) {
-    return getValues(getMenu(menuName).orElse(null), type);
-  }
-
-  public Optional<Object> getValue(Menu<?> menu) {
-    return getCell(menu).map(StandardCell::getValue);
-  }
-
-  public Optional<Object> getValue(String menuName) {
-    return getValue(getMenu(menuName).orElse(null));
-  }
-
-  public <K> Optional<K> getValue(Menu<?> menu, Class<K> type) {
-    return getValue(menu).map(value -> menu.cast(value, type));
-  }
-
-  public <K> Optional<K> getValue(String menuName, Class<K> type) {
-    Menu<?> menu = getMenu(menuName).orElse(null);
-    return getValue(menu).map(value -> menu.cast(value, type));
-  }
-  //
-
-  public void checkMenus() {
-    // TODO
-    // Map<MenuConfig, Menu> menuConfigToMenus = Maps.newHashMap();
-    // for (Menu menu : menus) {
-    // if (menu.getMenuConfig() != null) {
-    // menuConfigToMenus.put(menu.getMenuConfig(), menu);
-    // }
-    // }
-    // for(MenuConfig menuConfig:menuConfigs){
-    // if(!menuConfigToMenus.containsKey(menuConfig) && menuConfig.getMustFlag()){
-    // addError("请检查模板是否有误,工作簿"+sheet.getSheetName()+"未找到菜单:"+menuConfig.getMenuNameMatcher().getMatchString());
-    // }
-    // }
-  }
-
-  public Optional<Menu<?>> getMenu(String menuName) {
-    return getMenus().stream().filter(menu -> menu.getName().equals(menuName)).findAny();
-  }
-
-  public ImmutableList<Menu<?>> getMenus() {
-    return topMenus.stream().map(MENU_TRAVERSER::breadthFirst).flatMap(Streams::stream)
-        .collect(ImmutableList.toImmutableList());
-  }
-
-  public ImmutableList<Menu<?>> getDataMenus() {
-    return getMenus().stream().filter(Menu::isDataMenu).collect(ImmutableList.toImmutableList());
-  }
-
-  public ImmutableList<Menu<?>> getFixedDataMenus() {
-    return getDataMenus().stream().filter(Menu::isFixedDataMenu)
-        .collect(ImmutableList.toImmutableList());
-  }
-
-  public ImmutableList<Menu<?>> getUnFixedDataMenus() {
-    return getDataMenus().stream().filter(Menu::isUnFixedDataMenu)
-        .collect(ImmutableList.toImmutableList());
-  }
-
-  public ImmutableList<Menu<?>> getMixedDataMenus() {
-    return getDataMenus().stream().filter(Menu::isMixedDataMenu)
-        .collect(ImmutableList.toImmutableList());
-  }
-
-  public ImmutableList<Menu<?>> getMustMenus() {
-    return getMenus().stream().filter(Menu::isMustMenu).collect(ImmutableList.toImmutableList());
-  }
-
-  public ImmutableList<Menu<?>> getNotMustMenus() {
-    return getMenus().stream().filter(Menu::isNotMustMenu).collect(ImmutableList.toImmutableList());
+  public Stream<Menu<?>> getNotMustMenus() {
+    return getMenus().filter(Menu::isNotMustMenu);
   }
 
   public TableConfig getTableConfig() {

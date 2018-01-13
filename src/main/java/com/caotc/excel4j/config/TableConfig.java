@@ -2,6 +2,7 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.matcher.usermodel.TableMatcher;
@@ -101,15 +102,12 @@ public class TableConfig {
   private final TableMatcher matcher;
   private final ParserConfig parserConfig;
 
-  private final ImmutableCollection<MenuConfig<?>> menuConfigs;
-
   private TableConfig(Builder builder) {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
     matcher = builder.matcherBuilder.build();
 
-    // topMenuConfigs = Collections2.filter(menuConfigs, MenuConfig::isTopMenu);
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
@@ -117,8 +115,6 @@ public class TableConfig {
 
     // menuConfigs =
     // builder.menuConfigBuilders.stream().map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
-    menuConfigs = topMenuConfigs.stream().map(MENU_CONFIG_TRAVERSER::breadthFirst)
-        .flatMap(Streams::stream).collect(ImmutableSet.toImmutableSet());
   }
 
   public Table.Builder parse(Sheet sheet) {
@@ -136,6 +132,11 @@ public class TableConfig {
     return Optional.ofNullable(parserConfig).orElse(sheetConfig.getEffectiveParserConfig());
   }
 
+  public Stream<MenuConfig<?>> getMenuConfigs() {
+    return topMenuConfigs.stream().map(MENU_CONFIG_TRAVERSER::breadthFirst)
+        .flatMap(Streams::stream);
+  }
+
   public SheetConfig getSheetConfig() {
     return sheetConfig;
   }
@@ -150,10 +151,6 @@ public class TableConfig {
 
   public Direction getUnFixedMenuDirection() {
     return unFixedMenuDirection;
-  }
-
-  public ImmutableCollection<MenuConfig<?>> getMenuConfigs() {
-    return menuConfigs;
   }
 
   public ParserConfig getParserConfig() {
