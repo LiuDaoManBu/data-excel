@@ -103,12 +103,12 @@ public class Table {
     }).filter(Optional::isPresent).map(Optional::get);
   }
 
-  public <T> T get(Class<T> type) {
-    Optional<T> optional = tableConfig.getEffectiveParserConfig().newInstance(type);
-    Preconditions.checkArgument(optional.isPresent());
-    topMenus.forEach(menu -> menu.getData().setFieldValue(optional.get()));
-    return optional.get();
-  }
+//  public <T> T get(Class<T> type) {
+//    Optional<T> optional = tableConfig.getEffectiveParserConfig().newInstance(type);
+//    Preconditions.checkArgument(optional.isPresent());
+//    topMenus.forEach(menu -> menu.getData().setFieldValue(optional.get()));
+//    return optional.get();
+//  }
 
   public Optional<Menu<?>> findMenu(String menuName) {
     return getMenus().filter(menu -> menu.getName().equals(menuName)).findAny();
