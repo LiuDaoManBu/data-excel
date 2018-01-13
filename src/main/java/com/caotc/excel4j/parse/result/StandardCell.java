@@ -256,7 +256,7 @@ public class StandardCell extends CellRangeAddress implements Cell {
     return valueCell;
   }
 
-  public Collection<Cell> getCells() {
+  public ImmutableCollection<Cell> getCells() {
     return cells;
   }
 }
