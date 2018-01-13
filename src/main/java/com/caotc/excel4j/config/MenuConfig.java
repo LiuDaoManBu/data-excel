@@ -14,7 +14,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 
 public class MenuConfig<V> {
   public static class Builder<V> {
@@ -186,7 +185,7 @@ public class MenuConfig<V> {
   }
 
   public boolean isTopMenu() {
-    return parentMenuConfig == null;
+    return Objects.isNull(parentMenuConfig);
   }
 
   public boolean isMustMenu() {
@@ -209,10 +208,6 @@ public class MenuConfig<V> {
     return isDataMenu() && LoadType.UNFIXED.equals(dataConfig.getLoadType());
   }
 
-  public boolean isMixedDataMenu() {
-    return isDataMenu() && LoadType.MIXED.equals(dataConfig.getLoadType());
-  }
-
   public ParserConfig getEffectiveParserConfig() {
     return Optional.ofNullable(parserConfig).orElse(Optional.ofNullable(parentMenuConfig)
         .map(MenuConfig::getParserConfig).orElse(tableConfig.getEffectiveParserConfig()));
@@ -220,32 +215,8 @@ public class MenuConfig<V> {
 
   // delegate methods start
 
-  public boolean test(StandardCell cell) {
+  public boolean matches(StandardCell cell) {
     return menuMatcher.test(cell);
-  }
-
-  public V cast(Object value) {
-    return dataConfig.cast(value);
-  }
-
-  public <T> boolean canCast(Class<T> clazz) {
-    return dataConfig.canCast(clazz);
-  }
-
-  public <T> T cast(Object value, Class<T> clazz) {
-    return dataConfig.cast(value, clazz);
-  }
-
-  public ImmutableCollection<TypeToken<?>> canCastTypes() {
-    return dataConfig.canCastTypes();
-  }
-
-  public <T> boolean canCast(TypeToken<T> type) {
-    return dataConfig.canCast(type);
-  }
-
-  public <T> T cast(Object value, TypeToken<T> type) {
-    return dataConfig.cast(value, type);
   }
 
   // delegate methods end

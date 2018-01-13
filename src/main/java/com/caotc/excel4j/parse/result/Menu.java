@@ -1,6 +1,7 @@
 package com.caotc.excel4j.parse.result;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -13,7 +14,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 
 public class Menu<V> {
   public static class Builder<V> {
@@ -111,9 +111,9 @@ public class Menu<V> {
         menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
     return menuCells.stream().map(cell -> {
       Builder builder = builder().setCell(cell).setParentMenu(this);
-      //TODO Duplicate matching?
+      // TODO Duplicate matching?
       MenuConfig<?> config = Iterables.getOnlyElement(childrenConfigs.stream()
-          .filter(c -> c.test(cell)).collect(ImmutableSet.toImmutableSet()));
+          .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
       return builder.setMenuConfig(config);
     });
   }
@@ -202,7 +202,7 @@ public class Menu<V> {
   }
 
   public Optional<StandardCell> nextDataCell(StandardCell cell) {
-    if (cell == null) {
+    if (Objects.isNull(cell)) {
       cell = this.cell;
     }
 
@@ -249,40 +249,12 @@ public class Menu<V> {
     return menuConfig.isUnFixedDataMenu();
   }
 
-  public boolean isMixedDataMenu() {
-    return menuConfig.isMixedDataMenu();
-  }
-
   public boolean isMustMenu() {
     return menuConfig.isMustMenu();
   }
 
   public boolean isNotMustMenu() {
     return menuConfig.isNotMustMenu();
-  }
-
-  public V cast(Object value) {
-    return menuConfig.cast(value);
-  }
-
-  public <T> boolean canCast(Class<T> clazz) {
-    return menuConfig.canCast(clazz);
-  }
-
-  public <T> T cast(Object value, Class<T> clazz) {
-    return menuConfig.cast(value, clazz);
-  }
-
-  public ImmutableCollection<TypeToken<?>> canCastTypes() {
-    return menuConfig.canCastTypes();
-  }
-
-  public <T> boolean canCast(TypeToken<T> type) {
-    return menuConfig.canCast(type);
-  }
-
-  public <T> T cast(Object value, TypeToken<T> type) {
-    return menuConfig.cast(value, type);
   }
 
   // delegate methods end

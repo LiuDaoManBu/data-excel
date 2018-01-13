@@ -42,42 +42,6 @@ public class ExcelUtil {
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
-  // TODO 转移到Menu类中?
-  // public static boolean isDataCell(Cell cell,Menu menu,Collection<Menu> menus){
-  // if(cell==null){
-  // return false;
-  // }
-  // CellRangeAddress cellRangeAddress=getMergedRegion(cell);
-  // if(cellRangeAddress!=null){
-  // return false;
-  // }
-  //
-  // String cellString=getStringValue(cell);
-  // if(StringUtils.isEmpty(cellString)){
-  // CellStyle cellStyle=cell.getCellStyle();
-  // short boderType=CellStyle.BORDER_NONE;
-  // switch(menu.getCheckMenuConfig().getDirection()){
-  // case TOP:boderType=cellStyle.getBorderTop();break;
-  // case BOTTOM:boderType=cellStyle.getBorderBottom();break;
-  // case LEFT:boderType=cellStyle.getBorderLeft();break;
-  // default:boderType=cellStyle.getBorderRight();
-  // }
-  // if(boderType==CellStyle.BORDER_NONE){
-  // return false;
-  // }
-  // }
-  //
-  // List<Cell> menuCells=Lists.newArrayList();
-  // for(Menu m:menus){
-  // menuCells.add(m.getCell());
-  // }
-  //
-  // if(menuCells.contains(cell)){
-  // return false;
-  // }
-  // return true;
-  // }
-
   public static WorkbookParseResult parse(Workbook workbook, WorkbookConfig config) {
     return config.parse(workbook);
   }
@@ -86,94 +50,6 @@ public class ExcelUtil {
   public static SheetParseResult parse(Sheet sheet, SheetConfig config) {
     return config.parse(sheet).build();
   }
-
-  /**
-   * 根据数据单元格数目并非固定的菜单数据检查配置对象集合将工作簿的的数据处理为一个Map的集合，一个map为一条数据
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param sheet 工作簿
-   * @param menuDataCheckConfigList 数据单元格数目并非固定的菜单数据检查配置对象集合
-   * @return 数据的集合
-   */
-  // TODO 改为直接解析后获取数据
-  // public static List<Map<String,String>> getNoFixedDatas(Sheet sheet,Collection<SheetConfig>
-  // menuDataCheckConfigList) {
-  // List<SheetConfig> noFixedDataConfigs= new ArrayList<SheetConfig>();
-  // for(SheetConfig menuDataCheckConfig:menuDataCheckConfigList){
-  // if(menuDataCheckConfig.isDataFlag() && !menuDataCheckConfig.isSingleDataFlag()){
-  // noFixedDataConfigs.add(menuDataCheckConfig);
-  // }
-  // }
-  // List<Map<String,String>> list=new ArrayList<Map<String,String>>();
-  // Map<SheetConfig,Cell> lastCellMap=new HashMap<SheetConfig,Cell>();
-  // Map<String,String> map=new LinkedHashMap<String,String>();
-  // for(SheetConfig menuDataCheckConfig:noFixedDataConfigs){
-  // Cell menuCell=getCellByMenuName(sheet,
-  // menuDataCheckConfig.getMenuNameMatcher().getMatchString());
-  // Cell dataCell=menuDataCheckConfig.getDirection().nextCell(menuCell);
-  // checkAndAddDataCell(dataCell,menuDataCheckConfig,menuDataCheckConfigList,lastCellMap,map);
-  // }
-  // while(!map.isEmpty()){
-  // list.add(map);
-  // map=new LinkedHashMap<String,String>();
-  // for(SheetConfig menuDataCheckConfig:noFixedDataConfigs){
-  // Cell lastDataCell=lastCellMap.get(menuDataCheckConfig);
-  // Cell dataCell=menuDataCheckConfig.getDirection().nextCell(lastDataCell);
-  // checkAndAddDataCell(dataCell,menuDataCheckConfig,menuDataCheckConfigList,lastCellMap,map);
-  // }
-  // }
-  // return list;
-  // }
-
-  /**
-   * 在工作簿中根据传入的数据单元格数目固定的菜单数据检查配置对象得到该菜单数据检查配置对象的数据单元格集合
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param sheet 工作簿
-   * @param menuDataCheckConfig 数据单元格数目固定的菜单数据检查配置对象
-   * @return 该菜单数据检查配置对象的数据单元格集合
-   */
-  // TODO 改为直接解析后获取数据
-  // public static String getFixedDatas(Sheet sheet,SheetConfig menuDataCheckConfig) {
-  // Cell menuCell=getCellByMenuName(sheet,
-  // menuDataCheckConfig.getMenuNameMatcher().getMatchString());
-  // Cell dataCell=menuDataCheckConfig.getDirection().nextCell(menuCell);
-  // return getStringValue(dataCell);
-  // }
-
-  // TODO 解决报错
-  // public static final JSONArray getDatas(Sheet sheet,SheetConfig sheetConfig){
-  // JSONArray datas=new JSONArray();
-  // List<Map<String,String>> noFixedDatas=getNoFixedDatas(sheet, menuDataCheckConfigs);
-  // Map<String,String> fixedDatas=Maps.newHashMap();
-  // for(SheetConfig menuDataCheckConfig:menuDataCheckConfigs){
-  // if(menuDataCheckConfig.isDataFlag() && menuDataCheckConfig.isSingleDataFlag()){
-  // String value=getFixedDatas(sheet,menuDataCheckConfig);
-  // fixedDatas.put(menuDataCheckConfig.getMenuNameMatcher().getMatchString(), value);
-  // }
-  // }
-  //
-  // for(Map<String,String> noFixedData:noFixedDatas){
-  // JSONObject json=new JSONObject();
-  // json.putAll(noFixedData);
-  // json.putAll(fixedDatas);
-  // datas.add(json);
-  // }
-  // return datas;
-  // }
-
-  // TODO 解决报错
-  // public static final <T> List<T> getDatas(Sheet sheet,SheetConfig sheetConfig, Class<T> clazz)
-  // {
-  // JSONArray datas=getDatas(sheet, menuDataCheckConfigs);
-  // List<T> javaDatas=Lists.newArrayList();
-  // for(int i=0;i<datas.size();i++){
-  // javaDatas.add(JSONObject.toJavaObject(datas.getJSONObject(i), clazz));
-  // }
-  // return javaDatas;
-  // }
 
   @Nullable
   public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {
@@ -236,70 +112,6 @@ public class ExcelUtil {
   public static boolean hasMergedRegion(@Nullable Sheet sheet) {
     return Optional.ofNullable(sheet).map(Sheet::getNumMergedRegions).map(n -> n > 0).orElse(false);
   }
-
-  // public static void setDataFromEntity(Sheet sheet, List<?> datas, Map<String, SheetConfig> map,
-  // SimpleDateFormat sdf) {
-  // if(datas!=null && !datas.isEmpty()){
-  // for(Entry<String,SheetConfig> entry:map.entrySet()){
-  // Field field=null;
-  // try {
-  // field=datas.get(0).getClass().getDeclaredField(entry.getKey());
-  // if(field!=null){
-  // field.setAccessible(true);
-  // SheetConfig config=entry.getValue();
-  // if(config.isDataFlag()){
-  // if(config.isSingleDataFlag()){
-  // Cell menuCell=getCellByMenuName(sheet, config.getMenuNameMatcher().getMatchString());
-  // if(menuCell!=null){
-  // Cell dataCell=config.getDirection().nextCell(menuCell);
-  // if(dataCell!=null){
-  // Object value=field.get(datas.get(0));
-  // setCellValue(dataCell,value,sdf);
-  // }
-  // }
-  // }else{
-  // Cell menuCell=getCellByMenuName(sheet, config.getMenuNameMatcher().getMatchString());
-  // if(menuCell!=null){
-  // CellStyle cellStyle=config.getDirection().nextCell(menuCell).getCellStyle();
-  // Cell dataCell=null;
-  // for(int i=0;i<datas.size();i++){
-  // dataCell=config.getDirection().nextCell(menuCell);
-  // Object value=field.get(datas.get(i));
-  // setCellValue(dataCell,value,sdf);
-  // dataCell.setCellStyle(cellStyle);
-  // }
-  // }
-  // }
-  // }
-  // field.setAccessible(false);
-  // }
-  // } catch (Exception e) {
-  // e.printStackTrace();
-  // }
-  // }
-  // }
-  // }
-
-  // public static void setDataFromMap(Sheet sheet, Collection<Map<String, Object>> datas,
-  // Collection<SheetConfig> menuConfigs, SimpleDateFormat sdf) {
-  // if(datas!=null && !datas.isEmpty()){
-  // ParseResult parseResult=parseMenu(sheet, menuConfigs);
-  // for(Menu menu:parseResult.getFixedMenus()){
-  // Cell dataCell=menu.getDataCell(1);
-  // setCellValue(dataCell,datas.iterator().next().get(menu.getMenuConfig().getFieldName()),sdf);
-  // }
-  // int i=1;
-  // for(Map<String,Object> data:datas){
-  // for(Menu menu:parseResult.getNoFixedMenus()){
-  // CellStyle cellStyle=menu.getDataCell(1).getCellStyle();
-  // Cell dataCell=menu.getDataCell(i);
-  // dataCell.setCellStyle(cellStyle);
-  // setCellValue(dataCell,data.get(menu.getCheckMenuConfig().getFieldName()),sdf);
-  // }
-  // i++;
-  // }
-  // }
-  // }
 
   // TODO 方法重写 指定cellType?
   public static void setCellValue(@Nullable Cell cell, @Nullable Object value) {

@@ -130,10 +130,6 @@ public class Table {
     return getDataMenus().filter(Menu::isUnFixedDataMenu);
   }
 
-  public Stream<Menu<?>> getMixedDataMenus() {
-    return getDataMenus().filter(Menu::isMixedDataMenu);
-  }
-
   public Stream<Menu<?>> getMustMenus() {
     return getMenus().filter(Menu::isMustMenu);
   }
