@@ -3,12 +3,14 @@ package com.caotc.excel4j;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -82,21 +84,24 @@ interface Ib extends Ia {
 
 public class TestGuava {
   public static <T> void main(String[] args) throws Exception {
+    testFluentIterable();
+  }
+
+  public static void testFluentIterable() {
+    FluentIterable.of(1, 2, 3, 4, 5, 6, 7, 8, 9).transform(i -> {
+      System.out.println(i);
+      return i * 10;
+    }).transform(i -> {
+      System.out.println(i);
+      return i + 1;
+    }).toList();
+  }
+
+  public static void testTypeToken() {
     // Table<List<String>> table=new Table<List<String>>();
     // List<String> n=table.get();
 
-    JSONObject jsonObject = new JSONObject();
-    JSONArray jsonArray = new JSONArray();
-    jsonArray.fluentAdd(new JSONObject().fluentPut("name", "a").fluentPut("type", "region"))
-        .fluentAdd(new JSONObject().fluentPut("name", "b").fluentPut("type", "city"));
-    jsonObject.put("values", jsonArray);
-    System.out.println(jsonObject.toJavaObject(AAA.class));
-    Collection<AAA> c = new JSONArray().fluentAdd(jsonObject).toJavaObject(Collection.class);
-    System.out.println(c);
-    // AAA aaa=c.iterator().next();
 
-    System.out.println(jsonObject.toJavaObject(Map.class).get("values"));
-    Multimap<String, Object> mmap = jsonObject.toJavaObject(Multimap.class);
     // System.out.println(int[][][].class.equals(int[].class));
     // Class<?> type=void.class;
     // System.out.println(type.isInterface());
@@ -121,8 +126,6 @@ public class TestGuava {
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection>() {}));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<String>>() {}));
     System.out.println(typeToken.isSubtypeOf(new TypeToken<Collection<Integer>>() {}));
-
-    testCollector();
   }
 
   public static void testCollector() {

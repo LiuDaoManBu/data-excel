@@ -80,9 +80,9 @@ public class WorkbookConfig {
       // TODO sheet被多个matcher匹配的情况?
       builder.setSheetParseResultBuilders(sheetConfigs.stream()
           .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
-          .map(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
+          .flatMap(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
               .map(config::parse))
-          .flatMap(Function.identity()).collect(ImmutableList.toImmutableList()));
+          .collect(ImmutableList.toImmutableList()));
     }
     builder.setErrors(errors.build());
     return builder.build();

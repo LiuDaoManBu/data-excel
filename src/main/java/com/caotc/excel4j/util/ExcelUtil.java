@@ -507,14 +507,16 @@ public class ExcelUtil {
   }
 
   public static Stream<Row> getRows(@Nullable Sheet sheet) {
-    // TODO sheet.getTopRow()? closed?
-    return Optional.ofNullable(sheet)
-        .map(t -> getRows(sheet, sheet.getFirstRowNum(), sheet.getLastRowNum())).get();
+    return getRows(sheet, null, null);
   }
 
-  public static Stream<Row> getRows(@Nullable Sheet sheet, int firstRowIndex, int lastRowIndex) {
+  public static Stream<Row> getRows(@Nullable Sheet sheet, @Nullable Integer firstRowIndex,
+      @Nullable Integer lastRowIndex) {
     // TODO sheet.getTopRow()? closed
-    return Optional.ofNullable(sheet).map(t -> IntStream.rangeClosed(firstRowIndex, lastRowIndex))
+    return Optional.ofNullable(sheet)
+        .map(t -> IntStream.rangeClosed(
+            Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
+            Optional.ofNullable(lastRowIndex).orElse(t.getLastRowNum())))
         .orElse(IntStream.empty()).mapToObj(sheet::getRow);
   }
 
@@ -524,11 +526,10 @@ public class ExcelUtil {
   }
 
   public static Stream<Cell> getCells(@Nullable Sheet sheet) {
-    return getCells(sheet);
+    return getCells(sheet, DEFAULT_MISSING_CELL_POLICY);
   }
 
   public static Stream<Cell> getCells(@Nullable Sheet sheet, @Nullable MissingCellPolicy policy) {
-    // TODO sheet.getTopRow()? closed
     MissingCellPolicy effectivePolicy =
         Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
     return getRows(sheet).flatMap(row -> getCells(row, effectivePolicy));
@@ -548,8 +549,8 @@ public class ExcelUtil {
     MissingCellPolicy effectivePolicy =
         Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
     return IntStream.rangeClosed(cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow())
-        .mapToObj(sheet::getRow).flatMap(row -> getCells(row, effectivePolicy))
-        .filter(cellRangeAddress::isInRange);
+        .mapToObj(sheet::getRow).flatMap(row -> getCells(row, cellRangeAddress.getFirstColumn(),
+            cellRangeAddress.getLastColumn(), effectivePolicy));
   }
 
   public static Stream<Cell> getCells(@Nullable Row row) {
@@ -557,20 +558,22 @@ public class ExcelUtil {
   }
 
   public static Stream<Cell> getCells(@Nullable Row row, @Nullable MissingCellPolicy policy) {
-    return Optional.ofNullable(row)
-        .map(t -> getCells(t, t.getFirstCellNum(), t.getLastCellNum(), policy)).get();
+    return getCells(row, null, null, policy);
   }
 
-  public static Stream<Cell> getCells(@Nullable Row row, int firstColumnIndex,
-      int lastColumnIndex) {
+  public static Stream<Cell> getCells(@Nullable Row row, @Nullable Integer firstColumnIndex,
+      @Nullable Integer lastColumnIndex) {
     return getCells(row, firstColumnIndex, lastColumnIndex, DEFAULT_MISSING_CELL_POLICY);
   }
 
-  public static Stream<Cell> getCells(@Nullable Row row, int firstColumnIndex, int lastColumnIndex,
-      @Nullable MissingCellPolicy policy) {
+  public static Stream<Cell> getCells(@Nullable Row row, @Nullable Integer firstColumnIndex,
+      @Nullable Integer lastColumnIndex, @Nullable MissingCellPolicy policy) {
     MissingCellPolicy effectivePolicy =
         Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
-    return Optional.ofNullable(row).map(t -> IntStream.range(firstColumnIndex, lastColumnIndex))
+    return Optional.ofNullable(row)
+        .map(t -> IntStream.range(
+            Optional.ofNullable(firstColumnIndex).orElse((int) t.getFirstCellNum()),
+            Optional.ofNullable(lastColumnIndex).orElse((int) t.getLastCellNum())))
         .orElse(IntStream.empty()).mapToObj(i -> row.getCell(i, effectivePolicy));
   }
 }

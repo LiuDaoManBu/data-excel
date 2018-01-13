@@ -3,8 +3,12 @@ package com.caotc.excel4j;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Map;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.google.common.collect.Multimap;
 
 class Data {
   private Class<?> type;
@@ -33,6 +37,21 @@ public class TestJson {
   public static void testCastLocalDate() {
     System.out.println(TypeUtils.castToJavaBean(Calendar.getInstance().getTime(), LocalDate.class));
     System.out.println(TypeUtils.castToJavaBean("2000-6-25", LocalDate.class));
+  }
+  
+  public static void testJsonToGuavaCollection() {
+    JSONObject jsonObject = new JSONObject();
+    JSONArray jsonArray = new JSONArray();
+    jsonArray.fluentAdd(new JSONObject().fluentPut("name", "a").fluentPut("type", "region"))
+        .fluentAdd(new JSONObject().fluentPut("name", "b").fluentPut("type", "city"));
+    jsonObject.put("values", jsonArray);
+    System.out.println(jsonObject.toJavaObject(AAA.class));
+    Collection<AAA> c = new JSONArray().fluentAdd(jsonObject).toJavaObject(Collection.class);
+    System.out.println(c);
+    // AAA aaa=c.iterator().next();
+
+    System.out.println(jsonObject.toJavaObject(Map.class).get("values"));
+    Multimap<String, Object> mmap = jsonObject.toJavaObject(Multimap.class);
   }
   
   public static void testClass() {
