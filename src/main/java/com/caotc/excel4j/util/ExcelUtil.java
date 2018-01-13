@@ -548,8 +548,8 @@ public class ExcelUtil {
 
     MissingCellPolicy effectivePolicy =
         Optional.ofNullable(policy).orElse(DEFAULT_MISSING_CELL_POLICY);
-    return IntStream.rangeClosed(cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow())
-        .mapToObj(sheet::getRow).flatMap(row -> getCells(row, cellRangeAddress.getFirstColumn(),
+    return getRows(sheet, cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow())
+        .flatMap(row -> getCells(row, cellRangeAddress.getFirstColumn(),
             cellRangeAddress.getLastColumn(), effectivePolicy));
   }
 
