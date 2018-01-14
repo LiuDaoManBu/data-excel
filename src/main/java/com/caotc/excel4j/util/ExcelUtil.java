@@ -46,10 +46,10 @@ public class ExcelUtil {
     return config.parse(workbook);
   }
 
-  // TODO can?
-  public static SheetParseResult parse(Sheet sheet, SheetConfig config) {
-    return config.parse(sheet).build();
-  }
+//  // TODO can?
+//  public static SheetParseResult parse(Sheet sheet, SheetConfig config) {
+//    return config.parse(sheet).build();
+//  }
 
   @Nullable
   public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {

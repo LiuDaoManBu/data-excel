@@ -19,7 +19,7 @@ public class Data<V> {
     this.menu = menu;
     this.dataConfig = menu.getMenuConfig().getDataConfig();
     this.valueCells =
-        menu.getChildrenMenus().isEmpty() ? dataConfig.getLoadType().getDataCells(menu)
+        menu.getChildrens().isEmpty() ? dataConfig.getLoadType().getDataCells(menu)
             : ImmutableList.of();
 
     // TODO is DataError?

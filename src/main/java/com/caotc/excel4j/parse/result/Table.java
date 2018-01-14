@@ -9,7 +9,6 @@ import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
 import com.caotc.excel4j.util.ExcelUtil;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -59,7 +58,7 @@ public class Table {
       Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
         @Override
         public Iterable<? extends Menu<?>> successors(Menu<?> node) {
-          return node.getChildrenMenus();
+          return node.getChildrens();
         }
       });
 

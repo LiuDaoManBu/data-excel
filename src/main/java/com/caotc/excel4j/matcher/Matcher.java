@@ -9,25 +9,27 @@ import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
   public static interface Builder<T> {
+    Builder<T> add(Predicate<T> predicate);
+
+    Builder<T> add(Builder<T> builder);
+    
+    <R> Builder<T> add(Predicate<R> predicate, Function<T, R> transform);
+
+    Builder<T> add(StringMatcherType type, String predicateValue, Function<T, String> transform);
+
+    <R extends Comparable<R>> Builder<T> add(ComparableMatcherType type, R predicateValue,
+        Function<T, R> transform);
+
+    Builder<T> and();
+
+    Builder<T> or();
+
+    Builder<T> endAnd();
+
+    Builder<T> endOr();
+
     Matcher<T> build();
   }
-
-  Matcher<T> add(Predicate<T> predicate);
-
-  <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform);
-
-  Matcher<T> add(StringMatcherType type, String predicateValue, Function<T, String> transform);
-
-  <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
-      Function<T, R> transform);
-
-  Matcher<T> and();
-
-  Matcher<T> or();
-
-  Matcher<T> endAnd();
-
-  Matcher<T> endOr();
 
   Optional<String> match(T value);
 

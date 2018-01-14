@@ -3,6 +3,7 @@ package com.caotc.excel4j.config;
 import java.util.List;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
+import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.google.common.collect.ImmutableCollection;
@@ -13,10 +14,10 @@ public class SheetConfig {
   public static class Builder {
     private List<TableConfig.Builder> tableConfigBuilders;
     private WorkbookConfig workbookConfig;
-    private SheetMatcher.Builder matcherBuilder;
+    private Matcher.Builder<Sheet> matcherBuilder;
     private ParserConfig parserConfig;
 
-    public SheetConfig builder() {
+    public SheetConfig build() {
       return new SheetConfig(this);
     }
 
@@ -38,11 +39,11 @@ public class SheetConfig {
       return this;
     }
 
-    public SheetMatcher.Builder getMatcherBuilder() {
+    public Matcher.Builder<Sheet> getMatcherBuilder() {
       return matcherBuilder;
     }
 
-    public Builder setMatcherBuilder(SheetMatcher.Builder matcherBuilder) {
+    public Builder setMatcherBuilder(Matcher.Builder<Sheet> matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
@@ -64,13 +65,13 @@ public class SheetConfig {
 
   private final ImmutableCollection<TableConfig> tableConfigs;
   private final WorkbookConfig workbookConfig;
-  private final SheetMatcher matcher;
+  private final Matcher<Sheet> matcher;
   private final ParserConfig parserConfig;
 
   private SheetConfig(Builder builder) {
     this.tableConfigs = builder.tableConfigBuilders.stream()
         .peek(tableConfigBuilder -> tableConfigBuilder.setSheetConfig(this))
-        .map(TableConfig.Builder::builder).collect(ImmutableSet.toImmutableSet());
+        .map(TableConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     this.workbookConfig = builder.workbookConfig;
     this.matcher = builder.matcherBuilder.build();
     this.parserConfig = builder.parserConfig;
@@ -97,7 +98,7 @@ public class SheetConfig {
     return workbookConfig;
   }
 
-  public SheetMatcher getMatcher() {
+  public Matcher<Sheet> getMatcher() {
     return matcher;
   }
 

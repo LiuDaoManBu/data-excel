@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.usermodel.TableMatcher;
 import com.caotc.excel4j.parse.result.Table;
 import com.google.common.collect.ImmutableCollection;
@@ -18,12 +19,12 @@ public class TableConfig {
   public static class Builder {
     private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
-    private TableMatcher.Builder matcherBuilder;
+    private Matcher.Builder<Table> matcherBuilder;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
     private ParserConfig parserConfig;
 
-    public TableConfig builder() {
+    public TableConfig build() {
       return new TableConfig(this);
     }
 
@@ -72,11 +73,11 @@ public class TableConfig {
       return this;
     }
 
-    public TableMatcher.Builder getMatcherBuilder() {
+    public Matcher.Builder<Table> getMatcherBuilder() {
       return matcherBuilder;
     }
 
-    public Builder setMatcherBuilder(TableMatcher.Builder matcherBuilder) {
+    public Builder setMatcherBuilder(Matcher.Builder<Table> matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
@@ -87,7 +88,7 @@ public class TableConfig {
       Traverser.forTree(new SuccessorsFunction<MenuConfig<?>>() {
         @Override
         public Iterable<? extends MenuConfig<?>> successors(MenuConfig<?> node) {
-          return node.getChildrenMenuConfigs();
+          return node.getChildrens();
         }
       });
 
@@ -99,14 +100,15 @@ public class TableConfig {
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
   private final ImmutableCollection<MenuConfig<?>> topMenuConfigs;
-  private final TableMatcher matcher;
+  private final Matcher<Table> matcher;
   private final ParserConfig parserConfig;
 
   private TableConfig(Builder builder) {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
-    matcher = builder.matcherBuilder.build();
+    // TODO
+    matcher = Optional.ofNullable(builder.matcherBuilder).map(Matcher.Builder::build).orElse(null);
 
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
@@ -157,7 +159,7 @@ public class TableConfig {
     return parserConfig;
   }
 
-  public TableMatcher getMatcher() {
+  public Matcher<Table> getMatcher() {
     return matcher;
   }
 

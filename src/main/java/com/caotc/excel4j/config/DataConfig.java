@@ -35,6 +35,8 @@ public class DataConfig<V> {
     public DataConfig<V> build() {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
       beList = Optional.ofNullable(beList).orElse(Boolean.FALSE);
+
+      matcherBuilder = Optional.ofNullable(matcherBuilder).orElse(DataTypeMatcher.builder());
       matcherBuilder.setDataType(dataType);
       // TODO 提示语
       Preconditions.checkState(Objects.nonNull(menuConfig));

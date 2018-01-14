@@ -18,6 +18,17 @@ public class SheetMatcher extends BaseMatcher<Sheet> {
       return new SheetMatcher(this);
     }
 
+    public Builder addNamePredicate(StringMatcherType type, String predicateValue) {
+      add(type, predicateValue, Sheet::getSheetName);
+      return this;
+    }
+
+    public Builder addNameLengthPredicate(ComparableMatcherType type, int predicateValue) {
+      Function<Sheet, String> f = Sheet::getSheetName;
+      add(type, predicateValue, f.andThen(String::length));
+      return this;
+    }
+    
     public List<Expression> getNameExpressions() {
       return nameExpressions;
     }
@@ -35,22 +46,11 @@ public class SheetMatcher extends BaseMatcher<Sheet> {
   
   private SheetMatcher(Builder builder) {
     super(builder);
-    if (Objects.nonNull(builder.nameExpressions)) {
-      builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
-          expression.getPredicateValue(), Sheet::getSheetName));
-    }
+    //TODO
+//    if (Objects.nonNull(builder.nameExpressions)) {
+//      builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
+//          expression.getPredicateValue(), Sheet::getSheetName));
+//    }
   }
-
-  public SheetMatcher addNamePredicate(StringMatcherType type, String predicateValue) {
-    add(type, predicateValue, Sheet::getSheetName);
-    return this;
-  }
-
-  public SheetMatcher addNameLengthPredicate(ComparableMatcherType type, int predicateValue) {
-    Function<Sheet, String> f = Sheet::getSheetName;
-    add(type, predicateValue, f.andThen(String::length));
-    return this;
-  }
-
 
 }

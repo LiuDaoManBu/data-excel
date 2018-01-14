@@ -1,21 +1,31 @@
 package com.caotc.excel4j;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.config.DataConfig;
+import com.caotc.excel4j.config.MenuConfig;
+import com.caotc.excel4j.config.SheetConfig;
+import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.constant.ConstructType;
-import com.caotc.excel4j.matcher.BaseMatcher;
+import com.caotc.excel4j.constant.LoadType;
+import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.matcher.ComparableMatcher;
+import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
+import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
+import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
+import com.caotc.excel4j.parse.result.WorkbookParseResult;
+import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -105,9 +115,69 @@ class C {
 }
 
 
+class User {
+  public final String a;
+  private String userName;
+  private String passWord;
+  private String region;
+
+  public User() {
+    a=null;
+  }
+  
+  public String getUserName() {
+    return userName;
+  }
+
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
+
+  public String getPassWord() {
+    return passWord;
+  }
+
+  public void setPassWord(String passWord) {
+    this.passWord = passWord;
+  }
+
+  public String getRegion() {
+    return region;
+  }
+
+  public void setRegion(String region) {
+    this.region = region;
+  }
+
+}
+
+
 public class Test {
   public static void main(String[] args) throws Exception {
-    System.out.println(Calendar.getInstance().getTime());
+    Workbook workbook = new XSSFWorkbook("C:\\Users\\呵呵\\Desktop\\用户.xlsx");
+    System.out.println(workbook.getSheetAt(0).getSheetName());
+
+    DataConfig.Builder<String> userNameDataConfig =
+        DataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
+            .setField(User.class.getDeclaredField("userName"));
+
+    MenuConfig.Builder<String> userNameMenuConfig = MenuConfig.<String>builder()
+        .setMatcherBuilder(
+            StandardCellMatcher.builder().setBaseDataType(BaseDataType.STRING).setType(Type.AND))
+        .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU);
+
+    WorkbookParseResult workbookParseResult = ExcelUtil.parse(workbook,
+        WorkbookConfig.builder()
+            .setSheetConfigBuilders(ImmutableList.of(SheetConfig.builder()
+                .setMatcherBuilder(SheetMatcher.builder().setType(Type.AND).setPredicates(
+                    Lists.newArrayList(sheet -> sheet.getSheetName().equalsIgnoreCase("user"))))
+                .setTableConfigBuilders(ImmutableList.of(TableConfig.builder()
+                    .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
+            .build());
+
+  }
+
+  public static void testConstructType() {
     Object array = new String[] {"AAA", "BBB", "CCC"};
     // Object array = new int[] {2, 3, 1};
     String[] strings = ConstructType.toArray(array);

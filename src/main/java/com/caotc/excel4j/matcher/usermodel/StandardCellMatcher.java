@@ -32,6 +32,71 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
       return new StandardCellMatcher(this);
     }
 
+    public Builder addDataPredicate(Predicate<Object> predicate) {
+      add(predicate, StandardCell::getValue);
+      return this;
+    }
+
+    public <T> Builder addDataPredicate(Predicate<T> predicate, TypeToken<T> type) {
+      add(predicate, value -> dataType.cast(value, type));
+      return this;
+    }
+
+    public Builder addDataPredicate(StringMatcherType type, String predicateValue) {
+      add(type, predicateValue, value -> dataType.cast(value, String.class));
+      return this;
+    }
+
+    public <T extends Comparable<T>> Builder addDataPredicate(ComparableMatcherType type,
+        T predicateValue) {
+      // TODO safe?
+      add(type, predicateValue, value -> (T) dataType.cast(value, predicateValue.getClass()));
+      return this;
+    }
+
+    public Builder addCellTypePredicate(Predicate<CellType> predicate) {
+      add(predicate, StandardCell::getCellTypeEnum);
+      return this;
+    }
+
+    public Builder addFirstRowIndexPredicate(ComparableMatcherType type,
+        int predicateValue) {
+      add(type, predicateValue, StandardCell::getFirstRow);
+      return this;
+    }
+
+    public Builder addLastRowIndexPredicate(ComparableMatcherType type,
+        int predicateValue) {
+      add(type, predicateValue, StandardCell::getLastRow);
+      return this;
+    }
+
+    public Builder addFirstColumnIndexPredicate(ComparableMatcherType type,
+        int predicateValue) {
+      add(type, predicateValue, StandardCell::getFirstColumn);
+      return this;
+    }
+
+    public Builder addLastColumnIndexPredicate(ComparableMatcherType type,
+        int predicateValue) {
+      add(type, predicateValue, StandardCell::getLastColumn);
+      return this;
+    }
+
+    public Builder addFirstColumnIndexStringPredicate(StringMatcherType type,
+        String predicateValue) {
+      Function<StandardCell, Integer> f = StandardCell::getFirstColumn;
+      add(type, predicateValue, f.andThen(CellReference::convertNumToColString));
+      return this;
+    }
+
+    public Builder addLastColumnIndexStringPredicate(StringMatcherType type,
+        String predicateValue) {
+      Function<StandardCell, Integer> f = StandardCell::getLastColumn;
+      add(type, predicateValue, f.andThen(CellReference::convertNumToColString));
+      return this;
+    }
+    
     public BaseDataType getBaseDataType() {
       return baseDataType;
     }
@@ -69,75 +134,12 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
   private StandardCellMatcher(Builder builder) {
     super(builder);
     this.dataType=builder.dataType;
-    if (Objects.nonNull(builder.nameExpressions)) {
-      builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
-          expression.getPredicateValue(), standardCell->dataType.cast(standardCell.getValue(), String.class)));
-    }
+    //TODO
+//    if (Objects.nonNull(builder.nameExpressions)) {
+//      builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
+//          expression.getPredicateValue(), standardCell->dataType.cast(standardCell.getValue(), String.class)));
+//    }
   }
 
-  public <T> StandardCellMatcher addDataPredicate(Predicate<Object> predicate) {
-    add(predicate, StandardCell::getValue);
-    return this;
-  }
-
-  public <T> StandardCellMatcher addDataPredicate(Predicate<T> predicate, TypeToken<T> type) {
-    add(predicate, value -> dataType.cast(value, type));
-    return this;
-  }
-
-  public StandardCellMatcher addDataPredicate(StringMatcherType type, String predicateValue) {
-    add(type, predicateValue, value -> dataType.cast(value, String.class));
-    return this;
-  }
-
-  public <T extends Comparable<T>> StandardCellMatcher addDataPredicate(ComparableMatcherType type,
-      T predicateValue) {
-    // TODO safe?
-    add(type, predicateValue, value -> (T) dataType.cast(value, predicateValue.getClass()));
-    return this;
-  }
-
-  public StandardCellMatcher addCellTypePredicate(Predicate<CellType> predicate) {
-    add(predicate, StandardCell::getCellTypeEnum);
-    return this;
-  }
-
-  public StandardCellMatcher addFirstRowIndexPredicate(ComparableMatcherType type,
-      int predicateValue) {
-    add(type, predicateValue, StandardCell::getFirstRow);
-    return this;
-  }
-
-  public StandardCellMatcher addLastRowIndexPredicate(ComparableMatcherType type,
-      int predicateValue) {
-    add(type, predicateValue, StandardCell::getLastRow);
-    return this;
-  }
-
-  public StandardCellMatcher addFirstColumnIndexPredicate(ComparableMatcherType type,
-      int predicateValue) {
-    add(type, predicateValue, StandardCell::getFirstColumn);
-    return this;
-  }
-
-  public StandardCellMatcher addLastColumnIndexPredicate(ComparableMatcherType type,
-      int predicateValue) {
-    add(type, predicateValue, StandardCell::getLastColumn);
-    return this;
-  }
-
-  public StandardCellMatcher addFirstColumnIndexStringPredicate(StringMatcherType type,
-      String predicateValue) {
-    Function<StandardCell, Integer> f = StandardCell::getFirstColumn;
-    add(type, predicateValue, f.andThen(CellReference::convertNumToColString));
-    return this;
-  }
-
-  public StandardCellMatcher addLastColumnIndexStringPredicate(StringMatcherType type,
-      String predicateValue) {
-    Function<StandardCell, Integer> f = StandardCell::getLastColumn;
-    add(type, predicateValue, f.andThen(CellReference::convertNumToColString));
-    return this;
-  }
 
 }
