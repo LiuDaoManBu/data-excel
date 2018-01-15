@@ -16,15 +16,21 @@ public enum Type {
 
     @Override
     public <T> Optional<String> apply(Matcher<T> matcher, T value) {
-      Optional<Predicate<T>> optional=matcher.getPredicates().stream().filter(predicate -> !predicate.test(value))
-          .findFirst();
-      if(optional.isPresent()) {
-        Predicate<T> predicate=optional.get();
-      //TODO 消灭instanceof?
-        if(predicate instanceof Matcher) {
-          return ((Matcher<T>) predicate).match(value);
-        }else {
-          return Optional.ofNullable(matcher.getEffectiveMessageFunction()).map(f->f.apply(value));
+      Optional<Predicate<T>> optional =
+          matcher.getPredicates().stream().filter(predicate -> !predicate.test(value)).findFirst();
+      if (optional.isPresent()) {
+        Predicate<T> predicate = optional.get();
+        // TODO 消灭instanceof?
+        if (predicate instanceof Matcher) {
+          Optional<String> result=((Matcher<T>) predicate).match(value);
+          
+          return result;
+        } else {
+          Optional<String> result=Optional.ofNullable(matcher.getEffectiveMessageFunction())
+              .map(f -> {
+                return f.apply(value);
+              });
+          return result;
         }
       }
       return Optional.empty();
@@ -39,7 +45,7 @@ public enum Type {
     @Override
     public <T> Optional<String> apply(Matcher<T> matcher, T value) {
       return matcher.getPredicates().stream().noneMatch(p -> p.test(value))
-          ? Optional.ofNullable(matcher.getEffectiveMessageFunction()).map(f->f.apply(value))
+          ? Optional.ofNullable(matcher.getEffectiveMessageFunction()).map(f -> f.apply(value))
           : Optional.empty();
     }
   };

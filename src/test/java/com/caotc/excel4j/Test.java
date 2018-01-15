@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.config.MenuConfig;
+import com.caotc.excel4j.config.MenuDataConfig;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
@@ -21,7 +22,6 @@ import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.matcher.ComparableMatcher;
-import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.DataTypeMatcher;
@@ -30,7 +30,6 @@ import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.SheetParseResult;
-import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
@@ -160,18 +159,21 @@ class User {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    Workbook workbook = new XSSFWorkbook("C:\\Users\\Administrator\\Desktop\\用户.xlsx");
+    String path1 = "C:\\\\Users\\\\呵呵\\\\Desktop\\\\用户.xlsx";
+    String path2 = "C:\\Users\\Administrator\\Desktop\\用户.xlsx";
+    Workbook workbook = new XSSFWorkbook(path1);
     System.out.println(workbook.getSheetAt(0).getSheetName());
-    
-    DataConfig.Builder<String> userNameDataConfig =
-        DataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
-            .setField(User.class.getDeclaredField("userName")).setMatcherBuilder(DataTypeMatcher.builder()
-                .addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
+
+    MenuDataConfig.Builder<String> userNameDataConfig =
+        MenuDataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
+            .setField(User.class.getDeclaredField("userName")).setMatcherBuilder(
+                DataTypeMatcher.builder().addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
 
     MenuConfig.Builder<String> userNameMenuConfig = MenuConfig.<String>builder()
         .setMatcherBuilder(
             StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
-        .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU).setDirection(Direction.BOTTOM);
+        .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU)
+        .setDirection(Direction.BOTTOM);
 
     WorkbookParseResult workbookParseResult = ExcelUtil.parse(workbook,
         WorkbookConfig.builder()
@@ -185,11 +187,11 @@ public class Test {
     workbookParseResult.getSheetParseResults().stream().map(SheetParseResult::getTables)
         .flatMap(Collection::stream).flatMap(com.caotc.excel4j.parse.result.Table::getDataMenus)
         .map(Menu::getData).map(com.caotc.excel4j.parse.result.Data::getErrors)
-        .forEach(values -> values.forEach(System.out::println));
+        .forEach(values -> values.forEach(error -> System.out.println(error.getMessage())));
   }
 
   public static void testConstructType() {
-    Object array = new String[] { "AAA", "BBB", "CCC" };
+    Object array = new String[] {"AAA", "BBB", "CCC"};
     // Object array = new int[] {2, 3, 1};
     String[] strings = ConstructType.toArray(array);
     System.out.println(Arrays.toString(strings));

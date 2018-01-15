@@ -181,7 +181,10 @@ public class BaseMatcher<T> implements Matcher<T> {
     this.type = Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE);
     this.parent = builder.realParent;
     this.messageFunction =
-        Optional.ofNullable(builder.messageFunction).orElse(value -> builder.message);
+        Optional.ofNullable(builder.messageFunction).orElse(Optional.ofNullable(builder.message).map(t->{
+          Function<T, String> function=value->t;
+          return function;
+        }).orElse(null));
     ImmutableList.Builder<Predicate<T>> predicates = ImmutableList.builder();
     if (Objects.nonNull(builder.isNull) && builder.isNull) {
       predicates.add(Objects::isNull);

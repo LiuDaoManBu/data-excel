@@ -1,152 +1,17 @@
 package com.caotc.excel4j.config;
 
-import java.lang.reflect.Field;
-import java.util.Objects;
-import java.util.Optional;
-import com.caotc.excel4j.constant.ConstructType;
-import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.matcher.constant.Type;
-import com.caotc.excel4j.matcher.data.DataMatcher;
-import com.caotc.excel4j.matcher.data.DataTypeMatcher;
-import com.caotc.excel4j.matcher.data.type.BaseDataType;
-import com.caotc.excel4j.matcher.data.type.DataType;
-import com.caotc.excel4j.parse.result.Menu;
-import com.caotc.excel4j.parse.result.StandardCell;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
 public class DataConfig<V> {
   public static class Builder<V> {
-    private MenuConfig<V> menuConfig;
-    private Field field;
-    private BaseDataType baseDataType;
-    private DataType dataType;
-    // TODO interface?
-    private DataTypeMatcher.Builder matcherBuilder;
-    private TypeToken<V> fieldType;
-    private String fieldName;
-    private ConstructType constructType;
-    private LoadType loadType;
-    private Integer dataNumber;
-    // TODO 自由升降维?
-    private Boolean beList;
+    private TypeToken<V> type;
 
-    public DataConfig<V> build() {
-      dataType = Optional.ofNullable(dataType).orElse(baseDataType);
-      beList = Optional.ofNullable(beList).orElse(Boolean.FALSE);
-      //TODO 
-      fieldType=Optional.ofNullable(field).map(Field::getType).map(type->(Class<V>)type).map(TypeToken::of).orElse(null);
-
-      DataTypeMatcher.Builder builder=DataTypeMatcher.builder();
-      builder.setDataType(dataType).setType(Type.AND).setMessageFunction(value->value+"不合格").
-      add(dataType::test);
-      Optional.ofNullable(matcherBuilder).ifPresent(t->builder.add(t.setDataType(dataType)));
-      matcherBuilder = builder;
-      // TODO 提示语
-      Preconditions.checkState(Objects.nonNull(menuConfig));
-      Preconditions.checkState(Objects.nonNull(dataType));
-     
-      return new DataConfig<V>(this);
+    public TypeToken<V> getType() {
+      return type;
     }
 
-    public MenuConfig<V> getMenuConfig() {
-      return menuConfig;
-    }
-
-    public Builder<V> setMenuConfig(MenuConfig<V> menuConfig) {
-      this.menuConfig = menuConfig;
-      return this;
-    }
-
-    public Field getField() {
-      return field;
-    }
-
-    public Builder<V> setField(Field field) {
-      this.field = field;
-      return this;
-    }
-
-    public DataType getDataType() {
-      return dataType;
-    }
-
-    public Builder<V> setDataType(DataType dataType) {
-      this.dataType = dataType;
-      return this;
-    }
-
-    public TypeToken<V> getFieldType() {
-      return fieldType;
-    }
-
-    public Builder<V> setFieldType(TypeToken<V> fieldType) {
-      this.fieldType = fieldType;
-      return this;
-    }
-
-    public String getFieldName() {
-      return fieldName;
-    }
-
-    public Builder<V> setFieldName(String fieldName) {
-      this.fieldName = fieldName;
-      return this;
-    }
-
-    public ConstructType getConstructType() {
-      return constructType;
-    }
-
-    public Builder<V> setConstructType(ConstructType constructType) {
-      this.constructType = constructType;
-      return this;
-    }
-
-    public LoadType getLoadType() {
-      return loadType;
-    }
-
-    public Builder<V> setLoadType(LoadType loadType) {
-      this.loadType = loadType;
-      return this;
-    }
-
-    public Integer getDataNumber() {
-      return dataNumber;
-    }
-
-    public Builder<V> setDataNumber(Integer dataNumber) {
-      this.dataNumber = dataNumber;
-      return this;
-    }
-
-    public Boolean getBeList() {
-      return beList;
-    }
-
-    public Builder<V> setBeList(Boolean beList) {
-      this.beList = beList;
-      return this;
-    }
-
-    public BaseDataType getBaseDataType() {
-      return baseDataType;
-    }
-
-    public Builder<V> setBaseDataType(BaseDataType baseDataType) {
-      this.baseDataType = baseDataType;
-      return this;
-    }
-
-    public DataTypeMatcher.Builder getMatcherBuilder() {
-      return matcherBuilder;
-    }
-
-    public Builder<V> setMatcherBuilder(DataTypeMatcher.Builder matcherBuilder) {
-      this.matcherBuilder = matcherBuilder;
+    public Builder<V> setType(TypeToken<V> type) {
+      this.type = type;
       return this;
     }
 
@@ -156,94 +21,15 @@ public class DataConfig<V> {
     return new Builder<>();
   }
 
-  private final MenuConfig<V> menuConfig;
-  private final Field field;
-  private final DataType dataType;
-  private final DataMatcher dataMatcher;
-  private final TypeToken<V> fieldType;
-  private final String fieldName;
-  private final ConstructType constructType;
-  private final LoadType loadType;
-  private final Integer dataNumber;
-  // TODO 自由升降维?
-  private final boolean beList;
+  private final TypeToken<V> type;
 
-  private DataConfig(Builder<V> builder) {
-    this.menuConfig = builder.menuConfig;
-    this.field = builder.field;
-    this.dataType = builder.dataType;
-    this.dataMatcher = builder.matcherBuilder.build();
-    this.fieldType = builder.fieldType;
-    this.fieldName = builder.fieldName;
-    this.constructType = builder.constructType;
-    this.loadType = builder.loadType;
-    this.dataNumber = builder.dataNumber;
-    this.beList = builder.beList;
+  protected DataConfig(Builder<V> builder) {
+    this.type = builder.type;
+    
   }
 
-  @SuppressWarnings("unchecked")
-  public V cast(Object value) {
-    return (V) dataType.cast(value, fieldType.getRawType());
-  }
-
-  public <T> boolean canCast(Class<T> clazz) {
-    return dataType.canCast(clazz);
-  }
-
-  public <T> T cast(Object value, Class<T> clazz) {
-    return dataType.cast(value, clazz);
-  }
-
-  public ImmutableCollection<TypeToken<?>> canCastTypes() {
-    return dataType.canCastTypes();
-  }
-
-  public <T> boolean canCast(TypeToken<T> type) {
-    return dataType.canCast(type);
-  }
-
-  public <T> T cast(Object value, TypeToken<T> type) {
-    return dataType.cast(value, type);
-  }
-
-  public <T> ImmutableList<StandardCell> getDataCells(Menu<T> menu) {
-    return loadType.getDataCells(menu);
-  }
-
-  public MenuConfig<V> getMenuConfig() {
-    return menuConfig;
-  }
-
-  public DataMatcher getDataMatcher() {
-    return dataMatcher;
-  }
-
-  public LoadType getLoadType() {
-    return loadType;
-  }
-
-  public Integer getDataNumber() {
-    return dataNumber;
-  }
-
-  public Field getField() {
-    return field;
-  }
-
-  public TypeToken<V> getFieldType() {
-    return fieldType;
-  }
-
-  public String getFieldName() {
-    return fieldName;
-  }
-
-  public ConstructType getConstructType() {
-    return constructType;
-  }
-
-  public boolean isBeList() {
-    return beList;
+  public TypeToken<V> getType() {
+    return type;
   }
 
 }

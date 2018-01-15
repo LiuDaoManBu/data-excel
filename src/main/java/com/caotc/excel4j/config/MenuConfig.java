@@ -20,7 +20,7 @@ public class MenuConfig<V> {
   public static class Builder<V> {
     private TableConfig tableConfig;
     private MenuConfig<?> parent;
-    private DataConfig.Builder<V> dataConfigBuilder;
+    private MenuDataConfig.Builder<V> dataConfigBuilder;
     private List<MenuConfig.Builder<?>> childrenBuilders;
     // 菜单匹配器
     private Matcher.Builder<StandardCell> matcherBuilder;
@@ -107,11 +107,11 @@ public class MenuConfig<V> {
       return this;
     }
 
-    public DataConfig.Builder<V> getDataConfigBuilder() {
+    public MenuDataConfig.Builder<V> getDataConfigBuilder() {
       return dataConfigBuilder;
     }
 
-    public Builder<V> setDataConfigBuilder(DataConfig.Builder<V> dataConfigBuilder) {
+    public Builder<V> setDataConfigBuilder(MenuDataConfig.Builder<V> dataConfigBuilder) {
       this.dataConfigBuilder = dataConfigBuilder;
       return this;
     }
@@ -167,7 +167,7 @@ public class MenuConfig<V> {
   private final Direction direction;
   private final MenuConfig<?> parent;
   private final ImmutableCollection<MenuConfig<?>> childrens;
-  private final DataConfig<V> dataConfig;
+  private final MenuDataConfig<V> dataConfig;
   private final ParserConfig parserConfig;
 
   private MenuConfig(Builder<V> builder) {
@@ -185,11 +185,11 @@ public class MenuConfig<V> {
   }
 
   public Optional<Field> getField() {
-    return Optional.ofNullable(dataConfig).map(DataConfig::getField);
+    return Optional.ofNullable(dataConfig).map(MenuDataConfig::getField);
   }
 
   public Optional<String> getFieldName() {
-    return Optional.ofNullable(dataConfig).map(DataConfig::getFieldName);
+    return Optional.ofNullable(dataConfig).map(MenuDataConfig::getFieldName);
   }
 
   public boolean isTopMenu() {
@@ -249,7 +249,7 @@ public class MenuConfig<V> {
     return menuNecessity;
   }
 
-  public DataConfig<V> getDataConfig() {
+  public MenuDataConfig<V> getDataConfig() {
     return dataConfig;
   }
 

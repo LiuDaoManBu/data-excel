@@ -25,8 +25,8 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
     @Override
     public DataTypeMatcher build() {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
-//      // TODO 提示语
-//      Preconditions.checkState(Objects.nonNull(dataType));
+      // TODO 提示语
+      Preconditions.checkState(Objects.nonNull(dataType));
       return new DataTypeMatcher(this);
     }
 
