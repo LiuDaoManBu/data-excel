@@ -23,7 +23,7 @@ public class Menu<V> {
     private Menu<?> parent;
 
     public Menu<V> build() {
-      table = Optional.ofNullable(table).orElse(parent.table);
+      table = Optional.ofNullable(table).orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
 
       // TODO tip
       Preconditions.checkNotNull(cell);
@@ -106,15 +106,19 @@ public class Menu<V> {
   private <T> Stream<Builder<?>> loadChildrens() {
     ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrens();
 
-    ImmutableList<StandardCell> menuCells =
-        menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
-    return menuCells.stream().map(cell -> {
-      Builder builder = builder().setCell(cell).setParent(this);
-      // TODO Duplicate matching?
-      MenuConfig<?> config = Iterables.getOnlyElement(childrenConfigs.stream()
-          .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
-      return builder.setMenuConfig(config);
-    });
+    if(!childrenConfigs.isEmpty()) {
+      ImmutableList<StandardCell> menuCells =
+          menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
+      return menuCells.stream().map(cell -> {
+        Builder builder = builder().setCell(cell).setParent(this);
+        // TODO Duplicate matching?
+        MenuConfig<?> config = Iterables.getOnlyElement(childrenConfigs.stream()
+            .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
+        return builder.setMenuConfig(config);
+      });
+    }else {
+      return Stream.empty();
+    }
   }
 
   public Optional<Menu<?>> getSuper(Predicate<? super Menu<?>> predicate) {

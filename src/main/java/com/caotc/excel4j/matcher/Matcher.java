@@ -8,7 +8,7 @@ import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
-  public static interface Builder<T> {
+  public interface Builder<T> extends Predicate<T>{
     Builder<T> add(Predicate<T> predicate);
 
     Builder<T> add(Builder<T> builder);
@@ -33,7 +33,7 @@ public interface Matcher<T> extends Predicate<T> {
 
   Optional<String> match(T value);
 
-  Function<T, String> getMessageFunction();
+  Function<T, String> getEffectiveMessageFunction();
 
   List<Predicate<T>> getPredicates();
 }

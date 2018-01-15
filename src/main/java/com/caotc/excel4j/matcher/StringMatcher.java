@@ -35,6 +35,11 @@ public class StringMatcher extends BaseMatcher<String> {
 
     @Override
     public StringMatcher build() {
+      //TODO 子类?
+      if (Objects.nonNull(expressions)) {
+        expressions.stream()
+            .forEach(expression -> add(expression.MatcherType, expression.predicateValue));
+      }
       return new StringMatcher(this);
     }
 
@@ -135,11 +140,6 @@ public class StringMatcher extends BaseMatcher<String> {
 
   private StringMatcher(Builder builder) {
     super(builder);
-  //TODO
-//    if (Objects.nonNull(builder.expressions)) {
-//      builder.expressions.stream()
-//          .forEach(expression -> add(expression.MatcherType, expression.predicateValue));
-//    }
   }
 
 }

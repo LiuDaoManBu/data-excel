@@ -2,9 +2,9 @@ package com.caotc.excel4j.matcher.usermodel;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.ss.usermodel.CellType;
 import com.caotc.excel4j.matcher.BaseMatcher;
@@ -26,9 +26,15 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
 
     @Override
     public StandardCellMatcher build() {
-      dataType=Optional.ofNullable(dataType).orElse(baseDataType);
-    //TODO 提示语
+      dataType=Stream.of(dataType,baseDataType).filter(Objects::nonNull).findFirst().orElse(DEFAULT_DATA_TYPE);
+    //TODO tip
       Preconditions.checkState(Objects.nonNull(dataType));
+      
+      //TODO 子类
+    if (Objects.nonNull(nameExpressions)) {
+      nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
+          expression.getPredicateValue(), standardCell->dataType.cast(standardCell.getValue(), String.class)));
+    }
       return new StandardCellMatcher(this);
     }
 
@@ -38,19 +44,19 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
     }
 
     public <T> Builder addDataPredicate(Predicate<T> predicate, TypeToken<T> type) {
-      add(predicate, value -> dataType.cast(value, type));
+      add(predicate, cell -> dataType.cast(cell.getValue(), type));
       return this;
     }
 
     public Builder addDataPredicate(StringMatcherType type, String predicateValue) {
-      add(type, predicateValue, value -> dataType.cast(value, String.class));
+      add(type, predicateValue, cell ->dataType.cast(cell.getValue(), String.class));
       return this;
     }
 
     public <T extends Comparable<T>> Builder addDataPredicate(ComparableMatcherType type,
         T predicateValue) {
       // TODO safe?
-      add(type, predicateValue, value -> (T) dataType.cast(value, predicateValue.getClass()));
+      add(type, predicateValue, cell -> (T) dataType.cast(cell.getValue(), predicateValue.getClass()));
       return this;
     }
 
@@ -125,7 +131,9 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
     }
     
   }
-
+  
+  private static final DataType DEFAULT_DATA_TYPE=BaseDataType.STRING;
+  
   public static Builder builder() {
     return new Builder();
   }
@@ -134,12 +142,8 @@ public class StandardCellMatcher extends BaseMatcher<StandardCell> {
   private StandardCellMatcher(Builder builder) {
     super(builder);
     this.dataType=builder.dataType;
-    //TODO
-//    if (Objects.nonNull(builder.nameExpressions)) {
-//      builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
-//          expression.getPredicateValue(), standardCell->dataType.cast(standardCell.getValue(), String.class)));
-//    }
   }
-
-
+  public DataType getDataType() {
+    return dataType;
+  }
 }

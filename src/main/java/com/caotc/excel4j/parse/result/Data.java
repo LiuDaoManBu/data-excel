@@ -22,6 +22,8 @@ public class Data<V> {
         menu.getChildrens().isEmpty() ? dataConfig.getLoadType().getDataCells(menu)
             : ImmutableList.of();
 
+    System.out.println(valueCells.stream().map(StandardCell::getValue).map(dataConfig.getDataMatcher()::match)
+        .filter(Optional::isPresent).map(Optional::get).collect(ImmutableList.toImmutableList()));   
     // TODO is DataError?
     errors = valueCells.stream().map(StandardCell::getValue).map(dataConfig.getDataMatcher()::match)
         .filter(Optional::isPresent).map(Optional::get)

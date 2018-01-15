@@ -24,18 +24,15 @@ public class BaseMatcher<T> implements Matcher<T> {
     private Boolean nonNull;
     private Boolean isNull;
     private List<String> scripts;
-    private List<Builder<T>> matcherBuilders;
     private List<Predicate<T>> predicates = Lists.newArrayList();
-    // TODO fieldNameToMatchers等复杂逻辑待考虑支持
-    // private Map<String, Matcher.Builder<?>> fieldNameToMatchers;
-    // private Map<String, Matcher.Builder<?>> MethodNameToMatchers;
-    // private Map<Field, Matcher.Builder<?>> fieldToMatchers;
-    // private Map<Function<T, ?>, Matcher.Builder<?>> MethodToMatchers;
+
+    @Override
+    public boolean test(T t) {
+      return type.apply(predicates).test(t);
+    }
 
     @Override
     public BaseMatcher<T> build() {
-      type = Optional.ofNullable(type).orElse(DEFAULT_TYPE);
-      messageFunction = Optional.ofNullable(messageFunction).orElse(value -> message);
       return new BaseMatcher<T>(this);
     }
 
@@ -47,7 +44,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
     @Override
     public Builder<T> add(Matcher.Builder<T> builder) {
-      matcherBuilders.add(builder);
+      predicates.add(builder);
       return this;
     }
 
@@ -116,45 +113,6 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
-    // public Map<String, Matcher.Builder<?>> getFieldNameToMatchers() {
-    // return fieldNameToMatchers;
-    // }
-    //
-    // public Builder<T> setFieldNameToMatchers(Map<String, Matcher.Builder<?>> fieldNameToMatchers)
-    // {
-    // this.fieldNameToMatchers = fieldNameToMatchers;
-    // return this;
-    // }
-    //
-    // public Map<String, Matcher.Builder<?>> getMethodNameToMatchers() {
-    // return MethodNameToMatchers;
-    // }
-    //
-    // public Builder<T> setMethodNameToMatchers(
-    // Map<String, Matcher.Builder<?>> methodNameToMatchers) {
-    // MethodNameToMatchers = methodNameToMatchers;
-    // return this;
-    // }
-    //
-    // public Map<Field, Matcher.Builder<?>> getFieldToMatchers() {
-    // return fieldToMatchers;
-    // }
-    //
-    // public Builder<T> setFieldToMatchers(Map<Field, Matcher.Builder<?>> fieldToMatchers) {
-    // this.fieldToMatchers = fieldToMatchers;
-    // return this;
-    // }
-    //
-    // public Map<Function<T, ?>, Matcher.Builder<?>> getMethodToMatchers() {
-    // return MethodToMatchers;
-    // }
-    //
-    // public Builder<T> setMethodToMatchers(
-    // Map<Function<T, ?>, Matcher.Builder<?>> methodToMatchers) {
-    // MethodToMatchers = methodToMatchers;
-    // return this;
-    // }
-
     public List<String> getScripts() {
       return scripts;
     }
@@ -170,15 +128,6 @@ public class BaseMatcher<T> implements Matcher<T> {
 
     public Builder<T> setType(Type type) {
       this.type = type;
-      return this;
-    }
-
-    public List<Builder<T>> getMatcherBuilders() {
-      return matcherBuilders;
-    }
-
-    public Builder<T> setMatcherBuilders(List<Builder<T>> matcherBuilders) {
-      this.matcherBuilders = matcherBuilders;
       return this;
     }
 
@@ -229,14 +178,11 @@ public class BaseMatcher<T> implements Matcher<T> {
   private final Function<T, String> messageFunction;
 
   protected BaseMatcher(Builder<T> builder) {
-    this.type = builder.type;
+    this.type = Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE);
     this.parent = builder.realParent;
+    this.messageFunction =
+        Optional.ofNullable(builder.messageFunction).orElse(value -> builder.message);
     ImmutableList.Builder<Predicate<T>> predicates = ImmutableList.builder();
-    if (Objects.nonNull(builder.predicates)) {
-      predicates.addAll(builder.predicates);
-    }
-
-    this.messageFunction = builder.messageFunction;
     if (Objects.nonNull(builder.isNull) && builder.isNull) {
       predicates.add(Objects::isNull);
     }
@@ -250,9 +196,15 @@ public class BaseMatcher<T> implements Matcher<T> {
         return predicate;
       }).forEach(predicates::add);
     }
-    if (Objects.nonNull(builder.matcherBuilders)) {
-      builder.matcherBuilders.stream().peek(t -> t.realParent = this).map(Matcher.Builder::build)
-          .forEach(predicates::add);
+    if (Objects.nonNull(builder.predicates)) {
+      builder.predicates.stream().map(p -> {
+        if (p instanceof Builder) {
+          Builder<T> b = (Builder<T>) p;
+          b.realParent = this;
+          return b.build();
+        }
+        return p;
+      }).forEach(predicates::add);
     }
     this.predicates = predicates.build();
     // TODO tip?
@@ -285,4 +237,9 @@ public class BaseMatcher<T> implements Matcher<T> {
     return type.apply(this, value);
   }
 
+  public Function<T, String> getEffectiveMessageFunction(){
+    return Optional.ofNullable(messageFunction).orElse(Optional.ofNullable(parent)
+        .map(Matcher::getEffectiveMessageFunction).orElse(null));
+  }
+  
 }

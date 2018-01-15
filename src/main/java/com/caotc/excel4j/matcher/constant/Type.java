@@ -2,6 +2,7 @@ package com.caotc.excel4j.matcher.constant;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.Matcher;
 import com.google.common.collect.Streams;
@@ -15,14 +16,18 @@ public enum Type {
 
     @Override
     public <T> Optional<String> apply(Matcher<T> matcher, T value) {
+      Optional<Predicate<T>> optional=matcher.getPredicates().stream().filter(predicate -> !predicate.test(value))
+          .findFirst();
+      if(optional.isPresent()) {
+        Predicate<T> predicate=optional.get();
       //TODO 消灭instanceof?
-      return matcher.getPredicates().stream().filter(predicate -> !predicate.test(value))
-          .findFirst()
-          .map(predicate -> predicate instanceof Matcher
-              && Objects.nonNull(((Matcher<T>) predicate).getMessageFunction())
-                  ? (Matcher<T>) predicate
-                  : matcher)
-          .map(m -> m.getMessageFunction().apply(value));
+        if(predicate instanceof Matcher) {
+          return ((Matcher<T>) predicate).match(value);
+        }else {
+          return Optional.ofNullable(matcher.getEffectiveMessageFunction()).map(f->f.apply(value));
+        }
+      }
+      return Optional.empty();
     }
   },
   OR {
@@ -34,7 +39,7 @@ public enum Type {
     @Override
     public <T> Optional<String> apply(Matcher<T> matcher, T value) {
       return matcher.getPredicates().stream().noneMatch(p -> p.test(value))
-          ? Optional.ofNullable(matcher.getMessageFunction().apply(value))
+          ? Optional.ofNullable(matcher.getEffectiveMessageFunction()).map(f->f.apply(value))
           : Optional.empty();
     }
   };

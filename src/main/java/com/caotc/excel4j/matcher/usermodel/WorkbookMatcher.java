@@ -12,6 +12,11 @@ public class WorkbookMatcher extends BaseMatcher<Workbook> {
 
     @Override
     public WorkbookMatcher build() {
+      //TODO 子类
+    if (Objects.nonNull(sheetSizeExpressions)) {
+      sheetSizeExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
+          expression.getPredicateValue(), Workbook::getNumberOfSheets));
+    }
       return new WorkbookMatcher(this);
     }
 
@@ -31,10 +36,5 @@ public class WorkbookMatcher extends BaseMatcher<Workbook> {
 
   private WorkbookMatcher(Builder builder) {
     super(builder);
-    //TODO
-//    if (Objects.nonNull(builder.sheetSizeExpressions)) {
-//      builder.sheetSizeExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
-//          expression.getPredicateValue(), Workbook::getNumberOfSheets));
-//    }
   }
 }

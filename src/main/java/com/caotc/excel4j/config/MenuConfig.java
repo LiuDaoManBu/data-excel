@@ -42,7 +42,7 @@ public class MenuConfig<V> {
       direction = Optional.ofNullable(direction)
           .orElse(Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(null));
       childrenBuilders = Optional.ofNullable(childrenBuilders).orElse(ImmutableList.of());
-      // TODO 提示语
+      // TODO tip
       Preconditions.checkState(Objects.nonNull(tableConfig));
       Preconditions.checkNotNull(matcherBuilder);
       Preconditions.checkNotNull(menuNecessity);
@@ -165,7 +165,6 @@ public class MenuConfig<V> {
   private final int distance;
   private final MenuNecessity menuNecessity;
   private final Direction direction;
-  private final MenuType menuType;
   private final MenuConfig<?> parent;
   private final ImmutableCollection<MenuConfig<?>> childrens;
   private final DataConfig<V> dataConfig;
@@ -177,7 +176,6 @@ public class MenuConfig<V> {
     distance = builder.distance;
     menuNecessity = builder.menuNecessity;
     direction = builder.direction;
-    menuType = builder.menuType;
     parent = builder.parent;
     childrens = builder.childrenBuilders.stream()
         .peek(childrenMenuConfigBuilder -> childrenMenuConfigBuilder.setParent(this))
@@ -230,10 +228,6 @@ public class MenuConfig<V> {
   }
 
   // delegate methods end
-
-  public MenuType getMenuType() {
-    return menuType;
-  }
 
   public Matcher<StandardCell> getMenuMatcher() {
     return menuMatcher;

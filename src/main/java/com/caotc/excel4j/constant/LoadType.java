@@ -14,12 +14,13 @@ public enum LoadType {
   UNFIXED {
     @Override
     public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
-      ImmutableCollection<StandardCell> menuCells =
-          menu.getTable().getMenus().map(Menu::getCell).collect(ImmutableSet.toImmutableSet());
+      //TODO 此时menu尚未存在table中
+//      ImmutableCollection<StandardCell> menuCells =
+//          menu.getTable().getMenus().map(Menu::getCell).collect(ImmutableSet.toImmutableSet());
       Builder<StandardCell> builder = ImmutableList.builder();
       //TODO stream
       for (Optional<StandardCell> optional = menu.nextDataCell(menu.getCell()); optional
-          .filter(cell -> !menuCells.contains(cell))
+//          .filter(cell -> !menuCells.contains(cell))
           .isPresent(); optional = menu.nextDataCell(optional.get())) {
         builder.add(optional.get());
       }
@@ -30,13 +31,14 @@ public enum LoadType {
   FIXED {
     @Override
     public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
-      ImmutableCollection<StandardCell> menuCells =
-          menu.getTable().getMenus().map(Menu::getCell).collect(ImmutableSet.toImmutableSet());
+//      ImmutableCollection<StandardCell> menuCells =
+//          menu.getTable().getMenus().map(Menu::getCell).collect(ImmutableSet.toImmutableSet());
       List<StandardCell> cells = Lists.newArrayList();
 
     //TODO stream
       for (Optional<StandardCell> optional = menu.nextDataCell(menu.getCell()); optional
-          .filter(cell -> !menuCells.contains(cell)).isPresent()
+//          .filter(cell -> !menuCells.contains(cell))
+          .isPresent()
           && cells.size() <= menu.getMenuConfig().getDataConfig().getDataNumber(); optional =
               menu.nextDataCell(optional.get())) {
         cells.add(optional.get());

@@ -15,6 +15,11 @@ public class SheetMatcher extends BaseMatcher<Sheet> {
 
     @Override
     public SheetMatcher build() {
+      //TODO 子类
+    if (Objects.nonNull(nameExpressions)) {
+      nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
+          expression.getPredicateValue(), Sheet::getSheetName));
+    }
       return new SheetMatcher(this);
     }
 
@@ -46,11 +51,6 @@ public class SheetMatcher extends BaseMatcher<Sheet> {
   
   private SheetMatcher(Builder builder) {
     super(builder);
-    //TODO
-//    if (Objects.nonNull(builder.nameExpressions)) {
-//      builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
-//          expression.getPredicateValue(), Sheet::getSheetName));
-//    }
   }
 
 }

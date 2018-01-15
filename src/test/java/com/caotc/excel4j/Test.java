@@ -17,13 +17,20 @@ import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.constant.ConstructType;
+import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.matcher.ComparableMatcher;
+import com.caotc.excel4j.matcher.Matcher;
+import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
+import com.caotc.excel4j.matcher.data.DataTypeMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
+import com.caotc.excel4j.parse.result.Menu;
+import com.caotc.excel4j.parse.result.SheetParseResult;
+import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
@@ -31,7 +38,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
 import com.google.common.reflect.Invokable;
 
 class A implements Cloneable {
@@ -122,9 +128,9 @@ class User {
   private String region;
 
   public User() {
-    a=null;
+    a = null;
   }
-  
+
   public String getUserName() {
     return userName;
   }
@@ -154,17 +160,18 @@ class User {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    Workbook workbook = new XSSFWorkbook("C:\\Users\\呵呵\\Desktop\\用户.xlsx");
+    Workbook workbook = new XSSFWorkbook("C:\\Users\\Administrator\\Desktop\\用户.xlsx");
     System.out.println(workbook.getSheetAt(0).getSheetName());
-
+    
     DataConfig.Builder<String> userNameDataConfig =
         DataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
-            .setField(User.class.getDeclaredField("userName"));
+            .setField(User.class.getDeclaredField("userName")).setMatcherBuilder(DataTypeMatcher.builder()
+                .addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
 
     MenuConfig.Builder<String> userNameMenuConfig = MenuConfig.<String>builder()
         .setMatcherBuilder(
-            StandardCellMatcher.builder().setBaseDataType(BaseDataType.STRING).setType(Type.AND))
-        .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU);
+            StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
+        .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU).setDirection(Direction.BOTTOM);
 
     WorkbookParseResult workbookParseResult = ExcelUtil.parse(workbook,
         WorkbookConfig.builder()
@@ -175,10 +182,14 @@ public class Test {
                     .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
             .build());
 
+    workbookParseResult.getSheetParseResults().stream().map(SheetParseResult::getTables)
+        .flatMap(Collection::stream).flatMap(com.caotc.excel4j.parse.result.Table::getDataMenus)
+        .map(Menu::getData).map(com.caotc.excel4j.parse.result.Data::getErrors)
+        .forEach(values -> values.forEach(System.out::println));
   }
 
   public static void testConstructType() {
-    Object array = new String[] {"AAA", "BBB", "CCC"};
+    Object array = new String[] { "AAA", "BBB", "CCC" };
     // Object array = new int[] {2, 3, 1};
     String[] strings = ConstructType.toArray(array);
     System.out.println(Arrays.toString(strings));

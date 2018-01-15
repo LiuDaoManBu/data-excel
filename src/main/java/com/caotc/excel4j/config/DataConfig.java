@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.LoadType;
+import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.data.DataTypeMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
@@ -35,12 +36,18 @@ public class DataConfig<V> {
     public DataConfig<V> build() {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
       beList = Optional.ofNullable(beList).orElse(Boolean.FALSE);
+      //TODO 
+      fieldType=Optional.ofNullable(field).map(Field::getType).map(type->(Class<V>)type).map(TypeToken::of).orElse(null);
 
-      matcherBuilder = Optional.ofNullable(matcherBuilder).orElse(DataTypeMatcher.builder());
-      matcherBuilder.setDataType(dataType);
+      DataTypeMatcher.Builder builder=DataTypeMatcher.builder();
+      builder.setDataType(dataType).setType(Type.AND).setMessageFunction(value->value+"不合格").
+      add(dataType::test);
+      Optional.ofNullable(matcherBuilder).ifPresent(t->builder.add(t.setDataType(dataType)));
+      matcherBuilder = builder;
       // TODO 提示语
       Preconditions.checkState(Objects.nonNull(menuConfig));
       Preconditions.checkState(Objects.nonNull(dataType));
+     
       return new DataConfig<V>(this);
     }
 
@@ -122,6 +129,24 @@ public class DataConfig<V> {
 
     public Builder<V> setBeList(Boolean beList) {
       this.beList = beList;
+      return this;
+    }
+
+    public BaseDataType getBaseDataType() {
+      return baseDataType;
+    }
+
+    public Builder<V> setBaseDataType(BaseDataType baseDataType) {
+      this.baseDataType = baseDataType;
+      return this;
+    }
+
+    public DataTypeMatcher.Builder getMatcherBuilder() {
+      return matcherBuilder;
+    }
+
+    public Builder<V> setMatcherBuilder(DataTypeMatcher.Builder matcherBuilder) {
+      this.matcherBuilder = matcherBuilder;
       return this;
     }
 

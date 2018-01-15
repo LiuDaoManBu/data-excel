@@ -32,6 +32,11 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
 
     @Override
     public ComparableMatcher<T> build() {
+      //TODO 子类?
+    if (Objects.nonNull(expressions)) {
+      expressions.stream()
+          .forEach(expression -> add(expression.MatcherType, expression.predicateValue));
+    }
       return new ComparableMatcher<T>(this);
     }
 
@@ -94,11 +99,6 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
 
   private ComparableMatcher(Builder<T> builder) {
     super(builder);
-  //TODO
-//    if (Objects.nonNull(builder.expressions)) {
-//      builder.expressions.stream()
-//          .forEach(expression -> add(expression.MatcherType, expression.predicateValue));
-//    }
   }
 
 }

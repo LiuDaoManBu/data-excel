@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.BaseMatcher;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
+import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.google.common.base.Preconditions;
@@ -24,8 +25,8 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
     @Override
     public DataTypeMatcher build() {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
-      // TODO 提示语
-      Preconditions.checkState(Objects.nonNull(dataType));
+//      // TODO 提示语
+//      Preconditions.checkState(Objects.nonNull(dataType));
       return new DataTypeMatcher(this);
     }
 
@@ -82,7 +83,7 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
   private final DataType dataType;
 
   private DataTypeMatcher(Builder builder) {
-    super(builder.add(builder.dataType::test));
+    super(builder);
     this.dataType = builder.dataType;
     // if (Objects.nonNull(builder.nameExpressions)) {
     // builder.nameExpressions.stream().forEach(expression -> add(expression.getMatcherType(),
@@ -96,7 +97,7 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
   public boolean support(Object value) {
     return dataType.test(value);
   }
-
+  
   // @SuppressWarnings({"rawtypes", "unchecked"})
   // private static <T> TypeToken<T> findType(Predicate<T> predicate) {
   // TypeToken<? extends Predicate> token = TypeToken.of(predicate.getClass());
