@@ -16,21 +16,21 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
-public class Table {
-  public static class Builder {
-    private TableConfig tableConfig;
+public class Table<V> {
+  public static class Builder<V> {
+    private TableConfig<V> tableConfig;
     private SheetParseResult sheetParseResult;
     private List<TableError> errors;
 
-    public Table build() {
-      return new Table(this);
+    public Table<V> build() {
+      return new Table<>(this);
     }
 
-    public TableConfig getTableConfig() {
+    public TableConfig<V> getTableConfig() {
       return tableConfig;
     }
 
-    public Builder setTableConfig(TableConfig tableConfig) {
+    public Builder<V> setTableConfig(TableConfig<V> tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -39,7 +39,7 @@ public class Table {
       return sheetParseResult;
     }
 
-    public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
+    public Builder<V> setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
       return this;
     }
@@ -48,7 +48,7 @@ public class Table {
       return errors;
     }
 
-    public Builder setErrors(List<TableError> errors) {
+    public Builder<V> setErrors(List<TableError> errors) {
       this.errors = errors;
       return this;
     }
@@ -65,16 +65,16 @@ public class Table {
   private static final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
       config -> config + "don't have any matches cell";
 
-  public static Builder builder() {
-    return new Builder();
+  public static <V> Builder<V> builder() {
+    return new Builder<>();
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig<V> tableConfig;
   private final ImmutableList<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu<?>> topMenus;
 
-  public Table(Builder builder) {
+  public Table(Builder<V> builder) {
     tableConfig = builder.tableConfig;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
@@ -137,7 +137,7 @@ public class Table {
     return getMenus().filter(Menu::isNotMustMenu);
   }
 
-  public TableConfig getTableConfig() {
+  public TableConfig<V> getTableConfig() {
     return tableConfig;
   }
 

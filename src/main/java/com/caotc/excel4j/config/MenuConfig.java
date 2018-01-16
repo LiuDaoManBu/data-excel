@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.constant.MenuNecessity;
+import com.caotc.excel4j.constant.Necessity;
 import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.parse.result.StandardCell;
@@ -18,7 +18,7 @@ import com.google.common.collect.Iterables;
 
 public class MenuConfig<V> {
   public static class Builder<V> {
-    private TableConfig tableConfig;
+    private TableConfig<?> tableConfig;
     private MenuConfig<?> parent;
     private MenuDataConfig.Builder<V> dataConfigBuilder;
     private List<MenuConfig.Builder<?>> childrenBuilders;
@@ -26,7 +26,7 @@ public class MenuConfig<V> {
     private Matcher.Builder<StandardCell> matcherBuilder;
     // 第一个数据单元格相对于菜单单元格的单元格距离
     private Integer distance;
-    private MenuNecessity menuNecessity;
+    private Necessity necessity;
     private Direction direction;
     // TODO need enum?
     private MenuType menuType;
@@ -34,18 +34,18 @@ public class MenuConfig<V> {
 
     public MenuConfig<V> build() {
       distance = Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
-      menuNecessity = Optional.ofNullable(menuNecessity).orElse(DEFAULT_MENU_NECESSITY);
+      necessity = Optional.ofNullable(necessity).orElse(DEFAULT_MENU_NECESSITY);
 
-      // tableConfig = Optional.ofNullable(tableConfig).orElse(parentMenuConfig.tableConfig);
-      tableConfig = Optional.ofNullable(tableConfig)
-          .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
-      direction = Optional.ofNullable(direction)
-          .orElse(Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(null));
+
+      tableConfig = Optional.ofNullable(tableConfig).orElse((TableConfig<?>) Optional
+          .ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
+      direction = Optional.ofNullable(direction).orElse(
+          Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(DEFAULT_DIRECTION));
       childrenBuilders = Optional.ofNullable(childrenBuilders).orElse(ImmutableList.of());
       // TODO tip
       Preconditions.checkState(Objects.nonNull(tableConfig));
       Preconditions.checkNotNull(matcherBuilder);
-      Preconditions.checkNotNull(menuNecessity);
+      Preconditions.checkNotNull(necessity);
       // Preconditions.checkState(Objects.nonNull(direction));
       Preconditions.checkNotNull(menuType);
       Preconditions.checkState(
@@ -53,11 +53,11 @@ public class MenuConfig<V> {
       return new MenuConfig<V>(this);
     }
 
-    public TableConfig getTableConfig() {
+    public TableConfig<?> getTableConfig() {
       return tableConfig;
     }
 
-    public Builder<V> setTableConfig(TableConfig tableConfig) {
+    public Builder<V> setTableConfig(TableConfig<?> tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -66,17 +66,12 @@ public class MenuConfig<V> {
       return distance;
     }
 
-    public Builder<V> setDistance(int distance) {
-      this.distance = distance;
-      return this;
+    public Necessity getNecessity() {
+      return necessity;
     }
 
-    public MenuNecessity getMenuNecessity() {
-      return menuNecessity;
-    }
-
-    public Builder<V> setMenuNecessity(MenuNecessity menuNecessity) {
-      this.menuNecessity = menuNecessity;
+    public Builder<V> setNecessity(Necessity necessity) {
+      this.necessity = necessity;
       return this;
     }
 
@@ -151,19 +146,20 @@ public class MenuConfig<V> {
 
   }
 
-  private static final int DEFAULT_DISTANCE = 1;
-  private static final MenuNecessity DEFAULT_MENU_NECESSITY = MenuNecessity.MUST;
+  public static final int DEFAULT_DISTANCE = 1;
+  private static final Necessity DEFAULT_MENU_NECESSITY = Necessity.MUST;
+  public static final Direction DEFAULT_DIRECTION = Direction.BOTTOM;
 
   public static <V> Builder<V> builder() {
     return new Builder<>();
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig<?> tableConfig;
   // 菜单匹配器
   private final Matcher<StandardCell> menuMatcher;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private final int distance;
-  private final MenuNecessity menuNecessity;
+  private final Necessity necessity;
   private final Direction direction;
   private final MenuConfig<?> parent;
   private final ImmutableCollection<MenuConfig<?>> childrens;
@@ -174,7 +170,7 @@ public class MenuConfig<V> {
     tableConfig = builder.tableConfig;
     menuMatcher = builder.matcherBuilder.build();
     distance = builder.distance;
-    menuNecessity = builder.menuNecessity;
+    necessity = builder.necessity;
     direction = builder.direction;
     parent = builder.parent;
     childrens = builder.childrenBuilders.stream()
@@ -197,11 +193,11 @@ public class MenuConfig<V> {
   }
 
   public boolean isMustMenu() {
-    return MenuNecessity.MUST.equals(menuNecessity);
+    return Necessity.MUST.equals(necessity);
   }
 
   public boolean isNotMustMenu() {
-    return MenuNecessity.NOT_MUST.equals(menuNecessity);
+    return Necessity.NOT_MUST.equals(necessity);
   }
 
   public boolean isDataMenu() {
@@ -245,8 +241,8 @@ public class MenuConfig<V> {
     return direction;
   }
 
-  public MenuNecessity getMenuNecessity() {
-    return menuNecessity;
+  public Necessity getNecessity() {
+    return necessity;
   }
 
   public MenuDataConfig<V> getDataConfig() {
@@ -257,7 +253,7 @@ public class MenuConfig<V> {
     return childrens;
   }
 
-  public TableConfig getTableConfig() {
+  public TableConfig<?> getTableConfig() {
     return tableConfig;
   }
 

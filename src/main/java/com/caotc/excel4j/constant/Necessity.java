@@ -1,5 +1,5 @@
 package com.caotc.excel4j.constant;
 
-public enum MenuNecessity {
+public enum Necessity {
   MUST, NOT_MUST;
 }

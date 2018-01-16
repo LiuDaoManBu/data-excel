@@ -7,20 +7,20 @@ import com.google.common.base.Preconditions;
 public class TableDataConfig<V> extends DataConfig<V> {
 
   public static class Builder<V> extends DataConfig.Builder<V> {
-    private TableConfig tableConfig;
+    private TableConfig<V> tableConfig;
     private ConstructType constructType;
 
     public TableDataConfig<V> build() {
       // TODO 提示语
       Preconditions.checkState(Objects.nonNull(tableConfig));
-      return new TableDataConfig<V>(this);
+      return new TableDataConfig<>(this);
     }
 
-    public TableConfig getTableConfig() {
+    public TableConfig<V> getTableConfig() {
       return tableConfig;
     }
 
-    public Builder<V> setTableConfig(TableConfig tableConfig) {
+    public Builder<V> setTableConfig(TableConfig<V> tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -36,7 +36,7 @@ public class TableDataConfig<V> extends DataConfig<V> {
 
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig<V> tableConfig;
   private final ConstructType constructType;
 
   protected TableDataConfig(Builder<V> builder) {
@@ -49,7 +49,7 @@ public class TableDataConfig<V> extends DataConfig<V> {
     return constructType;
   }
 
-  public TableConfig getTableConfig() {
+  public TableConfig<V> getTableConfig() {
     return tableConfig;
   }
   

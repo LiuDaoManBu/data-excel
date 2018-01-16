@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.matcher.Matcher;
-import com.caotc.excel4j.matcher.usermodel.TableMatcher;
 import com.caotc.excel4j.parse.result.Table;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
@@ -15,24 +14,25 @@ import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
 // TODO classType?
-public class TableConfig {
-  public static class Builder {
+public class TableConfig<V> {
+  public static class Builder<V> {
     private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
-    private Matcher.Builder<Table> matcherBuilder;
+    private Matcher.Builder<Table<V>> matcherBuilder;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
+    private TableDataConfig<V> dataConfig;
     private ParserConfig parserConfig;
 
-    public TableConfig build() {
-      return new TableConfig(this);
+    public TableConfig<V> build() {
+      return new TableConfig<>(this);
     }
 
     public SheetConfig getSheetConfig() {
       return sheetConfig;
     }
 
-    public Builder setSheetConfig(SheetConfig sheetConfig) {
+    public Builder<V> setSheetConfig(SheetConfig sheetConfig) {
       this.sheetConfig = sheetConfig;
       return this;
     }
@@ -41,7 +41,7 @@ public class TableConfig {
       return fixedMenuDirection;
     }
 
-    public Builder setFixedMenuDirection(Direction fixedMenuDirection) {
+    public Builder<V> setFixedMenuDirection(Direction fixedMenuDirection) {
       this.fixedMenuDirection = fixedMenuDirection;
       return this;
     }
@@ -50,7 +50,7 @@ public class TableConfig {
       return unFixedMenuDirection;
     }
 
-    public Builder setUnFixedMenuDirection(Direction unFixedMenuDirection) {
+    public Builder<V> setUnFixedMenuDirection(Direction unFixedMenuDirection) {
       this.unFixedMenuDirection = unFixedMenuDirection;
       return this;
     }
@@ -59,7 +59,7 @@ public class TableConfig {
       return topMenuConfigBuilders;
     }
 
-    public Builder setTopMenuConfigBuilders(List<MenuConfig.Builder<?>> topMenuConfigBuilders) {
+    public Builder<V> setTopMenuConfigBuilders(List<MenuConfig.Builder<?>> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }
@@ -68,17 +68,26 @@ public class TableConfig {
       return parserConfig;
     }
 
-    public Builder setParserConfig(ParserConfig parserConfig) {
+    public Builder<V> setParserConfig(ParserConfig parserConfig) {
       this.parserConfig = parserConfig;
       return this;
     }
 
-    public Matcher.Builder<Table> getMatcherBuilder() {
+    public Matcher.Builder<Table<V>> getMatcherBuilder() {
       return matcherBuilder;
     }
 
-    public Builder setMatcherBuilder(Matcher.Builder<Table> matcherBuilder) {
+    public Builder<V> setMatcherBuilder(Matcher.Builder<Table<V>> matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
+      return this;
+    }
+
+    public TableDataConfig<V> getDataConfig() {
+      return dataConfig;
+    }
+
+    public Builder<V> setDataConfig(TableDataConfig<V> dataConfig) {
+      this.dataConfig = dataConfig;
       return this;
     }
 
@@ -92,18 +101,19 @@ public class TableConfig {
         }
       });
 
-  public static <V> Builder builder() {
-    return new Builder();
+  public static <V> Builder<V> builder() {
+    return new Builder<>();
   }
 
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
   private final ImmutableCollection<MenuConfig<?>> topMenuConfigs;
-  private final Matcher<Table> matcher;
+  private final Matcher<Table<V>> matcher;
+  private final TableDataConfig<V> dataConfig;
   private final ParserConfig parserConfig;
 
-  private TableConfig(Builder builder) {
+  private TableConfig(Builder<V> builder) {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
@@ -113,14 +123,15 @@ public class TableConfig {
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
+    dataConfig = builder.dataConfig;
     parserConfig = builder.parserConfig;
 
     // menuConfigs =
     // builder.menuConfigBuilders.stream().map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
   }
 
-  public Table.Builder parse(Sheet sheet) {
-    Table.Builder builder = Table.builder().setTableConfig(this);
+  public Table.Builder<V> parse(Sheet sheet) {
+    Table.Builder<V> builder = Table.<V>builder().setTableConfig(this);
 
     // if (matcher.test(sheet)) {
     // builder.setTableBuilders(tableBuilders);
@@ -159,7 +170,11 @@ public class TableConfig {
     return parserConfig;
   }
 
-  public Matcher<Table> getMatcher() {
+  public TableDataConfig<V> getDataConfig() {
+    return dataConfig;
+  }
+
+  public Matcher<Table<V>> getMatcher() {
     return matcher;
   }
 

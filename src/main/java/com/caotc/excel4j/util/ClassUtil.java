@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -20,19 +21,13 @@ public class ClassUtil {
   private static final ImmutableCollection<Class<?>> COLLECTORS =
       ImmutableSet.of(Iterable.class, Map.class, Multimap.class, Table.class);
 
-  /**
-   * get all fields of the Class.
-   *
-   * @param type Class Object
-   * @return all fields of the Class
-   */
-  public static ImmutableCollection<Field> getAllFields(Class<?> type) {
+  public static Stream<Field> getAllFields(Class<?> type) {
     return getAllFields(TypeToken.of(type));
   }
 
-  public static ImmutableCollection<Field> getAllFields(TypeToken<?> token) {
+  public static Stream<Field> getAllFields(TypeToken<?> token) {
     return token.getTypes().classes().rawTypes().stream().map(Class::getDeclaredFields)
-        .flatMap(Arrays::stream).collect(ImmutableSet.toImmutableSet());
+        .flatMap(Arrays::stream);
   }
 
   public static ImmutableMultimap<String, Field> getNameToFields(Class<?> type) {
@@ -40,7 +35,8 @@ public class ClassUtil {
   }
 
   public static ImmutableMultimap<String, Field> getNameToFields(TypeToken<?> token) {
-    return Multimaps.index(getAllFields(token), Field::getName);
+    return Multimaps.index(getAllFields(token).collect(ImmutableSet.toImmutableSet()),
+        Field::getName);
   }
 
   public static Optional<Field> getField(Class<?> type, String fieldName) {

@@ -6,6 +6,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.parse.result.SheetParseResult;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -59,6 +61,9 @@ public class SheetConfig {
 
   }
 
+  private static final Matcher<Sheet> DEFAULT_MATCHER =
+      SheetMatcher.builder().setPredicates(ImmutableList.of(Predicates.alwaysTrue())).build();
+
   public static Builder builder() {
     return new Builder();
   }
@@ -73,7 +78,8 @@ public class SheetConfig {
         .peek(tableConfigBuilder -> tableConfigBuilder.setSheetConfig(this))
         .map(TableConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     this.workbookConfig = builder.workbookConfig;
-    this.matcher = builder.matcherBuilder.build();
+    this.matcher = Optional.ofNullable(builder.matcherBuilder).map(Matcher.Builder::build)
+        .orElse(DEFAULT_MATCHER);
     this.parserConfig = builder.parserConfig;
   }
 
@@ -89,7 +95,7 @@ public class SheetConfig {
   public ParserConfig getEffectiveParserConfig() {
     return Optional.ofNullable(parserConfig).orElse(workbookConfig.getEffectiveParserConfig());
   }
-  
+
   public ImmutableCollection<TableConfig> getTableConfigs() {
     return tableConfigs;
   }

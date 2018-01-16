@@ -1,8 +1,14 @@
 package com.caotc.excel4j.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +17,8 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,15 +27,22 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
-import com.caotc.excel4j.config.SheetConfig;
+import com.caotc.excel4j.annotation.ExcelField;
+import com.caotc.excel4j.annotation.ExcelTable;
+import com.caotc.excel4j.config.MenuConfig;
+import com.caotc.excel4j.config.MenuDataConfig;
+import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
+import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
-import com.caotc.excel4j.parse.result.SheetParseResult;
+import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 
 
 public class ExcelUtil {
@@ -42,14 +57,39 @@ public class ExcelUtil {
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
-  public static WorkbookParseResult parse(Workbook workbook, WorkbookConfig config) {
-    return config.parse(workbook);
+  public static WorkbookParseResult parse(File file, WorkbookConfig config)
+      throws EncryptedDocumentException, InvalidFormatException, IOException {
+    return config.parse(WorkbookFactory.create(file));
   }
 
-//  // TODO can?
-//  public static SheetParseResult parse(Sheet sheet, SheetConfig config) {
-//    return config.parse(sheet).build();
-//  }
+  public static WorkbookParseResult parse(InputStream inputStream, WorkbookConfig config)
+      throws EncryptedDocumentException, InvalidFormatException, IOException {
+    return config.parse(WorkbookFactory.create(inputStream));
+  }
+
+  public static List<Object> importSheet(Workbook workbook, Class<?> sheetClass) {
+    ExcelTable excelTable = sheetClass.getAnnotation(ExcelTable.class);
+    ClassUtil.getAllFields(sheetClass);
+    return null;
+  }
+
+  public static <V> TableConfig.Builder<V> toConfig(Class<?> type) {
+    return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
+      return TableConfig.<V>builder();
+    }).orElse(null);
+  }
+
+  public static <V> MenuConfig.Builder<V> toConfig(Field field) {
+    return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
+      return MenuConfig.<V>builder()
+          .setMatcherBuilder(
+              StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, f.name()))
+          .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
+          .setDataConfigBuilder(
+              MenuDataConfig.<V>builder().setLoadType(f.loadType()).setDataNumber(f.dataNumber())
+                  .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
+    }).orElse(null);
+  }
 
   @Nullable
   public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {

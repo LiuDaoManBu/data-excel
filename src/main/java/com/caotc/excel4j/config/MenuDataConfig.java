@@ -3,8 +3,6 @@ package com.caotc.excel4j.config;
 import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Optional;
-import com.caotc.excel4j.config.DataConfig.Builder;
-import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.DataMatcher;
@@ -34,6 +32,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       setType(Optional.ofNullable(field).map(Field::getType).map(type -> (Class<V>) type)
           .map(TypeToken::of).orElse(null));
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
+      loadType = Optional.ofNullable(loadType).orElse(DEFAULT_LOAD_TYPE);
 
       DataTypeMatcher.Builder builder = DataTypeMatcher.builder();
       builder.setDataType(dataType).setType(Type.AND).setMessageFunction(value -> value + "不合格")
@@ -121,6 +120,8 @@ public class MenuDataConfig<V> extends DataConfig<V> {
 
   }
 
+  private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
+
   public static <V> Builder<V> builder() {
     return new Builder<>();
   }
@@ -147,7 +148,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
   public V cast(Object value) {
     return dataType.cast(value, getType());
   }
-  
+
   public <T> ImmutableList<StandardCell> getDataCells(Menu<T> menu) {
     return loadType.getDataCells(menu);
   }
@@ -171,7 +172,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
   public Integer getDataNumber() {
     return dataNumber;
   }
-  
+
   public DataMatcher getDataMatcher() {
     return dataMatcher;
   }

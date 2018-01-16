@@ -25,7 +25,6 @@ public class DataConfig<V> {
 
   protected DataConfig(Builder<V> builder) {
     this.type = builder.type;
-    
   }
 
   public TypeToken<V> getType() {

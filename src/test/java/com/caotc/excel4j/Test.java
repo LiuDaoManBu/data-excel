@@ -1,5 +1,6 @@
 package com.caotc.excel4j;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.annotation.ExcelField;
 import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.MenuDataConfig;
@@ -159,10 +161,8 @@ class User {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    String path1 = "C:\\\\Users\\\\呵呵\\\\Desktop\\\\用户.xlsx";
+    String path1 = "C:\\Users\\呵呵\\Desktop\\用户.xlsx";
     String path2 = "C:\\Users\\Administrator\\Desktop\\用户.xlsx";
-    Workbook workbook = new XSSFWorkbook(path1);
-    System.out.println(workbook.getSheetAt(0).getSheetName());
 
     MenuDataConfig.Builder<String> userNameDataConfig =
         MenuDataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
@@ -175,7 +175,7 @@ public class Test {
         .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU)
         .setDirection(Direction.BOTTOM);
 
-    WorkbookParseResult workbookParseResult = ExcelUtil.parse(workbook,
+    WorkbookParseResult workbookParseResult = ExcelUtil.parse(new File(path1),
         WorkbookConfig.builder()
             .setSheetConfigBuilders(ImmutableList.of(SheetConfig.builder()
                 .setMatcherBuilder(SheetMatcher.builder().setType(Type.AND).setPredicates(
