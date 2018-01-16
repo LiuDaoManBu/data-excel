@@ -17,10 +17,6 @@ public class DataConfig<V> {
 
   }
 
-  public static <V> Builder<V> builder() {
-    return new Builder<>();
-  }
-
   private final TypeToken<V> type;
 
   protected DataConfig(Builder<V> builder) {

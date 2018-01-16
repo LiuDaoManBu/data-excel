@@ -54,7 +54,7 @@ public class Table<V> {
     }
   }
 
-  private static final Traverser<Menu<?>> MENU_TRAVERSER =
+  private final Traverser<Menu<?>> MENU_TRAVERSER =
       Traverser.forTree(new SuccessorsFunction<Menu<?>>() {
         @Override
         public Iterable<? extends Menu<?>> successors(Menu<?> node) {
@@ -62,7 +62,7 @@ public class Table<V> {
         }
       });
 
-  private static final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+  private final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
       config -> config + "don't have any matches cell";
 
   public static <V> Builder<V> builder() {

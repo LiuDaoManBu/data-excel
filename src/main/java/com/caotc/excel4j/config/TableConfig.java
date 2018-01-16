@@ -59,7 +59,8 @@ public class TableConfig<V> {
       return topMenuConfigBuilders;
     }
 
-    public Builder<V> setTopMenuConfigBuilders(List<MenuConfig.Builder<?>> topMenuConfigBuilders) {
+    public Builder<V> setTopMenuConfigBuilders(
+        List<MenuConfig.Builder<?>> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }
@@ -93,14 +94,6 @@ public class TableConfig<V> {
 
   }
 
-  private static final Traverser<MenuConfig<?>> MENU_CONFIG_TRAVERSER =
-      Traverser.forTree(new SuccessorsFunction<MenuConfig<?>>() {
-        @Override
-        public Iterable<? extends MenuConfig<?>> successors(MenuConfig<?> node) {
-          return node.getChildrens();
-        }
-      });
-
   public static <V> Builder<V> builder() {
     return new Builder<>();
   }
@@ -112,6 +105,14 @@ public class TableConfig<V> {
   private final Matcher<Table<V>> matcher;
   private final TableDataConfig<V> dataConfig;
   private final ParserConfig parserConfig;
+
+  private final Traverser<MenuConfig<?>> MENU_CONFIG_TRAVERSER =
+      Traverser.forTree(new SuccessorsFunction<MenuConfig<?>>() {
+        @Override
+        public Iterable<? extends MenuConfig<?>> successors(MenuConfig<?> node) {
+          return node.getChildrens();
+        }
+      });
 
   private TableConfig(Builder<V> builder) {
     sheetConfig = builder.sheetConfig;

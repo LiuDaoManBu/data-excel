@@ -180,7 +180,7 @@ public class Test {
             .setSheetConfigBuilders(ImmutableList.of(SheetConfig.builder()
                 .setMatcherBuilder(SheetMatcher.builder().setType(Type.AND).setPredicates(
                     Lists.newArrayList(sheet -> sheet.getSheetName().equalsIgnoreCase("user"))))
-                .setTableConfigBuilders(ImmutableList.of(TableConfig.builder()
+                .setTableConfigBuilders(ImmutableList.of(TableConfig.<User>builder()
                     .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
             .build());
 

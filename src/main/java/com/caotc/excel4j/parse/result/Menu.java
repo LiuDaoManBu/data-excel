@@ -19,16 +19,17 @@ public class Menu<V> {
   public static class Builder<V> {
     private StandardCell cell;
     private MenuConfig<V> menuConfig;
-    private Table table;
+    private Table<?> table;
     private Menu<?> parent;
 
     public Menu<V> build() {
-      table = Optional.ofNullable(table).orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
+      // table = Optional.ofNullable(table)
+      // .orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
 
       // TODO tip
       Preconditions.checkNotNull(cell);
       Preconditions.checkNotNull(table);
-      return new Menu<V>(this);
+      return new Menu<>(this);
     }
 
     public StandardCell getCell() {
@@ -49,11 +50,11 @@ public class Menu<V> {
       return this;
     }
 
-    public Table getTable() {
+    public Table<?> getTable() {
       return table;
     }
 
-    public Builder<V> setTable(Table table) {
+    public Builder<V> setTable(Table<?> table) {
       this.table = table;
       return this;
     }
@@ -62,14 +63,14 @@ public class Menu<V> {
       return parent;
     }
 
-    public Builder<V> setParent(Menu<?> parentMenu) {
-      this.parent = parentMenu;
+    public Builder<V> setParent(Menu<?> parent) {
+      this.parent = parent;
       return this;
     }
 
   }
 
-  private static final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+  private final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
       config -> config + "don't have any matches cell";
 
   public static <V> Builder<V> builder() {
@@ -79,7 +80,7 @@ public class Menu<V> {
   private final StandardCell cell;
   private final MenuConfig<V> menuConfig;
   private final ImmutableList<MenuError<V>> errors;
-  private final Table table;
+  private final Table<?> table;
   private final Menu<?> parent;
   private final ImmutableList<Menu<?>> childrens;
   private final Data<V> data;
@@ -90,8 +91,10 @@ public class Menu<V> {
     table = builder.table;
     parent = builder.parent;
 
-    childrens = loadChildrens().map(Builder::build).collect(ImmutableList.toImmutableList());
-    data = new Data<V>(this);
+    childrens =
+        loadChildrens().peek(childrenBuilder -> childrenBuilder.setParent(this).setTable(table))
+            .map(Builder::build).collect(ImmutableList.toImmutableList());
+    data = new Data<>(this);
 
     ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
         childrens.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
@@ -99,14 +102,14 @@ public class Menu<V> {
     // TODO dataError? is MenuError?
     errors = menuConfig.getChildrens().stream()
         .filter(config -> !matchesMenuConfigs.contains(config))
-        .map(config -> new MenuError<V>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+        .map(config -> new MenuError<>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
 
-  private <T> Stream<Builder<?>> loadChildrens() {
+  private Stream<Builder<?>> loadChildrens() {
     ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrens();
 
-    if(!childrenConfigs.isEmpty()) {
+    if (!childrenConfigs.isEmpty()) {
       ImmutableList<StandardCell> menuCells =
           menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
       return menuCells.stream().map(cell -> {
@@ -116,7 +119,7 @@ public class Menu<V> {
             .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
         return builder.setMenuConfig(config);
       });
-    }else {
+    } else {
       return Stream.empty();
     }
   }
@@ -233,7 +236,7 @@ public class Menu<V> {
     return parent;
   }
 
-  public Table getTable() {
+  public Table<?> getTable() {
     return table;
   }
 

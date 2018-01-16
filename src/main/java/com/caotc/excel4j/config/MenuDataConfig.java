@@ -9,10 +9,7 @@ import com.caotc.excel4j.matcher.data.DataMatcher;
 import com.caotc.excel4j.matcher.data.DataTypeMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
-import com.caotc.excel4j.parse.result.Menu;
-import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
 public class MenuDataConfig<V> extends DataConfig<V> {
@@ -43,7 +40,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       Preconditions.checkState(Objects.nonNull(menuConfig));
       Preconditions.checkState(Objects.nonNull(dataType));
 
-      return new MenuDataConfig<V>(this);
+      return new MenuDataConfig<>(this);
     }
 
     public MenuConfig<V> getMenuConfig() {
@@ -148,10 +145,10 @@ public class MenuDataConfig<V> extends DataConfig<V> {
   public V cast(Object value) {
     return dataType.cast(value, getType());
   }
-
-  public <T> ImmutableList<StandardCell> getDataCells(Menu<T> menu) {
-    return loadType.getDataCells(menu);
-  }
+//
+//  public ImmutableList<StandardCell> getDataCells(Menu<?,V> menu) {
+//    return loadType.getDataCells(menu);
+//  }
 
   public LoadType getLoadType() {
     return loadType;

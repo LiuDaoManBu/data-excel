@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.constant.Necessity;
 import com.caotc.excel4j.constant.MenuType;
+import com.caotc.excel4j.constant.Necessity;
 import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
@@ -37,8 +37,8 @@ public class MenuConfig<V> {
       necessity = Optional.ofNullable(necessity).orElse(DEFAULT_MENU_NECESSITY);
 
 
-      tableConfig = Optional.ofNullable(tableConfig).orElse((TableConfig<?>) Optional
-          .ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
+//      tableConfig = Optional.ofNullable(tableConfig).orElse(Optional
+//          .ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
       direction = Optional.ofNullable(direction).orElse(
           Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(DEFAULT_DIRECTION));
       childrenBuilders = Optional.ofNullable(childrenBuilders).orElse(ImmutableList.of());
@@ -50,7 +50,7 @@ public class MenuConfig<V> {
       Preconditions.checkNotNull(menuType);
       Preconditions.checkState(
           !(!Iterables.isEmpty(childrenBuilders) && Objects.nonNull(dataConfigBuilder)));
-      return new MenuConfig<V>(this);
+      return new MenuConfig<>(this);
     }
 
     public TableConfig<?> getTableConfig() {
@@ -174,7 +174,7 @@ public class MenuConfig<V> {
     direction = builder.direction;
     parent = builder.parent;
     childrens = builder.childrenBuilders.stream()
-        .peek(childrenMenuConfigBuilder -> childrenMenuConfigBuilder.setParent(this))
+        .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
     parserConfig = builder.parserConfig;

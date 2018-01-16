@@ -73,7 +73,7 @@ public class ExcelUtil {
     return null;
   }
 
-  public static <V> TableConfig.Builder<V> toConfig(Class<?> type) {
+  public static <V> TableConfig.Builder<V> toConfig(Class<V> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
       return TableConfig.<V>builder();
     }).orElse(null);
