@@ -8,6 +8,8 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.caotc.excel4j.matcher.BaseMatcher;
+import com.caotc.excel4j.matcher.Matcher;
 import com.google.common.collect.Multimap;
 
 class Data {
@@ -31,7 +33,7 @@ class Data {
 
 public class TestJson {
   public static void main(String[] args) {
-    testCastLocalDate();
+    testEnum();
   }
 
   public static void testCastLocalDate() {
@@ -71,5 +73,12 @@ public class TestJson {
 //    typeToValuesJson.put("NE", "8.8");
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("typeToValues", typeToValuesJson);
+  }
+  
+  public static void testEnum() {
+    JSONObject jsonObject=new JSONObject();
+    jsonObject.put("type", "or");
+    BaseMatcher.Builder<Object> builder=jsonObject.toJavaObject(BaseMatcher.Builder.class);
+    System.out.println(builder.getType());
   }
 }
