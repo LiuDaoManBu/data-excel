@@ -167,7 +167,7 @@ public class Test {
     MenuDataConfig.Builder<String> userNameDataConfig =
         MenuDataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
             .setField(User.class.getDeclaredField("userName")).setMatcherBuilder(
-                DataTypeMatcher.builder().addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
+                StandardCellMatcher.builder().addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
 
     MenuConfig.Builder<String> userNameMenuConfig = MenuConfig.<String>builder()
         .setMatcherBuilder(
@@ -184,10 +184,10 @@ public class Test {
                     .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
             .build());
 
-    workbookParseResult.getSheetParseResults().stream().map(SheetParseResult::getTables)
-        .flatMap(Collection::stream).flatMap(com.caotc.excel4j.parse.result.Table::getDataMenus)
-        .map(Menu::getData).map(com.caotc.excel4j.parse.result.Data::getErrors)
-        .forEach(values -> values.forEach(error -> System.out.println(error.getMessage())));
+//    workbookParseResult.getSheetParseResults().stream().map(SheetParseResult::getTables)
+//        .flatMap(Collection::stream).flatMap(com.caotc.excel4j.parse.result.Table::getDataMenus)
+//        .map(Menu::getData).map(com.caotc.excel4j.parse.result.MenuData::getErrors)
+//        .forEach(values -> values.forEach(error -> System.out.println(error.getMessage())));
   }
 
   public static void testConstructType() {

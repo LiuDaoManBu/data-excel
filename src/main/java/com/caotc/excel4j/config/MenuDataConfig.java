@@ -5,10 +5,10 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.constant.Type;
-import com.caotc.excel4j.matcher.data.DataMatcher;
-import com.caotc.excel4j.matcher.data.DataTypeMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
+import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
 
@@ -19,7 +19,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     private BaseDataType baseDataType;
     private DataType dataType;
     // TODO interface?
-    private DataTypeMatcher.Builder matcherBuilder;
+    private StandardCellMatcher.Builder matcherBuilder;
     private String fieldName;
     private LoadType loadType;
     private Integer dataNumber;
@@ -31,8 +31,8 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
       loadType = Optional.ofNullable(loadType).orElse(DEFAULT_LOAD_TYPE);
 
-      DataTypeMatcher.Builder builder = DataTypeMatcher.builder();
-      builder.setDataType(dataType).setType(Type.AND).setMessageFunction(value -> value + "不合格")
+      StandardCellMatcher.Builder builder = StandardCellMatcher.builder();
+      builder.setDataType(dataType).setType(Type.AND).setMessageFunction(cell -> JOINER.join(cell.formatAsString(),"数据格式不正确"))
           .add(dataType::test);
       Optional.ofNullable(matcherBuilder).ifPresent(t -> builder.add(t.setDataType(dataType)));
       matcherBuilder = builder;
@@ -79,11 +79,11 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return this;
     }
 
-    public DataTypeMatcher.Builder getMatcherBuilder() {
+    public StandardCellMatcher.Builder getMatcherBuilder() {
       return matcherBuilder;
     }
 
-    public Builder<V> setMatcherBuilder(DataTypeMatcher.Builder matcherBuilder) {
+    public Builder<V> setMatcherBuilder(StandardCellMatcher.Builder matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
@@ -116,7 +116,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     }
 
   }
-
+  private static final Joiner JOINER=Joiner.on("");
   private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
 
   public static <V> Builder<V> builder() {
@@ -129,7 +129,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
   private final String fieldName;
   private final Integer dataNumber;
   private final DataType dataType;
-  private final DataMatcher dataMatcher;
+  private final StandardCellMatcher matcher;
 
   protected MenuDataConfig(Builder<V> builder) {
     super(builder);
@@ -139,7 +139,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     this.fieldName = builder.fieldName;
     this.dataNumber = builder.dataNumber;
     this.dataType = builder.dataType;
-    this.dataMatcher = builder.matcherBuilder.build();
+    this.matcher = builder.matcherBuilder.build();
   }
 
   public V cast(Object value) {
@@ -170,8 +170,8 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     return dataNumber;
   }
 
-  public DataMatcher getDataMatcher() {
-    return dataMatcher;
+  public StandardCellMatcher getMatcher() {
+    return matcher;
   }
 
   public DataType getDataType() {

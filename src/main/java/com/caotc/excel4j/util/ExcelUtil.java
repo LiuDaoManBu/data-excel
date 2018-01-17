@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -14,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -30,19 +30,22 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import com.caotc.excel4j.annotation.ExcelField;
+import com.caotc.excel4j.annotation.ExcelSheet;
 import com.caotc.excel4j.annotation.ExcelTable;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.MenuDataConfig;
+import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
+import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.google.common.reflect.TypeToken;
 
 
 public class ExcelUtil {
@@ -57,6 +60,10 @@ public class ExcelUtil {
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
+  public static <T> List<T> importSheet(Workbook workbook, Class<T> type) {
+    return null;
+  }
+  
   public static WorkbookParseResult parse(File file, WorkbookConfig config)
       throws EncryptedDocumentException, InvalidFormatException, IOException {
     return config.parse(WorkbookFactory.create(file));
@@ -67,15 +74,20 @@ public class ExcelUtil {
     return config.parse(WorkbookFactory.create(inputStream));
   }
 
-  public static List<Object> importSheet(Workbook workbook, Class<?> sheetClass) {
-    ExcelTable excelTable = sheetClass.getAnnotation(ExcelTable.class);
-    ClassUtil.getAllFields(sheetClass);
-    return null;
+  public static  SheetConfig.Builder toSheetConfig(Class<?> type) {
+    return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
+      SheetConfig.Builder builder=SheetConfig.builder();
+      if(!Strings.isNullOrEmpty(t.name())) {
+        builder.setMatcherBuilder(SheetMatcher.builder().add(StringMatcherType.EQUALS, t.name(), Sheet::getSheetName));
+      }
+      return builder;
+    }).orElse(null);
   }
-
-  public static <V> TableConfig.Builder<V> toConfig(Class<V> type) {
+  
+  public static <V> TableConfig.Builder<V> toTableConfig(Class<V> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
-      return TableConfig.<V>builder();
+      return TableConfig.<V>builder().setTopMenuConfigBuilders(ClassUtil.getAllFields(type).map(ExcelUtil::toConfig)
+          .filter(Objects::nonNull).collect(Collectors.toList()));
     }).orElse(null);
   }
 
@@ -366,7 +378,7 @@ public class ExcelUtil {
       @Nullable Integer lastRowIndex) {
     // TODO sheet.getTopRow()? closed
     return Optional.ofNullable(sheet)
-        .map(t -> IntStream.rangeClosed(
+        .map(t -> IntStream.range(
             Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
             Optional.ofNullable(lastRowIndex).orElse(t.getLastRowNum())))
         .orElse(IntStream.empty()).mapToObj(sheet::getRow);

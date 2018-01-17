@@ -9,13 +9,13 @@ import com.caotc.excel4j.parse.error.DataError;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-public class Data<V> {
+public class MenuData<V> {
   private final Menu<V> menu;
   private final MenuDataConfig<V> dataConfig;
   private final ImmutableList<DataError<V>> errors;
   private final ImmutableList<StandardCell> valueCells;
 
-  public Data(Menu<V> menu) {
+  public MenuData(Menu<V> menu) {
     super();
     this.menu = menu;
     this.dataConfig = menu.getMenuConfig().getDataConfig();
@@ -23,7 +23,7 @@ public class Data<V> {
         : ImmutableList.of();
 
     // TODO is DataError?
-    errors = valueCells.stream().map(StandardCell::getValue).map(dataConfig.getDataMatcher()::match)
+    errors = valueCells.stream().map(dataConfig.getMatcher()::match)
         .filter(Optional::isPresent).map(Optional::get)
         .map(message -> new DataError<>(this, message)).collect(ImmutableList.toImmutableList());
   }

@@ -83,7 +83,7 @@ public class Menu<V> {
   private final Table<?> table;
   private final Menu<?> parent;
   private final ImmutableList<Menu<?>> childrens;
-  private final Data<V> data;
+  private final MenuData<V> data;
 
   public Menu(Builder<V> builder) {
     cell = builder.cell;
@@ -94,7 +94,7 @@ public class Menu<V> {
     childrens =
         loadChildrens().peek(childrenBuilder -> childrenBuilder.setParent(this).setTable(table))
             .map(Builder::build).collect(ImmutableList.toImmutableList());
-    data = new Data<>(this);
+    data = new MenuData<>(this);
 
     ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
         childrens.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
@@ -244,7 +244,7 @@ public class Menu<V> {
     return childrens;
   }
 
-  public Data<V> getData() {
+  public MenuData<V> getData() {
     return data;
   }
 
