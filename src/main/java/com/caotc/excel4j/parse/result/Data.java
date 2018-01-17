@@ -25,7 +25,7 @@ public class Data<V> {
     // TODO is DataError?
     errors = valueCells.stream().map(StandardCell::getValue).map(dataConfig.getDataMatcher()::match)
         .filter(Optional::isPresent).map(Optional::get)
-        .map(message -> new DataError<V>(this, message)).collect(ImmutableList.toImmutableList());
+        .map(message -> new DataError<>(this, message)).collect(ImmutableList.toImmutableList());
   }
 
   // TODO
