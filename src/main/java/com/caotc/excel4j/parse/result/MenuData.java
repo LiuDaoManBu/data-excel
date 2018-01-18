@@ -1,21 +1,17 @@
 package com.caotc.excel4j.parse.result;
 
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.config.MenuDataConfig;
-import com.caotc.excel4j.parse.error.DataError;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import com.caotc.excel4j.parse.error.Error;
 
-public class MenuData<V> {
-  private final Menu<V> menu;
-  private final MenuDataConfig<V> dataConfig;
-  private final ImmutableList<DataError<V>> errors;
+public class MenuData {
+  private final Menu menu;
+  private final MenuDataConfig dataConfig;
+  private final ImmutableList<Error<MenuData>> errors;
   private final ImmutableList<StandardCell> valueCells;
 
-  public MenuData(Menu<V> menu) {
+  public MenuData(Menu menu) {
     super();
     this.menu = menu;
     this.dataConfig = menu.getMenuConfig().getDataConfig();
@@ -25,7 +21,7 @@ public class MenuData<V> {
     // TODO is DataError?
     errors = valueCells.stream().map(dataConfig.getMatcher()::match)
         .filter(Optional::isPresent).map(Optional::get)
-        .map(message -> new DataError<>(this, message)).collect(ImmutableList.toImmutableList());
+        .map(message -> new Error<MenuData>(this, message)).collect(ImmutableList.toImmutableList());
   }
 
   // TODO
@@ -41,7 +37,7 @@ public class MenuData<V> {
   // return result;
   // }
 
-  // public Optional<V> getValue() {
+  // public Optional getValue() {
   // V value = null;
   // // TODO
   // if (Objects.nonNull(dataConfig.getFieldName())) {
@@ -73,17 +69,17 @@ public class MenuData<V> {
   // return Optional.ofNullable(value);
   // }
 
-  public ImmutableList<V> getCellValues() {
-    // TODO
-    return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
-        .collect(ImmutableList.toImmutableList());
-  }
+//  public ImmutableList getCellValues() {
+//    // TODO
+//    return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
+//        .collect(ImmutableList.toImmutableList());
+//  }
 
-  public Menu<V> getMenu() {
+  public Menu getMenu() {
     return menu;
   }
 
-  public MenuDataConfig<V> getDataConfig() {
+  public MenuDataConfig getDataConfig() {
     return dataConfig;
   }
 
@@ -91,7 +87,7 @@ public class MenuData<V> {
     return valueCells;
   }
 
-  public ImmutableList<DataError<V>> getErrors() {
+  public ImmutableList<Error<MenuData>> getErrors() {
     return errors;
   }
 

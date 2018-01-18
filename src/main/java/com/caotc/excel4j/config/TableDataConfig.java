@@ -8,24 +8,24 @@ import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
 
-public class TableDataConfig<V> extends DataConfig<V> {
+public class TableDataConfig{
 
-  public static class Builder<V> extends DataConfig.Builder<V> {
-    private TableConfig<V> tableConfig;
+  public static class Builder{
+    private TableConfig tableConfig;
     private ConstructType constructType;
-    private Matcher.Builder<Map<Menu<?>, StandardCell>> matcherBuilder;
+    private Matcher.Builder<Map<Menu, StandardCell>> matcherBuilder;
 
-    public TableDataConfig<V> build() {
+    public TableDataConfig build() {
       // TODO 提示语
       Preconditions.checkState(Objects.nonNull(tableConfig));
-      return new TableDataConfig<>(this);
+      return new TableDataConfig(this);
     }
 
-    public TableConfig<V> getTableConfig() {
+    public TableConfig getTableConfig() {
       return tableConfig;
     }
 
-    public Builder<V> setTableConfig(TableConfig<V> tableConfig) {
+    public Builder setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -34,28 +34,27 @@ public class TableDataConfig<V> extends DataConfig<V> {
       return constructType;
     }
 
-    public Builder<V> setConstructType(ConstructType constructType) {
+    public Builder setConstructType(ConstructType constructType) {
       this.constructType = constructType;
       return this;
     }
 
-    public Matcher.Builder<Map<Menu<?>, StandardCell>> getMatcherBuilder() {
+    public Matcher.Builder<Map<Menu, StandardCell>> getMatcherBuilder() {
       return matcherBuilder;
     }
 
-    public Builder<V> setMatcherBuilder(Matcher.Builder<Map<Menu<?>, StandardCell>> matcherBuilder) {
+    public Builder setMatcherBuilder(Matcher.Builder<Map<Menu, StandardCell>> matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
 
   }
 
-  private final TableConfig<V> tableConfig;
+  private final TableConfig tableConfig;
   private final ConstructType constructType;
-  private final Matcher<Map<Menu<?>, StandardCell>> matcher;
+  private final Matcher<Map<Menu, StandardCell>> matcher;
 
-  protected TableDataConfig(Builder<V> builder) {
-    super(builder);
+  protected TableDataConfig(Builder builder) {
     this.constructType = builder.constructType;
     this.tableConfig = builder.tableConfig;
     this.matcher=builder.matcherBuilder.build();
@@ -65,11 +64,11 @@ public class TableDataConfig<V> extends DataConfig<V> {
     return constructType;
   }
 
-  public TableConfig<V> getTableConfig() {
+  public TableConfig getTableConfig() {
     return tableConfig;
   }
 
-  public Matcher<Map<Menu<?>, StandardCell>> getMatcher() {
+  public Matcher<Map<Menu, StandardCell>> getMatcher() {
     return matcher;
   }
   

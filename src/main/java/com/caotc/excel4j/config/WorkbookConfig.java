@@ -51,9 +51,6 @@ public class WorkbookConfig {
 
   }
 
-  private static final Function<SheetConfig, String> SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
-      config -> config + "don't have any matches sheet";
-
   public static Builder builder() {
     return new Builder();
   }
@@ -72,32 +69,7 @@ public class WorkbookConfig {
   }
 
   public WorkbookParseResult parse(Workbook workbook) {
-    WorkbookParseResult.Builder builder =
-        WorkbookParseResult.builder().setWorkbook(workbook).setConfig(this);
-    ImmutableList.Builder<WorkbookError> errors = ImmutableList.builder();
-
-    Optional<WorkbookError> optional =
-        Optional.ofNullable(matcher).map(m -> m.match(workbook).orElse(null))
-            .map(message -> new WorkbookError(workbook, message));
-    optional.ifPresent(errors::add);
-    if (!optional.isPresent()) {
-      // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
-      sheetConfigs.stream()
-          .filter(config -> ExcelUtil.getSheets(workbook).noneMatch(config.getMatcher()::test))
-          .map(config -> new WorkbookError(workbook,
-              SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
-          .forEach(errors::add);
-
-
-      // TODO sheet被多个matcher匹配的情况?
-      builder.setSheetParseResultBuilders(sheetConfigs.stream()
-          .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
-          .flatMap(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
-              .map(config::parse))
-          .collect(ImmutableList.toImmutableList()));
-    }
-    builder.setErrors(errors.build());
-    return builder.build();
+    return WorkbookParseResult.builder().setWorkbook(workbook).setConfig(this).build();
   }
 
   public ParserConfig getEffectiveParserConfig() {

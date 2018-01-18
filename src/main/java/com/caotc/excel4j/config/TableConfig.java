@@ -14,25 +14,25 @@ import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
 // TODO classType?
-public class TableConfig<V> {
-  public static class Builder<V> {
-    private List<MenuConfig.Builder<?>> topMenuConfigBuilders;
+public class TableConfig {
+  public static class Builder {
+    private List<MenuConfig.Builder> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
-    private Matcher.Builder<Table<V>> matcherBuilder;
+    private Matcher.Builder<Table> matcherBuilder;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
-    private TableDataConfig<V> dataConfig;
+    private TableDataConfig dataConfig;
     private ParserConfig parserConfig;
 
-    public TableConfig<V> build() {
-      return new TableConfig<>(this);
+    public TableConfig build() {
+      return new TableConfig(this);
     }
 
     public SheetConfig getSheetConfig() {
       return sheetConfig;
     }
 
-    public Builder<V> setSheetConfig(SheetConfig sheetConfig) {
+    public Builder setSheetConfig(SheetConfig sheetConfig) {
       this.sheetConfig = sheetConfig;
       return this;
     }
@@ -41,7 +41,7 @@ public class TableConfig<V> {
       return fixedMenuDirection;
     }
 
-    public Builder<V> setFixedMenuDirection(Direction fixedMenuDirection) {
+    public Builder setFixedMenuDirection(Direction fixedMenuDirection) {
       this.fixedMenuDirection = fixedMenuDirection;
       return this;
     }
@@ -50,17 +50,17 @@ public class TableConfig<V> {
       return unFixedMenuDirection;
     }
 
-    public Builder<V> setUnFixedMenuDirection(Direction unFixedMenuDirection) {
+    public Builder setUnFixedMenuDirection(Direction unFixedMenuDirection) {
       this.unFixedMenuDirection = unFixedMenuDirection;
       return this;
     }
 
-    public List<MenuConfig.Builder<?>> getTopMenuConfigBuilders() {
+    public List<MenuConfig.Builder> getTopMenuConfigBuilders() {
       return topMenuConfigBuilders;
     }
 
-    public Builder<V> setTopMenuConfigBuilders(
-        List<MenuConfig.Builder<?>> topMenuConfigBuilders) {
+    public Builder setTopMenuConfigBuilders(
+        List<MenuConfig.Builder> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }
@@ -69,52 +69,52 @@ public class TableConfig<V> {
       return parserConfig;
     }
 
-    public Builder<V> setParserConfig(ParserConfig parserConfig) {
+    public Builder setParserConfig(ParserConfig parserConfig) {
       this.parserConfig = parserConfig;
       return this;
     }
 
-    public Matcher.Builder<Table<V>> getMatcherBuilder() {
+    public Matcher.Builder<Table> getMatcherBuilder() {
       return matcherBuilder;
     }
 
-    public Builder<V> setMatcherBuilder(Matcher.Builder<Table<V>> matcherBuilder) {
+    public Builder setMatcherBuilder(Matcher.Builder<Table> matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
 
-    public TableDataConfig<V> getDataConfig() {
+    public TableDataConfig getDataConfig() {
       return dataConfig;
     }
 
-    public Builder<V> setDataConfig(TableDataConfig<V> dataConfig) {
+    public Builder setDataConfig(TableDataConfig dataConfig) {
       this.dataConfig = dataConfig;
       return this;
     }
 
   }
 
-  public static <V> Builder<V> builder() {
-    return new Builder<>();
+  public static  Builder builder() {
+    return new Builder();
   }
 
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
-  private final ImmutableCollection<MenuConfig<?>> topMenuConfigs;
-  private final Matcher<Table<V>> matcher;
-  private final TableDataConfig<V> dataConfig;
+  private final ImmutableCollection<MenuConfig> topMenuConfigs;
+  private final Matcher<Table> matcher;
+  private final TableDataConfig dataConfig;
   private final ParserConfig parserConfig;
 
-  private final Traverser<MenuConfig<?>> MENU_CONFIG_TRAVERSER =
-      Traverser.forTree(new SuccessorsFunction<MenuConfig<?>>() {
+  private final Traverser<MenuConfig> MENU_CONFIG_TRAVERSER =
+      Traverser.forTree(new SuccessorsFunction<MenuConfig>() {
         @Override
-        public Iterable<? extends MenuConfig<?>> successors(MenuConfig<?> node) {
+        public Iterable<? extends MenuConfig> successors(MenuConfig node) {
           return node.getChildrens();
         }
       });
 
-  private TableConfig(Builder<V> builder) {
+  private TableConfig(Builder builder) {
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
@@ -131,8 +131,8 @@ public class TableConfig<V> {
     // builder.menuConfigBuilders.stream().map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
   }
 
-  public Table.Builder<V> parse(Sheet sheet) {
-    Table.Builder<V> builder = Table.<V>builder().setTableConfig(this);
+  public Table.Builder parse(Sheet sheet) {
+    Table.Builder builder = Table.builder().setTableConfig(this);
 
     // if (matcher.test(sheet)) {
     // builder.setTableBuilders(tableBuilders);
@@ -146,7 +146,7 @@ public class TableConfig<V> {
     return Optional.ofNullable(parserConfig).orElse(sheetConfig.getEffectiveParserConfig());
   }
 
-  public Stream<MenuConfig<?>> getMenuConfigs() {
+  public Stream<MenuConfig> getMenuConfigs() {
     return topMenuConfigs.stream().map(MENU_CONFIG_TRAVERSER::breadthFirst)
         .flatMap(Streams::stream);
   }
@@ -155,7 +155,7 @@ public class TableConfig<V> {
     return sheetConfig;
   }
 
-  public ImmutableCollection<MenuConfig<?>> getTopMenuConfigs() {
+  public ImmutableCollection<MenuConfig> getTopMenuConfigs() {
     return topMenuConfigs;
   }
 
@@ -171,11 +171,11 @@ public class TableConfig<V> {
     return parserConfig;
   }
 
-  public TableDataConfig<V> getDataConfig() {
+  public TableDataConfig getDataConfig() {
     return dataConfig;
   }
 
-  public Matcher<Table<V>> getMatcher() {
+  public Matcher<Table> getMatcher() {
     return matcher;
   }
 

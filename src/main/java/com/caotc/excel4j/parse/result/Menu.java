@@ -14,78 +14,79 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.caotc.excel4j.parse.error.Error;
 
-public class Menu<V> {
-  public static class Builder<V> {
+public class Menu {
+  public static class Builder {
     private StandardCell cell;
-    private MenuConfig<V> menuConfig;
-    private Table<?> table;
-    private Menu<?> parent;
+    private MenuConfig menuConfig;
+    private Table table;
+    private Menu parent;
 
-    public Menu<V> build() {
+    public Menu build() {
       // table = Optional.ofNullable(table)
       // .orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
 
       // TODO tip
       Preconditions.checkNotNull(cell);
       Preconditions.checkNotNull(table);
-      return new Menu<>(this);
+      return new Menu(this);
     }
 
     public StandardCell getCell() {
       return cell;
     }
 
-    public Builder<V> setCell(StandardCell cell) {
+    public Builder setCell(StandardCell cell) {
       this.cell = cell;
       return this;
     }
 
-    public MenuConfig<V> getMenuConfig() {
+    public MenuConfig getMenuConfig() {
       return menuConfig;
     }
 
-    public Builder<V> setMenuConfig(MenuConfig<V> menuConfig) {
+    public Builder setMenuConfig(MenuConfig menuConfig) {
       this.menuConfig = menuConfig;
       return this;
     }
 
-    public Table<?> getTable() {
+    public Table getTable() {
       return table;
     }
 
-    public Builder<V> setTable(Table<?> table) {
+    public Builder setTable(Table table) {
       this.table = table;
       return this;
     }
 
-    public Menu<?> getParent() {
+    public Menu getParent() {
       return parent;
     }
 
-    public Builder<V> setParent(Menu<?> parent) {
+    public Builder setParent(Menu parent) {
       this.parent = parent;
       return this;
     }
 
   }
 
-  private final Function<MenuConfig<?>, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+  private final Function<MenuConfig, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
       config -> config + "don't have any matches cell";
 
-  public static <V> Builder<V> builder() {
-    return new Builder<>();
+  public static  Builder builder() {
+    return new Builder();
   }
 
   private final StandardCell cell;
-  private final MenuConfig<V> menuConfig;
-  private final ImmutableList<MenuError<V>> errors;
-  private final Table<?> table;
-  private final Menu<?> parent;
-  private final ImmutableList<Menu<?>> childrens;
-  private final MenuData<V> data;
+  private final MenuConfig menuConfig;
+  private final ImmutableList<Error<Menu>> errors;
+  private final Table table;
+  private final Menu parent;
+  private final ImmutableList<Menu> childrens;
+  private final MenuData data;
 
-  public Menu(Builder<V> builder) {
+  public Menu(Builder builder) {
     cell = builder.cell;
     menuConfig = builder.menuConfig;
     table = builder.table;
@@ -94,20 +95,20 @@ public class Menu<V> {
     childrens =
         loadChildrens().peek(childrenBuilder -> childrenBuilder.setParent(this).setTable(table))
             .map(Builder::build).collect(ImmutableList.toImmutableList());
-    data = new MenuData<>(this);
+    data = new MenuData(this);
 
-    ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
+    ImmutableCollection<MenuConfig> matchesMenuConfigs =
         childrens.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
 
     // TODO dataError? is MenuError?
     errors = menuConfig.getChildrens().stream()
         .filter(config -> !matchesMenuConfigs.contains(config))
-        .map(config -> new MenuError<>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+        .map(config -> new Error<Menu>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
 
-  private Stream<Builder<?>> loadChildrens() {
-    ImmutableCollection<MenuConfig<?>> childrenConfigs = menuConfig.getChildrens();
+  private Stream<Builder> loadChildrens() {
+    ImmutableCollection<MenuConfig> childrenConfigs = menuConfig.getChildrens();
 
     if (!childrenConfigs.isEmpty()) {
       ImmutableList<StandardCell> menuCells =
@@ -115,7 +116,7 @@ public class Menu<V> {
       return menuCells.stream().map(cell -> {
         Builder builder = builder().setCell(cell).setParent(this);
         // TODO Duplicate matching?
-        MenuConfig<?> config = Iterables.getOnlyElement(childrenConfigs.stream()
+        MenuConfig config = Iterables.getOnlyElement(childrenConfigs.stream()
             .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
         return builder.setMenuConfig(config);
       });
@@ -124,7 +125,7 @@ public class Menu<V> {
     }
   }
 
-  public Optional<Menu<?>> getSuper(Predicate<? super Menu<?>> predicate) {
+  public Optional<Menu> getSuper(Predicate<? super Menu> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isTopMenu()) {
       return Optional.empty();
@@ -132,22 +133,22 @@ public class Menu<V> {
     return predicate.apply(parent) ? Optional.of(parent) : parent.getSuper(predicate);
   }
 
-  public Optional<Menu<?>> getFieldParent() {
+  public Optional<Menu> getFieldParent() {
     return getSuper(menu -> menu.getFieldName().isPresent());
   }
 
-  public ImmutableList<Menu<?>> getSubs(Predicate<? super Menu<?>> predicate) {
+  public ImmutableList<Menu> getSubs(Predicate<? super Menu> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isDataMenu()) {
       return ImmutableList.of();
     }
-    ImmutableList<Menu<?>> subs =
+    ImmutableList<Menu> subs =
         childrens.stream().filter(predicate).collect(ImmutableList.toImmutableList());
     return subs.isEmpty() ? childrens.stream().flatMap(menu -> menu.getSubs(predicate).stream())
         .collect(ImmutableList.toImmutableList()) : subs;
   }
 
-  public ImmutableList<Menu<?>> getFieldChildrens() {
+  public ImmutableList<Menu> getFieldChildrens() {
     return getSubs(menu -> menu.getFieldName().isPresent());
   }
 
@@ -157,9 +158,9 @@ public class Menu<V> {
     }
     com.google.common.collect.ImmutableList.Builder<Field> builder = ImmutableList.builder();
     builder.add(getField().get());
-    Optional<Menu<?>> optional = getFieldParent();
+    Optional<Menu> optional = getFieldParent();
     while (optional.isPresent()) {
-      Menu<?> menu = optional.get();
+      Menu menu = optional.get();
       builder.add(menu.getField().get());
       optional = menu.getFieldParent();
     }
@@ -177,7 +178,7 @@ public class Menu<V> {
         : direction.nextCell(cell);
   }
 
-  public boolean hasChildren(Menu<?> childrenMenu) {
+  public boolean hasChildren(Menu childrenMenu) {
     return childrens.contains(childrenMenu);
   }
 
@@ -232,27 +233,27 @@ public class Menu<V> {
     return cell;
   }
 
-  public MenuConfig<V> getMenuConfig() {
+  public MenuConfig getMenuConfig() {
     return menuConfig;
   }
 
-  public Menu<?> getParent() {
+  public Menu getParent() {
     return parent;
   }
 
-  public Table<?> getTable() {
+  public Table getTable() {
     return table;
   }
 
-  public ImmutableList<Menu<?>> getChildrens() {
+  public ImmutableList<Menu> getChildrens() {
     return childrens;
   }
 
-  public MenuData<V> getData() {
+  public MenuData getData() {
     return data;
   }
 
-  public ImmutableList<MenuError<V>> getErrors() {
+  public ImmutableList<Error<Menu>> getErrors() {
     return errors;
   }
 

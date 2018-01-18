@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 public enum LoadType {
   UNFIXED {
     @Override
-    public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
+    public  ImmutableList<StandardCell> getDataCells(Menu menu) {
       // TODO 此时menu尚未存在table中
       // ImmutableCollection<StandardCell> menuCells =
       // menu.getTable().getMenus().map(Menu::getCell).collect(ImmutableSet.toImmutableSet());
@@ -31,7 +31,7 @@ public enum LoadType {
   },
 //  FIXED {
 //    @Override
-//    public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
+//    public  ImmutableList<StandardCell> getDataCells(Menu menu) {
 //      // ImmutableCollection<StandardCell> menuCells =
 //      // menu.getTable().getMenus().map(Menu::getCell).collect(ImmutableSet.toImmutableSet());
 //      List<StandardCell> cells = Lists.newArrayList();
@@ -51,10 +51,10 @@ public enum LoadType {
 //  },
   SINGLE {
     @Override
-    public <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu) {
+    public  ImmutableList<StandardCell> getDataCells(Menu menu) {
       return ImmutableList.of(menu.nextDataCell(menu.getCell()).get());
     }
   };
 
-  public abstract <V> ImmutableList<StandardCell> getDataCells(Menu<V> menu);
+  public abstract  ImmutableList<StandardCell> getDataCells(Menu menu);
 }

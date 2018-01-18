@@ -8,13 +8,16 @@ import com.caotc.excel4j.matcher.constant.Type;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.data.type.DataType;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
+import com.caotc.excel4j.parse.result.Menu;
+import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 
-public class MenuDataConfig<V> extends DataConfig<V> {
-  public static class Builder<V> extends DataConfig.Builder<V> {
-    private MenuConfig<V> menuConfig;
+public class MenuDataConfig{
+  public static class Builder{
+    private MenuConfig menuConfig;
     private Field field;
     private BaseDataType baseDataType;
     private DataType dataType;
@@ -24,10 +27,10 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     private LoadType loadType;
     private Integer dataNumber;
 
-    public MenuDataConfig<V> build() {
+    public MenuDataConfig build() {
       // TODO
-      setType(Optional.ofNullable(field).map(Field::getType).map(type -> (Class<V>) type)
-          .map(TypeToken::of).orElse(null));
+//      setType(Optional.ofNullable(field).map(Field::getType).map(type -> (Class) type)
+//          .map(TypeToken::of).orElse(null));
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
       loadType = Optional.ofNullable(loadType).orElse(DEFAULT_LOAD_TYPE);
 
@@ -40,14 +43,14 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       Preconditions.checkState(Objects.nonNull(menuConfig));
       Preconditions.checkState(Objects.nonNull(dataType));
 
-      return new MenuDataConfig<>(this);
+      return new MenuDataConfig(this);
     }
 
-    public MenuConfig<V> getMenuConfig() {
+    public MenuConfig getMenuConfig() {
       return menuConfig;
     }
 
-    public Builder<V> setMenuConfig(MenuConfig<V> menuConfig) {
+    public Builder setMenuConfig(MenuConfig menuConfig) {
       this.menuConfig = menuConfig;
       return this;
     }
@@ -56,7 +59,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return field;
     }
 
-    public Builder<V> setField(Field field) {
+    public Builder setField(Field field) {
       this.field = field;
       return this;
     }
@@ -65,7 +68,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return baseDataType;
     }
 
-    public Builder<V> setBaseDataType(BaseDataType baseDataType) {
+    public Builder setBaseDataType(BaseDataType baseDataType) {
       this.baseDataType = baseDataType;
       return this;
     }
@@ -74,7 +77,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return dataType;
     }
 
-    public Builder<V> setDataType(DataType dataType) {
+    public Builder setDataType(DataType dataType) {
       this.dataType = dataType;
       return this;
     }
@@ -83,7 +86,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return matcherBuilder;
     }
 
-    public Builder<V> setMatcherBuilder(StandardCellMatcher.Builder matcherBuilder) {
+    public Builder setMatcherBuilder(StandardCellMatcher.Builder matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
@@ -92,7 +95,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return fieldName;
     }
 
-    public Builder<V> setFieldName(String fieldName) {
+    public Builder setFieldName(String fieldName) {
       this.fieldName = fieldName;
       return this;
     }
@@ -101,7 +104,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return loadType;
     }
 
-    public Builder<V> setLoadType(LoadType loadType) {
+    public Builder setLoadType(LoadType loadType) {
       this.loadType = loadType;
       return this;
     }
@@ -110,7 +113,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
       return dataNumber;
     }
 
-    public Builder<V> setDataNumber(Integer dataNumber) {
+    public Builder setDataNumber(Integer dataNumber) {
       this.dataNumber = dataNumber;
       return this;
     }
@@ -119,11 +122,11 @@ public class MenuDataConfig<V> extends DataConfig<V> {
   private static final Joiner JOINER=Joiner.on("");
   private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
 
-  public static <V> Builder<V> builder() {
-    return new Builder<>();
+  public static  Builder builder() {
+    return new Builder();
   }
 
-  private final MenuConfig<V> menuConfig;
+  private final MenuConfig menuConfig;
   private final LoadType loadType;
   private final Field field;
   private final String fieldName;
@@ -131,8 +134,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
   private final DataType dataType;
   private final StandardCellMatcher matcher;
 
-  protected MenuDataConfig(Builder<V> builder) {
-    super(builder);
+  protected MenuDataConfig(Builder builder) {
     this.menuConfig = builder.menuConfig;
     this.loadType = builder.loadType;
     this.field = builder.field;
@@ -142,13 +144,13 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     this.matcher = builder.matcherBuilder.build();
   }
 
-  public V cast(Object value) {
-    return dataType.cast(value, getType());
+  public <T> T cast(Object value,TypeToken<T> type) {
+    return dataType.cast(value, type);
   }
-//
-//  public ImmutableList<StandardCell> getDataCells(Menu<?,V> menu) {
-//    return loadType.getDataCells(menu);
-//  }
+
+  public ImmutableList<StandardCell> getDataCells(Menu menu) {
+    return loadType.getDataCells(menu);
+  }
 
   public LoadType getLoadType() {
     return loadType;
@@ -162,7 +164,7 @@ public class MenuDataConfig<V> extends DataConfig<V> {
     return fieldName;
   }
 
-  public MenuConfig<V> getMenuConfig() {
+  public MenuConfig getMenuConfig() {
     return menuConfig;
   }
 

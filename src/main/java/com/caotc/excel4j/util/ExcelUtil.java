@@ -61,10 +61,6 @@ public class ExcelUtil {
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
-  public static <T> List<T> importSheet(Workbook workbook, Class<T> type) {
-    return null;
-  }
-  
   public static WorkbookParseResult parse(File file, WorkbookConfig config)
       throws EncryptedDocumentException, InvalidFormatException, IOException {
     return config.parse(WorkbookFactory.create(file));
@@ -75,35 +71,35 @@ public class ExcelUtil {
     return config.parse(WorkbookFactory.create(inputStream));
   }
 
-  public static  SheetConfig.Builder toSheetConfig(Class<?> type) {
+  public static SheetConfig.Builder toSheetConfig(Class<?> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
-      SheetConfig.Builder builder=SheetConfig.builder();
-      if(!Strings.isNullOrEmpty(t.name())) {
-        builder.setMatcherBuilder(SheetMatcher.builder().add(StringMatcherType.EQUALS, t.name(), Sheet::getSheetName));
+      SheetConfig.Builder builder = SheetConfig.builder();
+      if (!Strings.isNullOrEmpty(t.name())) {
+        builder.setMatcherBuilder(
+            SheetMatcher.builder().add(StringMatcherType.EQUALS, t.name(), Sheet::getSheetName));
       }
       return builder;
     }).orElse(null);
   }
-  
-  public static <V> TableConfig.Builder<V> toTableConfig(Class<V> type) {
+
+  public static <V> TableConfig.Builder toTableConfig(Class<V> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
-      return TableConfig.<V>builder().setTopMenuConfigBuilders(ClassUtil.getAllFields(type).map(ExcelUtil::toConfig)
-          .filter(Objects::nonNull).collect(Collectors.toList()));
+      return TableConfig.builder().setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
+          .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
     }).orElse(null);
   }
 
-  public static <V> MenuConfig.Builder<V> toConfig(Field field) {
+  public static MenuConfig.Builder toConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
-      MenuConfig.Builder<V> builder=
-       MenuConfig.<V>builder()
+      MenuConfig.Builder builder = MenuConfig.builder()
           .setMatcherBuilder(
               StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, f.name()))
           .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
           .setDataConfigBuilder(
-              MenuDataConfig.<V>builder().setLoadType(f.loadType()).setDataNumber(f.dataNumber())
+              MenuDataConfig.builder().setLoadType(f.loadType()).setDataNumber(f.dataNumber())
                   .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
-      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t->builder.getDataConfigBuilder().getMatcherBuilder()
-          .addDataPredicate(Objects::nonNull));
+      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t -> builder
+          .getDataConfigBuilder().getMatcherBuilder().addDataPredicate(Objects::nonNull));
       return builder;
     }).orElse(null);
   }
@@ -349,8 +345,7 @@ public class ExcelUtil {
       @Nullable Integer lastRowIndex) {
     // TODO sheet.getTopRow()? closed
     return Optional.ofNullable(sheet)
-        .map(t -> IntStream.range(
-            Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
+        .map(t -> IntStream.range(Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
             Optional.ofNullable(lastRowIndex).orElse(t.getLastRowNum())))
         .orElse(IntStream.empty()).mapToObj(sheet::getRow);
   }

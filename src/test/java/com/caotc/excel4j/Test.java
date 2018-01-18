@@ -13,7 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.annotation.ExcelField;
-import com.caotc.excel4j.config.DataConfig;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.MenuDataConfig;
 import com.caotc.excel4j.config.SheetConfig;
@@ -164,12 +163,12 @@ public class Test {
     String path1 = "C:\\Users\\呵呵\\Desktop\\用户.xlsx";
     String path2 = "C:\\Users\\Administrator\\Desktop\\用户.xlsx";
 
-    MenuDataConfig.Builder<String> userNameDataConfig =
+    MenuDataConfig.Builder userNameDataConfig =
         MenuDataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
             .setField(User.class.getDeclaredField("userName")).setMatcherBuilder(
                 StandardCellMatcher.builder().addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
 
-    MenuConfig.Builder<String> userNameMenuConfig = MenuConfig.<String>builder()
+    MenuConfig.Builder userNameMenuConfig = MenuConfig.<String>builder()
         .setMatcherBuilder(
             StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
         .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU)
@@ -180,7 +179,7 @@ public class Test {
             .setSheetConfigBuilders(ImmutableList.of(SheetConfig.builder()
                 .setMatcherBuilder(SheetMatcher.builder().setType(Type.AND).setPredicates(
                     Lists.newArrayList(sheet -> sheet.getSheetName().equalsIgnoreCase("user"))))
-                .setTableConfigBuilders(ImmutableList.of(TableConfig.<User>builder()
+                .setTableConfigBuilders(ImmutableList.of(TableConfig.builder()
                     .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
             .build());
 

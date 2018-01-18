@@ -3,10 +3,13 @@ package com.caotc.excel4j.parse.result;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.apache.poi.ss.usermodel.Workbook;
+import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.parse.error.Error;
 import com.caotc.excel4j.parse.error.WorkbookError;
+import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 
@@ -50,6 +53,9 @@ public class WorkbookParseResult {
 
   }
 
+  private static final Function<SheetConfig, String> SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
+      config -> config + "don't have any matches sheet";
+
   public static Builder builder() {
     return new Builder();
   }
@@ -62,13 +68,34 @@ public class WorkbookParseResult {
   private WorkbookParseResult(Builder builder) {
     this.workbook = builder.workbook;
     this.config = builder.config;
-    this.errors = Optional.ofNullable(config.getMatcher())
-        .map(matcher -> matcher.match(workbook).orElse(null))
-        .map(message -> new Error<Workbook>(workbook, message)).map(ImmutableList::of)
-        .orElse(ImmutableList.of());
-    this.sheetParseResults = builder.sheetParseResultBuilders.stream()
-        .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
-        .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
+    ImmutableList.Builder<Error<Workbook>> errors = ImmutableList.builder();
+    Optional<Error<Workbook>> optional =
+        Optional.ofNullable(config.getMatcher()).map(m -> m.match(workbook).orElse(null))
+            .map(message -> new Error<Workbook>(workbook, message));
+    optional.ifPresent(errors::add);
+    if (!optional.isPresent()) {
+      // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
+      config.getSheetConfigs().stream()
+          .filter(config -> ExcelUtil.getSheets(workbook).noneMatch(config.getMatcher()::test))
+          .map(config -> new Error<Workbook>(workbook,
+              SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+          .forEach(errors::add);
+
+
+      // TODO sheet被多个matcher匹配的情况?
+      builder.setSheetParseResultBuilders(config.getSheetConfigs().stream()
+          .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
+          .flatMap(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
+              .map(config::parse))
+          .collect(ImmutableList.toImmutableList()));
+
+      this.sheetParseResults = builder.sheetParseResultBuilders.stream()
+          .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
+          .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
+    } else {
+      this.sheetParseResults = ImmutableList.of();
+    }
+    this.errors = errors.build();
   }
 
   public Workbook getWorkbook() {

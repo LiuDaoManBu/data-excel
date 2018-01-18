@@ -16,12 +16,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
-public class MenuConfig<V> {
-  public static class Builder<V> {
-    private TableConfig<?> tableConfig;
-    private MenuConfig<?> parent;
-    private MenuDataConfig.Builder<V> dataConfigBuilder;
-    private List<MenuConfig.Builder<?>> childrenBuilders;
+public class MenuConfig {
+  public static class Builder {
+    private TableConfig tableConfig;
+    private MenuConfig parent;
+    private MenuDataConfig.Builder dataConfigBuilder;
+    private List<MenuConfig.Builder> childrenBuilders;
     // 菜单匹配器
     private Matcher.Builder<StandardCell> matcherBuilder;
     // 第一个数据单元格相对于菜单单元格的单元格距离
@@ -32,7 +32,7 @@ public class MenuConfig<V> {
     private MenuType menuType;
     private ParserConfig parserConfig;
 
-    public MenuConfig<V> build() {
+    public MenuConfig build() {
       distance = Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
       necessity = Optional.ofNullable(necessity).orElse(DEFAULT_MENU_NECESSITY);
 
@@ -50,14 +50,14 @@ public class MenuConfig<V> {
 //      Preconditions.checkNotNull(menuType);
       Preconditions.checkState(
           !(!Iterables.isEmpty(childrenBuilders) && Objects.nonNull(dataConfigBuilder)));
-      return new MenuConfig<>(this);
+      return new MenuConfig(this);
     }
 
-    public TableConfig<?> getTableConfig() {
+    public TableConfig getTableConfig() {
       return tableConfig;
     }
 
-    public Builder<V> setTableConfig(TableConfig<?> tableConfig) {
+    public Builder setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -70,7 +70,7 @@ public class MenuConfig<V> {
       return necessity;
     }
 
-    public Builder<V> setNecessity(Necessity necessity) {
+    public Builder setNecessity(Necessity necessity) {
       this.necessity = necessity;
       return this;
     }
@@ -79,7 +79,7 @@ public class MenuConfig<V> {
       return direction;
     }
 
-    public Builder<V> setDirection(Direction direction) {
+    public Builder setDirection(Direction direction) {
       this.direction = direction;
       return this;
     }
@@ -88,34 +88,34 @@ public class MenuConfig<V> {
       return menuType;
     }
 
-    public Builder<V> setMenuType(MenuType menuType) {
+    public Builder setMenuType(MenuType menuType) {
       this.menuType = menuType;
       return this;
     }
 
-    public MenuConfig<?> getParent() {
+    public MenuConfig getParent() {
       return parent;
     }
 
-    public Builder<V> setParent(MenuConfig<?> parent) {
+    public Builder setParent(MenuConfig parent) {
       this.parent = parent;
       return this;
     }
 
-    public MenuDataConfig.Builder<V> getDataConfigBuilder() {
+    public MenuDataConfig.Builder getDataConfigBuilder() {
       return dataConfigBuilder;
     }
 
-    public Builder<V> setDataConfigBuilder(MenuDataConfig.Builder<V> dataConfigBuilder) {
+    public Builder setDataConfigBuilder(MenuDataConfig.Builder dataConfigBuilder) {
       this.dataConfigBuilder = dataConfigBuilder;
       return this;
     }
 
-    public List<MenuConfig.Builder<?>> getChildrenBuilders() {
+    public List<MenuConfig.Builder> getChildrenBuilders() {
       return childrenBuilders;
     }
 
-    public Builder<V> setChildrenBuilders(List<MenuConfig.Builder<?>> childrenBuilders) {
+    public Builder setChildrenBuilders(List<MenuConfig.Builder> childrenBuilders) {
       this.childrenBuilders = childrenBuilders;
       return this;
     }
@@ -125,12 +125,12 @@ public class MenuConfig<V> {
       return matcherBuilder;
     }
 
-    public Builder<V> setMatcherBuilder(Matcher.Builder<StandardCell> matcherBuilder) {
+    public Builder setMatcherBuilder(Matcher.Builder<StandardCell> matcherBuilder) {
       this.matcherBuilder = matcherBuilder;
       return this;
     }
 
-    public Builder<V> setDistance(Integer distance) {
+    public Builder setDistance(Integer distance) {
       this.distance = distance;
       return this;
     }
@@ -139,7 +139,7 @@ public class MenuConfig<V> {
       return parserConfig;
     }
 
-    public Builder<V> setParserConfig(ParserConfig parserConfig) {
+    public Builder setParserConfig(ParserConfig parserConfig) {
       this.parserConfig = parserConfig;
       return this;
     }
@@ -150,23 +150,23 @@ public class MenuConfig<V> {
   private static final Necessity DEFAULT_MENU_NECESSITY = Necessity.MUST;
   public static final Direction DEFAULT_DIRECTION = Direction.BOTTOM;
 
-  public static <V> Builder<V> builder() {
-    return new Builder<>();
+  public static  Builder builder() {
+    return new Builder();
   }
 
-  private final TableConfig<?> tableConfig;
+  private final TableConfig tableConfig;
   // 菜单匹配器
   private final Matcher<StandardCell> menuMatcher;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private final int distance;
   private final Necessity necessity;
   private final Direction direction;
-  private final MenuConfig<?> parent;
-  private final ImmutableCollection<MenuConfig<?>> childrens;
-  private final MenuDataConfig<V> dataConfig;
+  private final MenuConfig parent;
+  private final ImmutableCollection<MenuConfig> childrens;
+  private final MenuDataConfig dataConfig;
   private final ParserConfig parserConfig;
 
-  private MenuConfig(Builder<V> builder) {
+  private MenuConfig(Builder builder) {
     tableConfig = builder.tableConfig;
     menuMatcher = builder.matcherBuilder.build();
     distance = builder.distance;
@@ -237,7 +237,7 @@ public class MenuConfig<V> {
     return distance;
   }
 
-  public MenuConfig<?> getParent() {
+  public MenuConfig getParent() {
     return parent;
   }
 
@@ -249,15 +249,15 @@ public class MenuConfig<V> {
     return necessity;
   }
 
-  public MenuDataConfig<V> getDataConfig() {
+  public MenuDataConfig getDataConfig() {
     return dataConfig;
   }
 
-  public ImmutableCollection<MenuConfig<?>> getChildrens() {
+  public ImmutableCollection<MenuConfig> getChildrens() {
     return childrens;
   }
 
-  public TableConfig<?> getTableConfig() {
+  public TableConfig getTableConfig() {
     return tableConfig;
   }
 
