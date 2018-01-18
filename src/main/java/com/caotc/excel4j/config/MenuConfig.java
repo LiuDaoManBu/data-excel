@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Optional;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.constant.Necessity;
 import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.parse.result.StandardCell;
@@ -29,7 +28,6 @@ public class MenuConfig {
     private Necessity necessity;
     private Direction direction;
     // TODO need enum?
-    private MenuType menuType;
     private ParserConfig parserConfig;
 
     public MenuConfig build() {
@@ -81,15 +79,6 @@ public class MenuConfig {
 
     public Builder setDirection(Direction direction) {
       this.direction = direction;
-      return this;
-    }
-
-    public MenuType getMenuType() {
-      return menuType;
-    }
-
-    public Builder setMenuType(MenuType menuType) {
-      this.menuType = menuType;
       return this;
     }
 
