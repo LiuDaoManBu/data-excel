@@ -1,40 +1,42 @@
 package com.caotc.excel4j.matcher.constant;
 
+import java.util.Objects;
+
 public enum StringMatcherType{
   EQUALS {
     @Override
     public boolean apply(String value, String predicateValue) {
-      return value.equals(predicateValue);
+      return Objects.nonNull(value) && value.equals(predicateValue);
     }
   },
   EQUALS_IGNORE_CASE {
     @Override
     public boolean apply(String value, String predicateValue) {
-      return value.equalsIgnoreCase(predicateValue);
+      return Objects.nonNull(value) && value.equalsIgnoreCase(predicateValue);
     }
   },
   CONTAINS {
     @Override
     public boolean apply(String value, String predicateValue) {
-      return value.contains(predicateValue);
+      return Objects.nonNull(value) && value.contains(predicateValue);
     }
   },
   MATCHES {
     @Override
     public boolean apply(String value, String predicateValue) {
-      return value.matches(predicateValue);
+      return Objects.nonNull(value) && value.matches(predicateValue);
     }
   },
   STARTS_WITH {
     @Override
     public boolean apply(String value, String predicateValue) {
-      return value.startsWith(predicateValue);
+      return Objects.nonNull(value) && value.startsWith(predicateValue);
     }
   },
   ENDS_WITH {
     @Override
     public boolean apply(String value, String predicateValue) {
-      return value.endsWith(predicateValue);
+      return Objects.nonNull(value) && value.endsWith(predicateValue);
     }
   };
 

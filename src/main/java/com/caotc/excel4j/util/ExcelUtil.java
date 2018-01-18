@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -93,13 +94,17 @@ public class ExcelUtil {
 
   public static <V> MenuConfig.Builder<V> toConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
-      return MenuConfig.<V>builder()
+      MenuConfig.Builder<V> builder=
+       MenuConfig.<V>builder()
           .setMatcherBuilder(
               StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, f.name()))
           .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
           .setDataConfigBuilder(
               MenuDataConfig.<V>builder().setLoadType(f.loadType()).setDataNumber(f.dataNumber())
                   .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
+      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t->builder.getDataConfigBuilder().getMatcherBuilder()
+          .addDataPredicate(Objects::nonNull));
+      return builder;
     }).orElse(null);
   }
 

@@ -206,9 +206,13 @@ public class Menu<V> {
     return menuConfig.isDataMenu();
   }
 
-  public boolean isFixedDataMenu() {
-    return menuConfig.isFixedDataMenu();
+  public boolean isSingleDataMenu() {
+    return menuConfig.isSingleDataMenu();
   }
+  
+//  public boolean isFixedDataMenu() {
+//    return menuConfig.isFixedDataMenu();
+//  }
 
   public boolean isUnFixedDataMenu() {
     return menuConfig.isUnFixedDataMenu();

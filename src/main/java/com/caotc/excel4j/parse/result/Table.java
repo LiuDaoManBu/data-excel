@@ -1,16 +1,21 @@
 package com.caotc.excel4j.parse.result;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.TableError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
@@ -84,6 +89,8 @@ public class Table<V> {
     ImmutableCollection<MenuConfig<?>> matchesMenuConfigs =
         topMenus.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
 
+    tableConfig.getDataConfig().getConstructType();
+    
     errors = tableConfig.getTopMenuConfigs().stream()
         .filter(config -> !matchesMenuConfigs.contains(config))
         .map(config -> new TableError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
@@ -108,7 +115,20 @@ public class Table<V> {
 //    topMenus.forEach(menu -> menu.getData().setFieldValue(optional.get()));
 //    return optional.get();
 //  }
-
+  
+  public void getDataMap() {
+    
+  }
+  
+  public JSONObject getJSONObjectData() {
+    Map<String,Object> map=getDataMenus().collect(Collectors.toMap(Menu::getName, menu->menu.getData().getCellValues()));
+    return new JSONObject(map);
+  }
+  
+//  public JSONArray getJSONArrayData() {
+//    Map<String,Object> map=getDataMenus().collect(Collectors.toMap(Menu::getName, menu->menu.getData().getCellValues()));
+//    return new JSONObject(map);
+//  }
   
   public Optional<Menu<?>> findMenu(String menuName) {
     return getMenus().filter(menu -> menu.getName().equals(menuName)).findAny();
@@ -122,10 +142,14 @@ public class Table<V> {
     return getMenus().filter(Menu::isDataMenu);
   }
 
-  public Stream<Menu<?>> getFixedDataMenus() {
-    return getDataMenus().filter(Menu::isFixedDataMenu);
-  }
+//  public Stream<Menu<?>> getFixedDataMenus() {
+//    return getDataMenus().filter(Menu::isFixedDataMenu);
+//  }
 
+  public Stream<Menu<?>> getFixedDataMenus() {
+    return getDataMenus().filter(Menu::isSingleDataMenu);
+  }
+  
   public Stream<Menu<?>> getUnFixedDataMenus() {
     return getDataMenus().filter(Menu::isUnFixedDataMenu);
   }

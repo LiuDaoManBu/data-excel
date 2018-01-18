@@ -47,7 +47,7 @@ public class MenuConfig<V> {
       Preconditions.checkNotNull(matcherBuilder);
       Preconditions.checkNotNull(necessity);
       // Preconditions.checkState(Objects.nonNull(direction));
-      Preconditions.checkNotNull(menuType);
+//      Preconditions.checkNotNull(menuType);
       Preconditions.checkState(
           !(!Iterables.isEmpty(childrenBuilders) && Objects.nonNull(dataConfigBuilder)));
       return new MenuConfig<>(this);
@@ -204,9 +204,13 @@ public class MenuConfig<V> {
     return childrens.isEmpty();
   }
 
-  public boolean isFixedDataMenu() {
-    return isDataMenu() && LoadType.FIXED.equals(dataConfig.getLoadType());
+  public boolean isSingleDataMenu() {
+    return isDataMenu() && LoadType.SINGLE.equals(dataConfig.getLoadType());
   }
+  
+//  public boolean isFixedDataMenu() {
+//    return isDataMenu() && LoadType.FIXED.equals(dataConfig.getLoadType());
+//  }
 
   public boolean isUnFixedDataMenu() {
     return isDataMenu() && LoadType.UNFIXED.equals(dataConfig.getLoadType());

@@ -83,7 +83,7 @@ public class MenuData<V> {
     return menu;
   }
 
-  public DataConfig<V> getDataConfig() {
+  public MenuDataConfig<V> getDataConfig() {
     return dataConfig;
   }
 

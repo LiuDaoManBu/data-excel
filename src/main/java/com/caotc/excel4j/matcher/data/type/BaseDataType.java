@@ -219,7 +219,26 @@ public enum BaseDataType implements DataType {
     public boolean test(Object t) {
       return STRING.cast(t, String.class).matches(ID_CARD_NUMBER_REGEX);
     }
-  };
+  },
+  //boolean
+  BOOLEAN(boolean.class,Boolean.class,String.class) {
+   @Override
+   public boolean test(Object t) {
+     try {
+       TypeUtils.castToBoolean(t);
+       return Boolean.TRUE;
+     } catch (JSONException e) {
+       return Boolean.FALSE;
+     }
+   }
+ },
+  //enum
+  ENUM(Enum.class,int.class,Integer.class,String.class) {
+   @Override
+   public boolean test(Object t) {
+     return STRING.test(t) || POSITIVE_WHOLE_NUMBER.test(t);
+   }
+ };
 
   private static final String WORD_REGEX = "^(\\w|[\\u0391-\\uFFE5])*$";
   private static final String ENGLISH_OR_NUMBER_REGEX = "^[A-Za-z0-9]*$";

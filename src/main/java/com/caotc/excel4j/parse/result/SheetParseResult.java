@@ -4,8 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.config.SheetConfig;
-import com.caotc.excel4j.parse.error.SheetError;
+import com.caotc.excel4j.parse.error.Error;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
 public class SheetParseResult {
   public static class Builder {
@@ -110,5 +111,9 @@ public class SheetParseResult {
 
   public WorkbookParseResult getWorkbookParseResult() {
     return workbookParseResult;
+  }
+  
+  public ImmutableList<Error<Sheet>> getAllErrors(){
+    return Streams.concat(errors.stream());
   }
 }

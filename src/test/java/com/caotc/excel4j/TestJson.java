@@ -1,6 +1,5 @@
 package com.caotc.excel4j;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Collection;
@@ -8,12 +7,20 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
-import com.caotc.excel4j.matcher.BaseMatcher;
-import com.caotc.excel4j.matcher.Matcher;
+import com.caotc.excel4j.matcher.constant.Type;
 import com.google.common.collect.Multimap;
 
 class Data {
   private Class<?> type;
+  private Type t;
+  
+  public Type getT() {
+    return t;
+  }
+
+  public void setT(Type t) {
+    this.t = t;
+  }
 
   public Class<?> getType() {
     return type;
@@ -21,11 +28,6 @@ class Data {
 
   public void setType(Class<?> type) {
     this.type = type;
-  }
-
-  @Override
-  public String toString() {
-    return "Data [type=" + type + "]";
   }
 
 }
@@ -77,8 +79,8 @@ public class TestJson {
   
   public static void testEnum() {
     JSONObject jsonObject=new JSONObject();
-    jsonObject.put("type", "or");
-    BaseMatcher.Builder<Object> builder=jsonObject.toJavaObject(BaseMatcher.Builder.class);
-    System.out.println(builder.getType());
+    jsonObject.put("t", "OR");
+    Data data=jsonObject.toJavaObject(Data.class);
+    System.out.println(data.getT());
   }
 }

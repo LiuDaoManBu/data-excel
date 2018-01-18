@@ -1,21 +1,22 @@
 package com.caotc.excel4j.parse.result;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.WorkbookConfig;
+import com.caotc.excel4j.parse.error.Error;
 import com.caotc.excel4j.parse.error.WorkbookError;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
 public class WorkbookParseResult {
   public static class Builder {
     private Workbook workbook;
     private WorkbookConfig config;
-    private List<WorkbookError> errors;
     private List<SheetParseResult.Builder> sheetParseResultBuilders;
 
     public WorkbookParseResult build() {
-      errors = Optional.ofNullable(errors).orElse(ImmutableList.of());
       return new WorkbookParseResult(this);
     }
 
@@ -37,15 +38,6 @@ public class WorkbookParseResult {
       return this;
     }
 
-    public List<WorkbookError> getErrors() {
-      return errors;
-    }
-
-    public Builder setErrors(List<WorkbookError> errors) {
-      this.errors = errors;
-      return this;
-    }
-
     public List<SheetParseResult.Builder> getSheetParseResultBuilders() {
       return sheetParseResultBuilders;
     }
@@ -64,13 +56,16 @@ public class WorkbookParseResult {
 
   private final Workbook workbook;
   private final WorkbookConfig config;
-  private final ImmutableList<WorkbookError> errors;
+  private final ImmutableList<Error<Workbook>> errors;
   private final ImmutableList<SheetParseResult> sheetParseResults;
 
   private WorkbookParseResult(Builder builder) {
     this.workbook = builder.workbook;
     this.config = builder.config;
-    this.errors = builder.errors.stream().collect(ImmutableList.toImmutableList());
+    this.errors = Optional.ofNullable(config.getMatcher())
+        .map(matcher -> matcher.match(workbook).orElse(null))
+        .map(message -> new Error<Workbook>(workbook, message)).map(ImmutableList::of)
+        .orElse(ImmutableList.of());
     this.sheetParseResults = builder.sheetParseResultBuilders.stream()
         .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
         .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
@@ -84,7 +79,7 @@ public class WorkbookParseResult {
     return config;
   }
 
-  public ImmutableList<WorkbookError> getErrors() {
+  public ImmutableList<com.caotc.excel4j.parse.error.Error<Workbook>> getErrors() {
     return errors;
   }
 
@@ -92,4 +87,10 @@ public class WorkbookParseResult {
     return sheetParseResults;
   }
 
+  public ImmutableList<Error<Workbook>> getAllErrors() {
+    return Streams.concat(errors.stream(),
+        sheetParseResults.stream().map(SheetParseResult::getAllErrors).flatMap(Collection::stream)
+            .map(error -> new Error<Workbook>(workbook, error.getMessage())))
+        .collect(ImmutableList.toImmutableList());
+  }
 }
