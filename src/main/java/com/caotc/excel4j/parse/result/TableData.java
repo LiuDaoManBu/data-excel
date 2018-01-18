@@ -20,13 +20,13 @@ import com.google.common.reflect.TypeToken;
 
 public class TableData {
   private final Table table;
-  private final TableDataConfig dataConfig;
+  private final TableDataConfig config;
   private final ImmutableList<Map<Menu, StandardCell>> menuToValueCells;
   private final ImmutableList<Error<TableData>> errors;
 
   public TableData(Table table) {
     this.table = table;
-    this.dataConfig = table.getTableConfig().getDataConfig();
+    this.config = table.getConfig().getDataConfig();
     List<Map<Menu, StandardCell>> menuTodatas = Lists.newArrayList();
     ImmutableList<Menu> menus = table.getDataMenus().collect(ImmutableList.toImmutableList());
     for (int i = 0; i < menus.size(); i++) {
@@ -51,11 +51,11 @@ public class TableData {
 
     Stream<Error<TableData>> menuMatcherErrors = menuToValueCells.stream().map(Map::entrySet)
         .flatMap(Collection::stream)
-        .map(entry -> entry.getKey().getData().getDataConfig().getMatcher().match(entry.getValue()))
+        .map(entry -> entry.getKey().getData().getConfig().getMatcher().match(entry.getValue()))
         .filter(Optional::isPresent).map(Optional::get)
         .map(message -> new Error<TableData>(this, message));
     Stream<Error<TableData>> tableDataMatcherErrors = menuToValueCells.stream()
-        .map(map -> dataConfig.getMatcher().match(map)).filter(Optional::isPresent)
+        .map(map -> config.getMatcher().match(map)).filter(Optional::isPresent)
         .map(Optional::get).map(message -> new Error<TableData>(this, message));
     this.errors = Streams.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
@@ -65,8 +65,8 @@ public class TableData {
     return table;
   }
 
-  public TableDataConfig getDataConfig() {
-    return dataConfig;
+  public TableDataConfig getConfig() {
+    return config;
   }
 
   public ImmutableList<Map<Menu, StandardCell>> getMenuToValueCells() {
@@ -89,7 +89,7 @@ public class TableData {
               fields.stream().filter(f -> f.getName().equals(menu.getFieldName().get())).findAny();
         }
 
-        jsonObject.put(field.get().getName(), menu.getData().getDataConfig().getDataType()
+        jsonObject.put(field.get().getName(), menu.getData().getConfig().getDataType()
             .cast(cell.getValue(), field.get().getType()));
       });
       return (T) jsonObject.toJavaObject(type.getRawType());

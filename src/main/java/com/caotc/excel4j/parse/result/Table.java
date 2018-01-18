@@ -25,7 +25,7 @@ import com.caotc.excel4j.parse.error.Error;
 
 public class Table {
   public static class Builder {
-    private TableConfig tableConfig;
+    private TableConfig config;
     private SheetParseResult sheetParseResult;
     private List<TableError> errors;
 
@@ -33,12 +33,12 @@ public class Table {
       return new Table(this);
     }
 
-    public TableConfig getTableConfig() {
-      return tableConfig;
+    public TableConfig getConfig() {
+      return config;
     }
 
-    public Builder setTableConfig(TableConfig tableConfig) {
-      this.tableConfig = tableConfig;
+    public Builder setConfig(TableConfig config) {
+      this.config = config;
       return this;
     }
 
@@ -76,38 +76,38 @@ public class Table {
     return new Builder();
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig config;
   private final ImmutableList<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu> topMenus;
 
   public Table(Builder builder) {
-    tableConfig = builder.tableConfig;
+    config = builder.config;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
 
     // new TableError(this, tableConfig.getMatcher().getMessageFunction().apply(this));
     // TODO 顺序问题?
     ImmutableCollection<MenuConfig> matchesMenuConfigs =
-        topMenus.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
+        topMenus.stream().map(Menu::getConfig).collect(ImmutableSet.toImmutableSet());
 
-    tableConfig.getDataConfig().getConstructType();
+    config.getDataConfig().getConstructType();
 
-    errors = tableConfig.getTopMenuConfigs().stream()
+    errors = config.getTopMenuConfigs().stream()
         .filter(config -> !matchesMenuConfigs.contains(config))
         .map(config -> new TableError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
 
   private Stream<Menu.Builder> loadTopMenus() {
-    ImmutableCollection<MenuConfig> menuConfigs = tableConfig.getTopMenuConfigs();
+    ImmutableCollection<MenuConfig> menuConfigs = config.getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
     return ExcelUtil.getCells(sheet).map(StandardCell::valueOf).map(cell -> {
       // TODO 重复匹配问题
       Optional<MenuConfig> optional = menuConfigs.stream()
           .filter(menuConfig -> menuConfig.getMenuMatcher().test(cell)).findAny();
       // TODO safe
-      return optional.map(t -> new Menu.Builder().setCell(cell).setMenuConfig(t).setTable(this));
+      return optional.map(t -> new Menu.Builder().setCell(cell).setConfig(t).setTable(this));
     }).filter(Optional::isPresent).map(Optional::get);
   }
 
@@ -170,8 +170,8 @@ public class Table {
     return null;
   }
 
-  public TableConfig getTableConfig() {
-    return tableConfig;
+  public TableConfig getConfig() {
+    return config;
   }
 
   public ImmutableList<TableError> getErrors() {

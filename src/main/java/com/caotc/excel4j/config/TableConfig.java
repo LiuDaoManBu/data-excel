@@ -132,7 +132,7 @@ public class TableConfig {
   }
 
   public Table.Builder parse(Sheet sheet) {
-    Table.Builder builder = Table.builder().setTableConfig(this);
+    Table.Builder builder = Table.builder().setConfig(this);
 
     // if (matcher.test(sheet)) {
     // builder.setTableBuilders(tableBuilders);

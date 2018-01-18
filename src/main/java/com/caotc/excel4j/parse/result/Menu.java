@@ -19,7 +19,7 @@ import com.caotc.excel4j.parse.error.Error;
 public class Menu {
   public static class Builder {
     private StandardCell cell;
-    private MenuConfig menuConfig;
+    private MenuConfig config;
     private Table table;
     private Menu parent;
 
@@ -42,12 +42,12 @@ public class Menu {
       return this;
     }
 
-    public MenuConfig getMenuConfig() {
-      return menuConfig;
+    public MenuConfig getConfig() {
+      return config;
     }
 
-    public Builder setMenuConfig(MenuConfig menuConfig) {
-      this.menuConfig = menuConfig;
+    public Builder setConfig(MenuConfig config) {
+      this.config = config;
       return this;
     }
 
@@ -79,7 +79,7 @@ public class Menu {
   }
 
   private final StandardCell cell;
-  private final MenuConfig menuConfig;
+  private final MenuConfig config;
   private final ImmutableList<Error<Menu>> errors;
   private final Table table;
   private final Menu parent;
@@ -88,7 +88,7 @@ public class Menu {
 
   public Menu(Builder builder) {
     cell = builder.cell;
-    menuConfig = builder.menuConfig;
+    config = builder.config;
     table = builder.table;
     parent = builder.parent;
 
@@ -98,27 +98,27 @@ public class Menu {
     data = new MenuData(this);
 
     ImmutableCollection<MenuConfig> matchesMenuConfigs =
-        childrens.stream().map(Menu::getMenuConfig).collect(ImmutableSet.toImmutableSet());
+        childrens.stream().map(Menu::getConfig).collect(ImmutableSet.toImmutableSet());
 
     // TODO dataError? is MenuError?
-    errors = menuConfig.getChildrens().stream()
+    errors = config.getChildrens().stream()
         .filter(config -> !matchesMenuConfigs.contains(config))
         .map(config -> new Error<Menu>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
 
   private Stream<Builder> loadChildrens() {
-    ImmutableCollection<MenuConfig> childrenConfigs = menuConfig.getChildrens();
+    ImmutableCollection<MenuConfig> childrenConfigs = config.getChildrens();
 
     if (!childrenConfigs.isEmpty()) {
       ImmutableList<StandardCell> menuCells =
-          menuConfig.getDirection().get(getCell(), menuConfig.getDistance());
+          config.getDirection().get(getCell(), config.getDistance());
       return menuCells.stream().map(cell -> {
         Builder builder = builder().setCell(cell).setParent(this);
         // TODO Duplicate matching?
         MenuConfig config = Iterables.getOnlyElement(childrenConfigs.stream()
             .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
-        return builder.setMenuConfig(config);
+        return builder.setConfig(config);
       });
     } else {
       return Stream.empty();
@@ -172,9 +172,9 @@ public class Menu {
       cell = this.cell;
     }
 
-    Direction direction = menuConfig.getDirection();
+    Direction direction = config.getDirection();
 
-    return this.cell.equals(cell) ? direction.getCell(cell, menuConfig.getDistance())
+    return this.cell.equals(cell) ? direction.getCell(cell, config.getDistance())
         : direction.nextCell(cell);
   }
 
@@ -191,24 +191,24 @@ public class Menu {
   }
 
   public Optional<Field> getField() {
-    return menuConfig.getField();
+    return config.getField();
   }
 
   public Optional<String> getFieldName() {
-    return menuConfig.getFieldName();
+    return config.getFieldName();
   }
 
   // delegate methods start
   public boolean isTopMenu() {
-    return menuConfig.isTopMenu();
+    return config.isTopMenu();
   }
 
   public boolean isDataMenu() {
-    return menuConfig.isDataMenu();
+    return config.isDataMenu();
   }
 
   public boolean isSingleDataMenu() {
-    return menuConfig.isSingleDataMenu();
+    return config.isSingleDataMenu();
   }
   
 //  public boolean isFixedDataMenu() {
@@ -216,15 +216,15 @@ public class Menu {
 //  }
 
   public boolean isUnFixedDataMenu() {
-    return menuConfig.isUnFixedDataMenu();
+    return config.isUnFixedDataMenu();
   }
 
   public boolean isMustMenu() {
-    return menuConfig.isMustMenu();
+    return config.isMustMenu();
   }
 
   public boolean isNotMustMenu() {
-    return menuConfig.isNotMustMenu();
+    return config.isNotMustMenu();
   }
 
   // delegate methods end
@@ -233,8 +233,8 @@ public class Menu {
     return cell;
   }
 
-  public MenuConfig getMenuConfig() {
-    return menuConfig;
+  public MenuConfig getConfig() {
+    return config;
   }
 
   public Menu getParent() {

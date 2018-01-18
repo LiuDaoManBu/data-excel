@@ -7,19 +7,19 @@ import com.caotc.excel4j.parse.error.Error;
 
 public class MenuData {
   private final Menu menu;
-  private final MenuDataConfig dataConfig;
+  private final MenuDataConfig config;
   private final ImmutableList<Error<MenuData>> errors;
   private final ImmutableList<StandardCell> valueCells;
 
   public MenuData(Menu menu) {
     super();
     this.menu = menu;
-    this.dataConfig = menu.getMenuConfig().getDataConfig();
-    this.valueCells = menu.getChildrens().isEmpty() ? dataConfig.getLoadType().getDataCells(menu)
+    this.config = menu.getConfig().getDataConfig();
+    this.valueCells = menu.getChildrens().isEmpty() ? config.getLoadType().getDataCells(menu)
         : ImmutableList.of();
 
     // TODO is DataError?
-    errors = valueCells.stream().map(dataConfig.getMatcher()::match)
+    errors = valueCells.stream().map(config.getMatcher()::match)
         .filter(Optional::isPresent).map(Optional::get)
         .map(message -> new Error<MenuData>(this, message)).collect(ImmutableList.toImmutableList());
   }
@@ -79,8 +79,8 @@ public class MenuData {
     return menu;
   }
 
-  public MenuDataConfig getDataConfig() {
-    return dataConfig;
+  public MenuDataConfig getConfig() {
+    return config;
   }
 
   public ImmutableList<StandardCell> getValueCells() {
