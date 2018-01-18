@@ -1,5 +1,6 @@
 package com.caotc.excel4j.parse.result;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,18 +62,17 @@ public class Table {
     }
   }
 
-  private final Traverser<Menu> MENU_TRAVERSER =
-      Traverser.forTree(new SuccessorsFunction<Menu>() {
-        @Override
-        public Iterable<? extends Menu> successors(Menu node) {
-          return node.getChildrens();
-        }
-      });
+  private final Traverser<Menu> MENU_TRAVERSER = Traverser.forTree(new SuccessorsFunction<Menu>() {
+    @Override
+    public Iterable<? extends Menu> successors(Menu node) {
+      return node.getChildrens();
+    }
+  });
 
   private final Function<MenuConfig, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
       config -> config + "don't have any matches cell";
 
-  public static  Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -80,6 +80,7 @@ public class Table {
   private final ImmutableList<TableError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu> topMenus;
+  private final TableData data;
 
   public Table(Builder builder) {
     config = builder.config;
@@ -91,12 +92,12 @@ public class Table {
     ImmutableCollection<MenuConfig> matchesMenuConfigs =
         topMenus.stream().map(Menu::getConfig).collect(ImmutableSet.toImmutableSet());
 
-    config.getDataConfig().getConstructType();
-
-    errors = config.getTopMenuConfigs().stream()
-        .filter(config -> !matchesMenuConfigs.contains(config))
-        .map(config -> new TableError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
-        .collect(ImmutableList.toImmutableList());
+    errors =
+        config.getTopMenuConfigs().stream().filter(config -> !matchesMenuConfigs.contains(config))
+            .map(
+                config -> new TableError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+            .collect(ImmutableList.toImmutableList());
+    this.data = new TableData(this);
   }
 
   private Stream<Menu.Builder> loadTopMenus() {
@@ -122,11 +123,11 @@ public class Table {
 
   }
 
-//  public JSONObject getJSONObjectData() {
-//    Map<String, Object> map = getDataMenus()
-//        .collect(Collectors.toMap(Menu::getName, menu -> menu.getData().getCellValues()));
-//    return new JSONObject(map);
-//  }
+  // public JSONObject getJSONObjectData() {
+  // Map<String, Object> map = getDataMenus()
+  // .collect(Collectors.toMap(Menu::getName, menu -> menu.getData().getCellValues()));
+  // return new JSONObject(map);
+  // }
 
   // public JSONArray getJSONArrayData() {
   // Map<String,Object> map=getDataMenus().collect(Collectors.toMap(Menu::getName,
@@ -167,7 +168,12 @@ public class Table {
   }
 
   public ImmutableList<Error<Table>> getAllErrors() {
-    return null;
+    return Streams
+        .concat(errors.stream(),
+            topMenus.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
+                .map(error -> new Error<Table>(this, error.getMessage())),
+            data.getErrors().stream().map(error -> new Error<Table>(this, error.getMessage())))
+        .collect(ImmutableList.toImmutableList());
   }
 
   public TableConfig getConfig() {

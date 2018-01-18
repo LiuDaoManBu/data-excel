@@ -1,12 +1,14 @@
 package com.caotc.excel4j.parse.result;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
+import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.parse.error.MenuError;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -14,6 +16,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import com.caotc.excel4j.parse.error.Error;
 
 public class Menu {
@@ -74,7 +77,7 @@ public class Menu {
   private final Function<MenuConfig, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
       config -> config + "don't have any matches cell";
 
-  public static  Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -101,8 +104,7 @@ public class Menu {
         childrens.stream().map(Menu::getConfig).collect(ImmutableSet.toImmutableSet());
 
     // TODO dataError? is MenuError?
-    errors = config.getChildrens().stream()
-        .filter(config -> !matchesMenuConfigs.contains(config))
+    errors = config.getChildrens().stream().filter(config -> !matchesMenuConfigs.contains(config))
         .map(config -> new Error<Menu>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
@@ -186,8 +188,17 @@ public class Menu {
     return childrens.stream().anyMatch(childrenMenu -> childrenMenu.getCell().equals(cell));
   }
 
+  public ImmutableList<Error<Menu>> getAllErrors() {
+    return Streams
+        .concat(errors.stream(),
+            childrens.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
+                .map(error -> new Error<Menu>(this, error.getMessage())),
+            data.getErrors().stream().map(error -> new Error<Menu>(this, error.getMessage())))
+        .collect(ImmutableList.toImmutableList());
+  }
+
   public String getName() {
-    return cell.getValueCell().getStringCellValue();
+    return BaseDataType.STRING.cast(cell.getValueCell(), String.class);
   }
 
   public Optional<Field> getField() {
@@ -210,10 +221,10 @@ public class Menu {
   public boolean isSingleDataMenu() {
     return config.isSingleDataMenu();
   }
-  
-//  public boolean isFixedDataMenu() {
-//    return menuConfig.isFixedDataMenu();
-//  }
+
+  // public boolean isFixedDataMenu() {
+  // return menuConfig.isFixedDataMenu();
+  // }
 
   public boolean isUnFixedDataMenu() {
     return config.isUnFixedDataMenu();

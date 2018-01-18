@@ -8,11 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.annotation.ExcelField;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.MenuDataConfig;
 import com.caotc.excel4j.config.SheetConfig;
@@ -21,16 +18,12 @@ import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
-import com.caotc.excel4j.constant.MenuType;
 import com.caotc.excel4j.matcher.ComparableMatcher;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
-import com.caotc.excel4j.matcher.data.DataTypeMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
-import com.caotc.excel4j.parse.result.Menu;
-import com.caotc.excel4j.parse.result.SheetParseResult;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
@@ -171,8 +164,7 @@ public class Test {
     MenuConfig.Builder userNameMenuConfig = MenuConfig.<String>builder()
         .setMatcherBuilder(
             StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
-        .setDataConfigBuilder(userNameDataConfig).setMenuType(MenuType.DATA_MENU)
-        .setDirection(Direction.BOTTOM);
+        .setDataConfigBuilder(userNameDataConfig).setDirection(Direction.BOTTOM);
 
     WorkbookParseResult workbookParseResult = ExcelUtil.parse(new File(path1),
         WorkbookConfig.builder()
