@@ -120,29 +120,11 @@ public class ExcelUtil {
     return getMergedRegion(cell).isPresent();
   }
 
-  /**
-   * 检查传入的单元格是否为合并单元格，是则返回该合并单元格对象
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param cell 单元格
-   * @return 该合并单元格对象，不是则为null
-   */
   public static Optional<CellRangeAddress> getMergedRegion(@Nullable Cell cell) {
     return Optional.ofNullable(cell)
         .map(t -> getMergedRegion(t.getSheet(), t.getRowIndex(), t.getColumnIndex())).get();
   }
 
-  /**
-   * 判断指定的单元格是否是合并单元格，是则返回该合并单元格对象
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param sheet 工作簿
-   * @param rowIndex 行下标
-   * @param columnIndex 列下标
-   * @return 该合并单元格对象，不是则为null
-   */
   public static Optional<CellRangeAddress> getMergedRegion(@Nullable Sheet sheet, int rowIndex,
       int columnIndex) {
     return getMergedRegions(sheet).filter(address -> address.isInRange(rowIndex, columnIndex))
@@ -153,14 +135,6 @@ public class ExcelUtil {
     return Optional.ofNullable(cell).map(StandardCell::valueOf);
   }
 
-  /**
-   * 判断传入的工作簿中是否含有合并单元格
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param sheet 工作簿
-   * @return 是否含有合并单元格
-   */
   public static boolean hasMergedRegion(@Nullable Sheet sheet) {
     return Optional.ofNullable(sheet).map(Sheet::getNumMergedRegions).map(n -> n > 0).orElse(false);
   }
@@ -340,14 +314,6 @@ public class ExcelUtil {
         .map(CELL_TYPE_TO_VALUE_FUNCTIONS::get).map(function -> function.apply(cell)).orElse(null);
   }
 
-  /**
-   * 获取单元格内的内容，并以字符串的形式返回
-   * 
-   * @author caotc
-   * @date 2016.4.24
-   * @param cell 单元格
-   * @return 单元格内容的字符串
-   */
   public static String getStringValue(@Nullable Cell cell) {
     // TODO 根据返回类型不同选择不同DataType?
     return Optional.ofNullable(cell).map(ExcelUtil::getValue)
