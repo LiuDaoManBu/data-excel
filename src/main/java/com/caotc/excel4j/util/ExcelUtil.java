@@ -99,8 +99,14 @@ public class ExcelUtil {
           .setDataConfigBuilder(
               MenuDataConfig.builder().setLoadType(f.loadType()).setDataNumber(f.dataNumber())
                   .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
-      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t -> builder
-          .getDataConfigBuilder().getMatcherBuilder().addDataPredicate(Objects::nonNull));
+      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t ->{
+        StandardCellMatcher.Builder matcherBuilder=
+        builder.getDataConfigBuilder().getMatcherBuilder();
+        if(Objects.isNull(matcherBuilder)) {
+          matcherBuilder=StandardCellMatcher.builder();
+        }
+        matcherBuilder.addDataPredicate(Objects::nonNull);
+      });
       return builder;
     }).orElse(null);
   }

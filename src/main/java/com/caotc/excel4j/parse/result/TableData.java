@@ -54,9 +54,9 @@ public class TableData {
         .map(entry -> entry.getKey().getData().getConfig().getMatcher().match(entry.getValue()))
         .filter(Optional::isPresent).map(Optional::get)
         .map(message -> new ConstraintViolation<TableData>(this, message));
-    Stream<ConstraintViolation<TableData>> tableDataMatcherErrors = menuToValueCells.stream()
-        .map(map -> config.getMatcher().match(map)).filter(Optional::isPresent)
-        .map(Optional::get).map(message -> new ConstraintViolation<TableData>(this, message));
+    Stream<ConstraintViolation<TableData>> tableDataMatcherErrors = Optional.ofNullable(config).map(TableDataConfig::getMatcher)
+        .map(macher->menuToValueCells.stream().map(macher::match).filter(Optional::isPresent).map(Optional::get)
+            .map(message -> new ConstraintViolation<TableData>(this, message))).orElse(Stream.empty());
     this.errors = Streams.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }
