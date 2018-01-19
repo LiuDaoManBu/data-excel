@@ -2,12 +2,18 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.constant.Direction;
-import com.caotc.excel4j.matcher.Matcher;
+import com.caotc.excel4j.matcher.BaseValidator;
+import com.caotc.excel4j.matcher.Validator;
+import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.Table;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
@@ -19,10 +25,10 @@ public class TableConfig {
     private Object id;
     private List<MenuConfig.Builder> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
-    private Matcher.Builder<Table> matcherBuilder;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
     private TableDataConfig dataConfig;
+    private List<Validator<Table>> validators;
     private ParserConfig parserConfig;
 
     public TableConfig build() {
@@ -69,8 +75,7 @@ public class TableConfig {
       return topMenuConfigBuilders;
     }
 
-    public Builder setTopMenuConfigBuilders(
-        List<MenuConfig.Builder> topMenuConfigBuilders) {
+    public Builder setTopMenuConfigBuilders(List<MenuConfig.Builder> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }
@@ -84,15 +89,6 @@ public class TableConfig {
       return this;
     }
 
-    public Matcher.Builder<Table> getMatcherBuilder() {
-      return matcherBuilder;
-    }
-
-    public Builder setMatcherBuilder(Matcher.Builder<Table> matcherBuilder) {
-      this.matcherBuilder = matcherBuilder;
-      return this;
-    }
-
     public TableDataConfig getDataConfig() {
       return dataConfig;
     }
@@ -102,9 +98,18 @@ public class TableConfig {
       return this;
     }
 
+    public List<Validator<Table>> getValidators() {
+      return validators;
+    }
+
+    public Builder setValidators(List<Validator<Table>> validators) {
+      this.validators = validators;
+      return this;
+    }
+
   }
 
-  public static  Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -113,7 +118,7 @@ public class TableConfig {
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
   private final ImmutableCollection<MenuConfig> topMenuConfigs;
-  private final Matcher<Table> matcher;
+  private final ImmutableList<Validator<Table>> validators;
   private final TableDataConfig dataConfig;
   private final ParserConfig parserConfig;
 
@@ -126,21 +131,28 @@ public class TableConfig {
       });
 
   private TableConfig(Builder builder) {
-    id=builder.id;
+    id = builder.id;
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
-    // TODO
-    matcher = Optional.ofNullable(builder.matcherBuilder).map(Matcher.Builder::build).orElse(null);
-
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
+    // TODO 注释,重复匹配?tip,sheet可选是否必须匹配
+    Validator<Table> validator = new BaseValidator<>(
+        topMenuConfigs.stream().collect(ImmutableMap.toImmutableMap(topMenuConfig -> {
+          Predicate<Table> predicate = table -> table.getTopMenus().stream().map(Menu::getConfig)
+              .filter(topMenuConfig::equals).findAny().isPresent();
+          return predicate;
+        }, topMenuConfig -> {
+          Function<Table, String> function = table -> topMenuConfig + "没有匹配到任何结果";
+          return function;
+        })));
+
+    validators = Stream.concat(builder.validators.stream(), Stream.of(validator))
+        .collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfig;
     parserConfig = builder.parserConfig;
-
-    // menuConfigs =
-    // builder.menuConfigBuilders.stream().map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
   }
 
   public Table.Builder parse(Sheet sheet) {
@@ -187,12 +199,12 @@ public class TableConfig {
     return dataConfig;
   }
 
-  public Matcher<Table> getMatcher() {
-    return matcher;
-  }
-
   public Object getId() {
     return id;
+  }
+
+  public ImmutableList<Validator<Table>> getValidators() {
+    return validators;
   }
 
 }

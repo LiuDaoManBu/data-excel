@@ -75,8 +75,8 @@ public class ExcelUtil {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
       SheetConfig.Builder builder = SheetConfig.builder();
       if (!Strings.isNullOrEmpty(t.name())) {
-        builder.setMatcherBuilder(
-            SheetMatcher.builder().add(StringMatcherType.EQUALS, t.name(), Sheet::getSheetName));
+        builder.setMatcher(
+            new SheetMatcher().add(StringMatcherType.EQUALS, t.name(), Sheet::getSheetName));
       }
       return builder;
     }).orElse(null);
@@ -92,15 +92,15 @@ public class ExcelUtil {
   public static MenuConfig.Builder toConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
       MenuConfig.Builder builder = MenuConfig.builder()
-          .setMatcherBuilder(
-              StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, f.menuName()))
+          .setMatcher(new StandardCellMatcher().addDataPredicate(StringMatcherType.EQUALS,
+              f.menuName(), value -> BaseDataType.STRING.cast(value, String.class)))
           .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
-          .setDataConfigBuilder(
-              MenuDataConfig.builder().setLoadType(f.loadType())
-                  .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
-      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t ->{
-        //TODO tip
-        builder.getDataConfigBuilder().getValidators().add(0,new BaseValidator<>(Objects::nonNull, cell->cell.formatAsString()));
+          .setDataConfigBuilder(MenuDataConfig.builder().setLoadType(f.loadType())
+              .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
+      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t -> {
+        // TODO tip
+        builder.getDataConfigBuilder().getValidators().add(0,
+            new BaseValidator<>(Objects::nonNull, cell -> cell.formatAsString()));
       });
       return builder;
     }).orElse(null);

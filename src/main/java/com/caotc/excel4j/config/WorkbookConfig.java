@@ -68,16 +68,18 @@ public class WorkbookConfig {
     sheetConfigs = builder.sheetConfigBuilders.stream()
         .peek(sheetConfigBuilder -> sheetConfigBuilder.setWorkbookConfig(this))
         .map(SheetConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
-    //TODO 注释,重复匹配?tip,sheet可选是否必须匹配
-    Validator<Workbook> validator=new BaseValidator<>(sheetConfigs.stream().collect(ImmutableMap.toImmutableMap(sheetConfig -> {
-      Predicate<Workbook> predicate = workbook -> ExcelUtil.getSheets(workbook)
-          .filter(sheetConfig.getMatcher()::test).findAny().isPresent();
-      return predicate;
-    }, sheetConfig->{
-      Function<Workbook, String> function=workbook->sheetConfig+"没有匹配到任何结果";
-      return function;
-    })));
-    validators = Streams.concat(Stream.of(validator),builder.validators.stream()).collect(ImmutableList.toImmutableList());
+    // TODO 注释,重复匹配?tip,sheet可选是否必须匹配
+    Validator<Workbook> validator = new BaseValidator<>(
+        sheetConfigs.stream().collect(ImmutableMap.toImmutableMap(sheetConfig -> {
+          Predicate<Workbook> predicate = workbook -> ExcelUtil.getSheets(workbook)
+              .filter(sheetConfig.getMatcher()::test).findAny().isPresent();
+          return predicate;
+        }, sheetConfig -> {
+          Function<Workbook, String> function = workbook -> sheetConfig + "没有匹配到任何结果";
+          return function;
+        })));
+    validators = Stream.concat(Stream.of(validator), builder.validators.stream())
+        .collect(ImmutableList.toImmutableList());
     parserConfig = builder.parserConfig;
   }
 

@@ -2,16 +2,14 @@ package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.parse.error.ValidationError;
-import com.caotc.excel4j.parse.error.WorkbookError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 
 public class WorkbookParseResult {
   public static class Builder {
@@ -99,7 +97,7 @@ public class WorkbookParseResult {
   }
 
   public ImmutableList<ValidationError<Workbook>> getAllErrors() {
-    return Streams.concat(errors.stream(),
+    return Stream.concat(errors.stream(),
         sheetParseResults.stream().map(SheetParseResult::getAllErrors).flatMap(Collection::stream)
             .map(error -> new ValidationError<Workbook>(workbook, error.getMessage())))
         .collect(ImmutableList.toImmutableList());

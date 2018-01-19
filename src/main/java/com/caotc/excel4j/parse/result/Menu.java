@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
-import com.caotc.excel4j.parse.error.MenuError;
+import com.caotc.excel4j.parse.error.MenuValidationError;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
@@ -190,7 +190,7 @@ public class Menu {
   }
 
   public ImmutableList<ValidationError<Menu>> getAllErrors() {
-    return Streams
+    return Stream
         .concat(errors.stream(),
             childrens.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
                 .map(error -> new ValidationError<Menu>(this, error.getMessage())))

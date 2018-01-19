@@ -1,6 +1,5 @@
 package com.caotc.excel4j;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -10,23 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.caotc.excel4j.config.MenuConfig;
-import com.caotc.excel4j.config.MenuDataConfig;
-import com.caotc.excel4j.config.SheetConfig;
-import com.caotc.excel4j.config.TableConfig;
-import com.caotc.excel4j.config.WorkbookConfig;
 import com.caotc.excel4j.constant.ConstructType;
-import com.caotc.excel4j.constant.Direction;
-import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.ComparableMatcher;
-import com.caotc.excel4j.matcher.constant.StringMatcherType;
-import com.caotc.excel4j.matcher.constant.Type;
+import com.caotc.excel4j.matcher.data.DataTypeMatcher;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
-import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
-import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
-import com.caotc.excel4j.parse.result.WorkbookParseResult;
-import com.caotc.excel4j.util.ExcelUtil;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
@@ -153,33 +140,44 @@ class User {
 
 public class Test {
   public static void main(String[] args) throws Exception {
-    String path1 = "C:\\Users\\呵呵\\Desktop\\用户.xlsx";
-    String path2 = "C:\\Users\\Administrator\\Desktop\\用户.xlsx";
-
-    MenuDataConfig.Builder userNameDataConfig =
-        MenuDataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
-            .setField(User.class.getDeclaredField("userName"));
-
-    MenuConfig.Builder userNameMenuConfig = MenuConfig.builder()
-        .setMatcherBuilder(
-            StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
-        .setDataConfigBuilder(userNameDataConfig).setDirection(Direction.BOTTOM);
-
-    WorkbookParseResult workbookParseResult = ExcelUtil.parse(new File(path1),
-        WorkbookConfig.builder()
-            .setSheetConfigBuilders(ImmutableList.of(SheetConfig.builder()
-                .setMatcherBuilder(SheetMatcher.builder().setType(Type.AND).setPredicates(
-                    Lists.newArrayList(sheet -> sheet.getSheetName().equalsIgnoreCase("user"))))
-                .setTableConfigBuilders(ImmutableList.of(TableConfig.builder()
-                    .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
-            .build());
-
-//    workbookParseResult.getSheetParseResults().stream().map(SheetParseResult::getTables)
-//        .flatMap(Collection::stream).flatMap(com.caotc.excel4j.parse.result.Table::getDataMenus)
-//        .map(Menu::getData).map(com.caotc.excel4j.parse.result.MenuData::getErrors)
-//        .forEach(values -> values.forEach(error -> System.out.println(error.getMessage())));
+    testLambda();
   }
 
+  // public static void testParse() {
+  // String path1 = "C:\\Users\\呵呵\\Desktop\\用户.xlsx";
+  // String path2 = "C:\\Users\\Administrator\\Desktop\\用户.xlsx";
+  //
+  // MenuDataConfig.Builder userNameDataConfig =
+  // MenuDataConfig.builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
+  // .setField(User.class.getDeclaredField("userName"));
+  //
+  // MenuConfig.Builder userNameMenuConfig = MenuConfig.builder()
+  // .setMatcherBuilder(
+  // new StandardCellMatcher().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
+  // .setDataConfigBuilder(userNameDataConfig).setDirection(Direction.BOTTOM);
+  //
+  // WorkbookParseResult workbookParseResult = ExcelUtil.parse(new File(path1),
+  // WorkbookConfig.builder()
+  // .setSheetConfigBuilders(ImmutableList.of(SheetConfig.builder()
+  // .setMatcherBuilder(new SheetMatcher().setType(Type.AND).setPredicates(
+  // Lists.newArrayList(sheet -> sheet.getSheetName().equalsIgnoreCase("user"))))
+  // .setTableConfigBuilders(ImmutableList.of(TableConfig.builder()
+  // .setTopMenuConfigBuilders(ImmutableList.of(userNameMenuConfig))))))
+  // .build());
+  //
+  //// workbookParseResult.getSheetParseResults().stream().map(SheetParseResult::getTables)
+  //// .flatMap(Collection::stream).flatMap(com.caotc.excel4j.parse.result.Table::getDataMenus)
+  //// .map(Menu::getData).map(com.caotc.excel4j.parse.result.MenuData::getErrors)
+  //// .forEach(values -> values.forEach(error -> System.out.println(error.getMessage())));
+  // }
+
+  public static void testLambda() {
+    DataTypeMatcher matcher = new DataTypeMatcher().setDataType(BaseDataType.NUMBER);
+    Predicate<Object> predicate = t -> matcher.getDataType().test(t);
+    matcher.setDataType(null);
+    System.out.println(predicate.test(5));
+  }
+  
   public static void testConstructType() {
     Object array = new String[] {"AAA", "BBB", "CCC"};
     // Object array = new int[] {2, 3, 1};
@@ -189,7 +187,7 @@ public class Test {
   }
 
   public static void testGeneric() {
-    ComparableMatcher<Integer> matcher = ComparableMatcher.<Integer>builder().build();
+    ComparableMatcher<Integer> matcher = new ComparableMatcher<>();
     System.out.println(matcher);
   }
 

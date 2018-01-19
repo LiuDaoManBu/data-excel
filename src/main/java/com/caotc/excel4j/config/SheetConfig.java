@@ -2,11 +2,10 @@ package com.caotc.excel4j.config;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.matcher.Matcher;
-import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.parse.result.SheetParseResult;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -16,7 +15,7 @@ public class SheetConfig {
   public static class Builder {
     private List<TableConfig.Builder> tableConfigBuilders;
     private WorkbookConfig workbookConfig;
-    private Matcher.Builder<Sheet> matcherBuilder;
+    private Matcher<Sheet> matcher;
     private ParserConfig parserConfig;
 
     public SheetConfig build() {
@@ -41,12 +40,13 @@ public class SheetConfig {
       return this;
     }
 
-    public Matcher.Builder<Sheet> getMatcherBuilder() {
-      return matcherBuilder;
+
+    public Matcher<Sheet> getMatcher() {
+      return matcher;
     }
 
-    public Builder setMatcherBuilder(Matcher.Builder<Sheet> matcherBuilder) {
-      this.matcherBuilder = matcherBuilder;
+    public Builder setMatcher(Matcher<Sheet> matcher) {
+      this.matcher = matcher;
       return this;
     }
 
@@ -61,8 +61,7 @@ public class SheetConfig {
 
   }
 
-  private static final Matcher<Sheet> DEFAULT_MATCHER =
-      SheetMatcher.builder().setPredicates(ImmutableList.of(Predicates.alwaysTrue())).build();
+  private static final Predicate<Sheet> DEFAULT_MATCHER = Predicates.alwaysTrue();
 
   public static Builder builder() {
     return new Builder();
@@ -70,7 +69,7 @@ public class SheetConfig {
 
   private final ImmutableCollection<TableConfig> tableConfigs;
   private final WorkbookConfig workbookConfig;
-  private final Matcher<Sheet> matcher;
+  private final Predicate<Sheet> matcher;
   private final ParserConfig parserConfig;
 
   private SheetConfig(Builder builder) {
@@ -78,8 +77,8 @@ public class SheetConfig {
         .peek(tableConfigBuilder -> tableConfigBuilder.setSheetConfig(this))
         .map(TableConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     this.workbookConfig = builder.workbookConfig;
-    this.matcher = Optional.ofNullable(builder.matcherBuilder).map(Matcher.Builder::build)
-        .orElse(DEFAULT_MATCHER);
+    this.matcher =
+        Optional.ofNullable(builder.matcher).map(Matcher::reduce).orElse(DEFAULT_MATCHER);
     this.parserConfig = builder.parserConfig;
   }
 
@@ -104,7 +103,7 @@ public class SheetConfig {
     return workbookConfig;
   }
 
-  public Matcher<Sheet> getMatcher() {
+  public Predicate<Sheet> getMatcher() {
     return matcher;
   }
 

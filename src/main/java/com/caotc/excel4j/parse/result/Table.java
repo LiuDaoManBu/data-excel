@@ -13,7 +13,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.parse.error.ValidationError;
-import com.caotc.excel4j.parse.error.TableError;
+import com.caotc.excel4j.parse.error.TableValidationError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -28,7 +28,7 @@ public class Table {
   public static class Builder {
     private TableConfig config;
     private SheetParseResult sheetParseResult;
-    private List<TableError> errors;
+    private List<TableValidationError> errors;
 
     public Table build() {
       return new Table(this);
@@ -52,11 +52,11 @@ public class Table {
       return this;
     }
 
-    public List<TableError> getErrors() {
+    public List<TableValidationError> getErrors() {
       return errors;
     }
 
-    public Builder setErrors(List<TableError> errors) {
+    public Builder setErrors(List<TableValidationError> errors) {
       this.errors = errors;
       return this;
     }
@@ -77,7 +77,7 @@ public class Table {
   }
 
   private final TableConfig config;
-  private final ImmutableList<TableError> errors;
+  private final ImmutableList<TableValidationError> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu> topMenus;
   private final TableData data;
@@ -95,7 +95,7 @@ public class Table {
     errors =
         config.getTopMenuConfigs().stream().filter(config -> !matchesMenuConfigs.contains(config))
             .map(
-                config -> new TableError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+                config -> new TableValidationError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
             .collect(ImmutableList.toImmutableList());
     this.data = new TableData(this);
   }
@@ -105,8 +105,8 @@ public class Table {
     Sheet sheet = sheetParseResult.getSheet();
     return ExcelUtil.getCells(sheet).map(StandardCell::valueOf).map(cell -> {
       // TODO 重复匹配问题
-      Optional<MenuConfig> optional = menuConfigs.stream()
-          .filter(menuConfig -> menuConfig.getMenuMatcher().test(cell)).findAny();
+      Optional<MenuConfig> optional =
+          menuConfigs.stream().filter(menuConfig -> menuConfig.getMatcher().test(cell)).findAny();
       // TODO safe
       return optional.map(t -> new Menu.Builder().setCell(cell).setConfig(t).setTable(this));
     }).filter(Optional::isPresent).map(Optional::get);
@@ -168,7 +168,8 @@ public class Table {
         .concat(errors.stream(),
             topMenus.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
                 .map(error -> new ValidationError<Table>(this, error.getMessage())),
-            data.getErrors().stream().map(error -> new ValidationError<Table>(this, error.getMessage())))
+            data.getErrors().stream()
+                .map(error -> new ValidationError<Table>(this, error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -176,7 +177,7 @@ public class Table {
     return config;
   }
 
-  public ImmutableList<TableError> getErrors() {
+  public ImmutableList<TableValidationError> getErrors() {
     return errors;
   }
 

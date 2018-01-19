@@ -8,184 +8,26 @@ import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.constant.Type;
-import com.caotc.excel4j.script.ScriptEngine;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 public class BaseMatcher<T> implements Matcher<T> {
-  public static class Builder<T> implements Matcher.Builder<T> {
-    private Matcher<T> realParent;
-    private Type type;
-    private Builder<T> parent;
-    private Boolean nonNull;
-    private Boolean isNull;
-    private List<String> scripts;
-    private List<Predicate<T>> predicates = Lists.newArrayList();
-
-    @Override
-    public boolean test(T t) {
-      return type.reduce(predicates).test(t);
-    }
-
-    @Override
-    public BaseMatcher<T> build() {
-      return new BaseMatcher<>(this);
-    }
-
-    @Override
-    public Builder<T> add(Predicate<T> predicate) {
-      predicates.add(predicate);
-      return this;
-    }
-
-    @Override
-    public Builder<T> add(Matcher.Builder<T> builder) {
-      predicates.add(builder);
-      return this;
-    }
-
-    @Override
-    public <R> Builder<T> add(Predicate<R> predicate, Function<T, R> transform) {
-      return add(value -> predicate.test(transform.apply(value)));
-    }
-
-    @Override
-    public Builder<T> add(StringMatcherType type, String predicateValue,
-        Function<T, String> transform) {
-      return add(value -> type.apply(value, predicateValue), transform);
-    }
-
-    @Override
-    public <R extends Comparable<R>> Builder<T> add(ComparableMatcherType type, R predicateValue,
-        Function<T, R> transform) {
-      return add(value -> type.apply(value, predicateValue), transform);
-    }
-
-    public Builder<T> stratJunction(Type type) {
-      Builder<T> builder = new Builder<T>().setType(type);
-      add(builder);
-      return builder;
-    }
-
-    public Builder<T> endJunction(Type type) {
-      return Objects.equals(this.type, type) ? Optional.ofNullable(parent).orElse(this) : this;
-    }
-
-    @Override
-    public Builder<T> and() {
-      return stratJunction(Type.AND);
-    }
-
-    @Override
-    public Builder<T> or() {
-      return stratJunction(Type.OR);
-    }
-
-    @Override
-    public Builder<T> endAnd() {
-      return endJunction(Type.AND);
-    }
-
-    @Override
-    public Builder<T> endOr() {
-      return endJunction(Type.OR);
-    }
-
-    public Boolean getNonNull() {
-      return nonNull;
-    }
-
-    public Builder<T> setNonNull(Boolean nonNull) {
-      this.nonNull = nonNull;
-      return this;
-    }
-
-    public Boolean getIsNull() {
-      return isNull;
-    }
-
-    public Builder<T> setIsNull(Boolean isNull) {
-      this.isNull = isNull;
-      return this;
-    }
-
-    public List<String> getScripts() {
-      return scripts;
-    }
-
-    public Builder<T> setScripts(List<String> scripts) {
-      this.scripts = scripts;
-      return this;
-    }
-
-    public Type getType() {
-      return type;
-    }
-
-    public Builder<T> setType(Type type) {
-      this.type = type;
-      return this;
-    }
-
-    public Builder<T> getParent() {
-      return parent;
-    }
-
-    public Builder<T> setParent(Builder<T> parent) {
-      this.parent = parent;
-      return this;
-    }
-
-    public List<Predicate<T>> getPredicates() {
-      return predicates;
-    }
-
-    public Builder<T> setPredicates(List<Predicate<T>> predicates) {
-      this.predicates = predicates;
-      return this;
-    }
-
-  }
-
   public static final Type DEFAULT_TYPE = Type.AND;
   public static final String SCRIPT_VALUE_KEY = "value";
 
-  private final Type type;
-  private final Matcher<T> parent;
-  private final ImmutableList<Predicate<T>> predicates;
+  private Type type;
+  private Matcher<T> parent;
+  private List<Predicate<T>> predicates;
 
-  protected BaseMatcher(Builder<T> builder) {
-    this.type = Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE);
-    this.parent = builder.realParent;
-    ImmutableList.Builder<Predicate<T>> predicates = ImmutableList.builder();
-    if (Objects.nonNull(builder.isNull) && builder.isNull) {
-      predicates.add(Objects::isNull);
-    }
-    if (Objects.nonNull(builder.nonNull) && builder.nonNull) {
-      predicates.add(Objects::nonNull);
-    }
-    if (Objects.nonNull(builder.scripts)) {
-      builder.scripts.stream().map(ScriptEngine::compile).map(expression -> {
-        Predicate<T> predicate = value -> (Boolean) expression
-            .execute(ImmutableMap.<String, Object>builder().put(SCRIPT_VALUE_KEY, value).build());
-        return predicate;
-      }).forEach(predicates::add);
-    }
-    if (Objects.nonNull(builder.predicates)) {
-      builder.predicates.stream().map(p -> {
-        if (p instanceof Builder) {
-          Builder<T> b = (Builder<T>) p;
-          b.realParent = this;
-          return b.build();
-        }
-        return p;
-      }).forEach(predicates::add);
-    }
-    this.predicates = predicates.build();
-    // TODO tip?
-    Preconditions.checkState(!this.predicates.isEmpty());
+  public BaseMatcher() {
+    this(null, null, null);
+  }
+
+  public BaseMatcher(Type type, Matcher<T> parent, List<Predicate<T>> predicates) {
+    super();
+    this.type = Optional.ofNullable(type).orElse(DEFAULT_TYPE);
+    this.parent = parent;
+    this.predicates = Optional.ofNullable(predicates).orElse(Lists.newLinkedList());
   }
 
   @Override
@@ -193,15 +35,91 @@ public class BaseMatcher<T> implements Matcher<T> {
     return type.reduce(predicates).test(t);
   }
 
+  @Override
+  public Matcher<T> add(Predicate<T> predicate) {
+    predicates.add(predicate);
+    return this;
+  }
+
+  @Override
+  public <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transformer) {
+    return add(value -> predicate.test(transformer.apply(value)));
+  }
+
+  @Override
+  public Matcher<T> add(StringMatcherType type, String predicateValue,
+      Function<T, String> transformer) {
+    return add(value -> type.apply(value, predicateValue), transformer);
+  }
+
+  @Override
+  public <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
+      Function<T, R> transformer) {
+    return add(value -> type.apply(value, predicateValue), transformer);
+  }
+
+  public Matcher<T> stratJunction(Type type) {
+    Matcher<T> builder = new BaseMatcher<>(type, null, null);
+    add(builder);
+    return builder;
+  }
+
+  public Matcher<T> endJunction(Type type) {
+    return Objects.equals(this.type, type) ? Optional.ofNullable(parent).orElse(this) : this;
+  }
+
+  @Override
+  public Matcher<T> and() {
+    return stratJunction(Type.AND);
+  }
+
+  @Override
+  public Matcher<T> or() {
+    return stratJunction(Type.OR);
+  }
+
+  @Override
+  public Matcher<T> endAnd() {
+    return endJunction(Type.AND);
+  }
+
+  @Override
+  public Matcher<T> endOr() {
+    return endJunction(Type.OR);
+  }
+
+  @Override
+  public Predicate<T> reduce() {
+    // TODO tip?
+    Preconditions.checkState(!predicates.isEmpty());
+    return type.reduce(predicates);
+  }
+
   public Type getType() {
     return type;
+  }
+
+  public Matcher<T> setType(Type type) {
+    this.type = type;
+    return this;
   }
 
   public Matcher<T> getParent() {
     return parent;
   }
 
-  public ImmutableList<Predicate<T>> getPredicates() {
+  public Matcher<T> setParent(Matcher<T> parent) {
+    this.parent = parent;
+    return this;
+  }
+
+  public List<Predicate<T>> getPredicates() {
     return predicates;
   }
+
+  public Matcher<T> setPredicates(List<Predicate<T>> predicates) {
+    this.predicates = predicates;
+    return this;
+  }
+
 }

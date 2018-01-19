@@ -4,14 +4,22 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.Necessity;
+import com.caotc.excel4j.matcher.BaseValidator;
 import com.caotc.excel4j.matcher.Matcher;
+import com.caotc.excel4j.matcher.Validator;
+import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
+import com.caotc.excel4j.parse.result.Table;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -22,30 +30,26 @@ public class MenuConfig {
     private MenuDataConfig.Builder dataConfigBuilder;
     private List<MenuConfig.Builder> childrenBuilders;
     // 菜单匹配器
-    private Matcher.Builder<StandardCell> matcherBuilder;
+    private Matcher<StandardCell> matcher;
+    private List<Validator<Menu>> validators;
     // 第一个数据单元格相对于菜单单元格的单元格距离
     private Integer distance;
     private Necessity necessity;
     private Direction direction;
-    // TODO need enum?
     private ParserConfig parserConfig;
 
     public MenuConfig build() {
       distance = Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
       necessity = Optional.ofNullable(necessity).orElse(DEFAULT_MENU_NECESSITY);
-
-
-//      tableConfig = Optional.ofNullable(tableConfig).orElse(Optional
-//          .ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
+      tableConfig = Optional.ofNullable(tableConfig)
+          .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
       direction = Optional.ofNullable(direction).orElse(
           Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(DEFAULT_DIRECTION));
       childrenBuilders = Optional.ofNullable(childrenBuilders).orElse(ImmutableList.of());
       // TODO tip
       Preconditions.checkState(Objects.nonNull(tableConfig));
-      Preconditions.checkNotNull(matcherBuilder);
+      Preconditions.checkNotNull(matcher);
       Preconditions.checkNotNull(necessity);
-      // Preconditions.checkState(Objects.nonNull(direction));
-//      Preconditions.checkNotNull(menuType);
       Preconditions.checkState(
           !(!Iterables.isEmpty(childrenBuilders) && Objects.nonNull(dataConfigBuilder)));
       return new MenuConfig(this);
@@ -55,12 +59,21 @@ public class MenuConfig {
       return tableConfig;
     }
 
+    public List<Validator<Menu>> getValidators() {
+      return validators;
+    }
+
+    public Builder setValidators(List<Validator<Menu>> validators) {
+      this.validators = validators;
+      return this;
+    }
+
     public Builder setTableConfig(TableConfig tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
 
-    public int getDistance() {
+    public Integer getDistance() {
       return distance;
     }
 
@@ -109,13 +122,12 @@ public class MenuConfig {
       return this;
     }
 
-
-    public Matcher.Builder<StandardCell> getMatcherBuilder() {
-      return matcherBuilder;
+    public Matcher<StandardCell> getMatcher() {
+      return matcher;
     }
 
-    public Builder setMatcherBuilder(Matcher.Builder<StandardCell> matcherBuilder) {
-      this.matcherBuilder = matcherBuilder;
+    public Builder setMatcher(Matcher<StandardCell> matcher) {
+      this.matcher = matcher;
       return this;
     }
 
@@ -139,25 +151,26 @@ public class MenuConfig {
   private static final Necessity DEFAULT_MENU_NECESSITY = Necessity.MUST;
   public static final Direction DEFAULT_DIRECTION = Direction.BOTTOM;
 
-  public static  Builder builder() {
+  public static Builder builder() {
     return new Builder();
   }
 
   private final TableConfig tableConfig;
   // 菜单匹配器
-  private final Matcher<StandardCell> menuMatcher;
+  private final Predicate<StandardCell> matcher;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private final int distance;
   private final Necessity necessity;
   private final Direction direction;
   private final MenuConfig parent;
   private final ImmutableCollection<MenuConfig> childrens;
+  private final ImmutableList<Validator<Menu>> validators;
   private final MenuDataConfig dataConfig;
   private final ParserConfig parserConfig;
 
   private MenuConfig(Builder builder) {
     tableConfig = builder.tableConfig;
-    menuMatcher = builder.matcherBuilder.build();
+    matcher = builder.matcher.reduce();
     distance = builder.distance;
     necessity = builder.necessity;
     direction = builder.direction;
@@ -165,6 +178,18 @@ public class MenuConfig {
     childrens = builder.childrenBuilders.stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
+    // TODO 注释,重复匹配?tip,sheet可选是否必须匹配
+    Validator<Menu> validator =
+        new BaseValidator<>(childrens.stream().collect(ImmutableMap.toImmutableMap(children -> {
+          Predicate<Menu> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
+              .filter(children::equals).findAny().isPresent();
+          return predicate;
+        }, children -> {
+          Function<Menu, String> function = table -> children + "没有匹配到任何结果";
+          return function;
+        })));
+    validators = Stream.concat(builder.validators.stream(), Stream.of(validator))
+        .collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
     parserConfig = builder.parserConfig;
   }
@@ -196,10 +221,10 @@ public class MenuConfig {
   public boolean isSingleDataMenu() {
     return isDataMenu() && LoadType.SINGLE.equals(dataConfig.getLoadType());
   }
-  
-//  public boolean isFixedDataMenu() {
-//    return isDataMenu() && LoadType.FIXED.equals(dataConfig.getLoadType());
-//  }
+
+  // public boolean isFixedDataMenu() {
+  // return isDataMenu() && LoadType.FIXED.equals(dataConfig.getLoadType());
+  // }
 
   public boolean isUnFixedDataMenu() {
     return isDataMenu() && LoadType.UNFIXED.equals(dataConfig.getLoadType());
@@ -213,13 +238,13 @@ public class MenuConfig {
   // delegate methods start
 
   public boolean matches(StandardCell cell) {
-    return menuMatcher.test(cell);
+    return matcher.test(cell);
   }
 
   // delegate methods end
 
-  public Matcher<StandardCell> getMenuMatcher() {
-    return menuMatcher;
+  public Predicate<StandardCell> getMatcher() {
+    return matcher;
   }
 
   public int getDistance() {
@@ -252,6 +277,10 @@ public class MenuConfig {
 
   public ParserConfig getParserConfig() {
     return parserConfig;
+  }
+
+  public ImmutableList<Validator<Menu>> getValidators() {
+    return validators;
   }
 
 }

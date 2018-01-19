@@ -65,7 +65,7 @@ public class TableData {
             .flatMap(Collection::stream))
         .map(error -> new ValidationError<>(this, error.getMessage()));
 
-    this.errors = Streams.concat(menuMatcherErrors, tableDataMatcherErrors)
+    this.errors = Stream.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }
 

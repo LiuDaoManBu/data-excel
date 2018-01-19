@@ -36,7 +36,7 @@ public class MenuDataConfig {
 
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
       loadType = Optional.ofNullable(loadType).orElse(DEFAULT_LOAD_TYPE);
-      
+
       validators.add(new BaseValidator<StandardCell>(
           ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
               .put(cell -> dataType.test(cell.getValue()),
@@ -134,7 +134,7 @@ public class MenuDataConfig {
     field = builder.field;
     fieldName = builder.fieldName;
     dataType = builder.dataType;
-    validators=builder.validators.stream().collect(ImmutableList.toImmutableList());
+    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
 
   public <T> T cast(Object value, TypeToken<T> type) {

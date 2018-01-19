@@ -1,35 +1,29 @@
 package com.caotc.excel4j.matcher;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import com.caotc.excel4j.matcher.constant.ComparableMatcherType;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 
 public interface Matcher<T> extends Predicate<T> {
-  public interface Builder<T> extends Predicate<T>{
-    Builder<T> add(Predicate<T> predicate);
+  Matcher<T> add(Predicate<T> predicate);
 
-    Builder<T> add(Builder<T> builder);
-    
-    <R> Builder<T> add(Predicate<R> predicate, Function<T, R> transform);
+//  Matcher<T> add(Matcher<T> builder);
 
-    Builder<T> add(StringMatcherType type, String predicateValue, Function<T, String> transform);
+  <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform);
 
-    <R extends Comparable<R>> Builder<T> add(ComparableMatcherType type, R predicateValue,
-        Function<T, R> transform);
+  Matcher<T> add(StringMatcherType type, String predicateValue, Function<T, String> transformer);
 
-    Builder<T> and();
+  <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
+      Function<T, R> transform);
 
-    Builder<T> or();
+  Matcher<T> and();
 
-    Builder<T> endAnd();
+  Matcher<T> or();
 
-    Builder<T> endOr();
+  Matcher<T> endAnd();
 
-    Matcher<T> build();
-  }
+  Matcher<T> endOr();
 
-  List<Predicate<T>> getPredicates();
+  Predicate<T> reduce();
 }
