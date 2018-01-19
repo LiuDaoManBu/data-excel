@@ -66,36 +66,20 @@ public class WorkbookParseResult {
   private final ImmutableList<SheetParseResult> sheetParseResults;
 
   private WorkbookParseResult(Builder builder) {
-    this.workbook = builder.workbook;
-    this.config = builder.config;
-    ImmutableList.Builder<ValidationError<Workbook>> errors = ImmutableList.builder();
-    Optional<ValidationError<Workbook>> optional =
-        Optional.ofNullable(config.getMatcher()).map(m -> m.match(workbook).orElse(null))
-            .map(message -> new ValidationError<Workbook>(workbook, message));
-    optional.ifPresent(errors::add);
-    if (!optional.isPresent()) {
-      // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
-      config.getSheetConfigs().stream()
-          .filter(config -> ExcelUtil.getSheets(workbook).noneMatch(config.getMatcher()::test))
-          .map(config -> new ValidationError<Workbook>(workbook,
-              SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
-          .forEach(errors::add);
+    workbook = builder.workbook;
+    config = builder.config;
+    // TODO sheet被多个matcher匹配的情况?
+    builder.setSheetParseResultBuilders(config.getSheetConfigs().stream()
+        .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
+        .flatMap(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
+            .map(config::parse))
+        .collect(ImmutableList.toImmutableList()));
 
-
-      // TODO sheet被多个matcher匹配的情况?
-      builder.setSheetParseResultBuilders(config.getSheetConfigs().stream()
-          .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
-          .flatMap(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
-              .map(config::parse))
-          .collect(ImmutableList.toImmutableList()));
-
-      this.sheetParseResults = builder.sheetParseResultBuilders.stream()
-          .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
-          .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
-    } else {
-      this.sheetParseResults = ImmutableList.of();
-    }
-    this.errors = errors.build();
+    sheetParseResults = builder.sheetParseResultBuilders.stream()
+        .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
+        .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());      
+    errors = config.getValidators().stream().map(validator->validator.validate(workbook))
+        .flatMap(Collection::stream).collect(ImmutableList.toImmutableList());
   }
 
   public Workbook getWorkbook() {

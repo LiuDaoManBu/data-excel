@@ -2,14 +2,13 @@ package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.parse.error.ValidationError;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.caotc.excel4j.parse.error.ValidationError;
 
 public class SheetParseResult {
   public static class Builder {
@@ -121,5 +120,9 @@ public class SheetParseResult {
         tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
         .map(error -> new ValidationError<Sheet>(sheet, error.getMessage())))
     .collect(ImmutableList.toImmutableList());
+  }
+  
+  public Table getById(Object id) {
+    return tables.stream().filter(table->Objects.equals(table.getConfig().getId(), id)).findAny().orElse(null);
   }
 }

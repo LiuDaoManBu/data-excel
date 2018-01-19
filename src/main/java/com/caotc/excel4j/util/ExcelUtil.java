@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -39,6 +37,7 @@ import com.caotc.excel4j.config.MenuDataConfig;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
+import com.caotc.excel4j.matcher.BaseValidator;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
@@ -85,7 +84,7 @@ public class ExcelUtil {
 
   public static <V> TableConfig.Builder toTableConfig(Class<V> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
-      return TableConfig.builder().setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
+      return TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
           .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
     }).orElse(null);
   }
@@ -94,18 +93,14 @@ public class ExcelUtil {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
       MenuConfig.Builder builder = MenuConfig.builder()
           .setMatcherBuilder(
-              StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, f.name()))
+              StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, f.menuName()))
           .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
           .setDataConfigBuilder(
-              MenuDataConfig.builder().setLoadType(f.loadType()).setDataNumber(f.dataNumber())
+              MenuDataConfig.builder().setLoadType(f.loadType())
                   .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
       Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t ->{
-        StandardCellMatcher.Builder matcherBuilder=
-        builder.getDataConfigBuilder().getMatcherBuilder();
-        if(Objects.isNull(matcherBuilder)) {
-          matcherBuilder=StandardCellMatcher.builder();
-        }
-        matcherBuilder.addDataPredicate(Objects::nonNull);
+        //TODO tip
+        builder.getDataConfigBuilder().getValidators().add(0,new BaseValidator<>(Objects::nonNull, cell->cell.formatAsString()));
       });
       return builder;
     }).orElse(null);

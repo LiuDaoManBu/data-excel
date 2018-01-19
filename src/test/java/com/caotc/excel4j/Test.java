@@ -158,10 +158,9 @@ public class Test {
 
     MenuDataConfig.Builder userNameDataConfig =
         MenuDataConfig.<String>builder().setDataType(BaseDataType.STRING).setLoadType(LoadType.UNFIXED)
-            .setField(User.class.getDeclaredField("userName")).setMatcherBuilder(
-                StandardCellMatcher.builder().addDataPredicate(StringMatcherType.STARTS_WITH, "s"));
+            .setField(User.class.getDeclaredField("userName"));
 
-    MenuConfig.Builder userNameMenuConfig = MenuConfig.<String>builder()
+    MenuConfig.Builder userNameMenuConfig = MenuConfig.builder()
         .setMatcherBuilder(
             StandardCellMatcher.builder().addDataPredicate(StringMatcherType.EQUALS, "用户名"))
         .setDataConfigBuilder(userNameDataConfig).setDirection(Direction.BOTTOM);

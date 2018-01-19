@@ -15,7 +15,7 @@ import com.caotc.excel4j.matcher.data.type.BaseDataType;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface ExcelField {
-  String name();
+  String menuName();
 
   // enum 不能使用其他类常量?
   Direction direction() default Direction.BOTTOM;
@@ -25,8 +25,6 @@ public @interface ExcelField {
   Necessity necessity() default Necessity.MUST;
 
   LoadType loadType() default LoadType.UNFIXED;
-
-  int dataNumber() default 0;
 
   BaseDataType dataType();
   // String dateformat() default "yyyy-MM-dd HH:mm:ss";

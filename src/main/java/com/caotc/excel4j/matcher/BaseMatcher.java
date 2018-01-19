@@ -19,8 +19,6 @@ public class BaseMatcher<T> implements Matcher<T> {
     private Matcher<T> realParent;
     private Type type;
     private Builder<T> parent;
-    private String message;
-    private Function<T, String> messageFunction;
     private Boolean nonNull;
     private Boolean isNull;
     private List<String> scripts;
@@ -28,12 +26,12 @@ public class BaseMatcher<T> implements Matcher<T> {
 
     @Override
     public boolean test(T t) {
-      return type.apply(predicates).test(t);
+      return type.reduce(predicates).test(t);
     }
 
     @Override
     public BaseMatcher<T> build() {
-      return new BaseMatcher<T>(this);
+      return new BaseMatcher<>(this);
     }
 
     @Override
@@ -140,24 +138,6 @@ public class BaseMatcher<T> implements Matcher<T> {
       return this;
     }
 
-    public String getMessage() {
-      return message;
-    }
-
-    public Builder<T> setMessage(String message) {
-      this.message = message;
-      return this;
-    }
-
-    public Function<T, String> getMessageFunction() {
-      return messageFunction;
-    }
-
-    public Builder<T> setMessageFunction(Function<T, String> messageFunction) {
-      this.messageFunction = messageFunction;
-      return this;
-    }
-
     public List<Predicate<T>> getPredicates() {
       return predicates;
     }
@@ -175,16 +155,10 @@ public class BaseMatcher<T> implements Matcher<T> {
   private final Type type;
   private final Matcher<T> parent;
   private final ImmutableList<Predicate<T>> predicates;
-  private final Function<T, String> messageFunction;
 
   protected BaseMatcher(Builder<T> builder) {
     this.type = Optional.ofNullable(builder.type).orElse(DEFAULT_TYPE);
     this.parent = builder.realParent;
-    this.messageFunction =
-        Optional.ofNullable(builder.messageFunction).orElse(Optional.ofNullable(builder.message).map(t->{
-          Function<T, String> function=value->t;
-          return function;
-        }).orElse(null));
     ImmutableList.Builder<Predicate<T>> predicates = ImmutableList.builder();
     if (Objects.nonNull(builder.isNull) && builder.isNull) {
       predicates.add(Objects::isNull);
@@ -216,7 +190,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public boolean test(T t) {
-    return type.apply(predicates).test(t);
+    return type.reduce(predicates).test(t);
   }
 
   public Type getType() {
@@ -230,19 +204,4 @@ public class BaseMatcher<T> implements Matcher<T> {
   public ImmutableList<Predicate<T>> getPredicates() {
     return predicates;
   }
-
-  public Function<T, String> getMessageFunction() {
-    return messageFunction;
-  }
-
-  @Override
-  public Optional<String> match(T value) {
-    return type.apply(this, value);
-  }
-
-  public Function<T, String> getEffectiveMessageFunction(){
-    return Optional.ofNullable(messageFunction).orElse(Optional.ofNullable(parent)
-        .map(Matcher::getEffectiveMessageFunction).orElse(null));
-  }
-  
 }

@@ -3,33 +3,38 @@ package com.caotc.excel4j.config;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Workbook;
-import com.caotc.excel4j.matcher.Matcher;
-import com.caotc.excel4j.parse.error.WorkbookError;
+import com.caotc.excel4j.matcher.BaseValidator;
+import com.caotc.excel4j.matcher.Validator;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 
 public class WorkbookConfig {
   public static class Builder {
     private List<SheetConfig.Builder> sheetConfigBuilders;
-    private Matcher.Builder<Workbook> matcherBuilder;
+    private List<Validator<Workbook>> validators;
     private ParserConfig parserConfig;
 
     public WorkbookConfig build() {
       return new WorkbookConfig(this);
     }
 
-    public Matcher.Builder<Workbook> getMatcherBuilder() {
-      return matcherBuilder;
+    public List<Validator<Workbook>> getValidators() {
+      return validators;
     }
 
-    public Builder setMatcherBuilder(Matcher.Builder<Workbook> matcherBuilder) {
-      this.matcherBuilder = matcherBuilder;
+    public Builder setValidators(List<Validator<Workbook>> validators) {
+      this.validators = validators;
       return this;
     }
+
 
     public ParserConfig getParserConfig() {
       return parserConfig;
@@ -56,16 +61,24 @@ public class WorkbookConfig {
   }
 
   private final ImmutableCollection<SheetConfig> sheetConfigs;
-  private final Matcher<Workbook> matcher;
+  private final ImmutableList<Validator<Workbook>> validators;
   private final ParserConfig parserConfig;
 
   private WorkbookConfig(Builder builder) {
-    this.sheetConfigs = builder.sheetConfigBuilders.stream()
+    sheetConfigs = builder.sheetConfigBuilders.stream()
         .peek(sheetConfigBuilder -> sheetConfigBuilder.setWorkbookConfig(this))
         .map(SheetConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
-    this.matcher =
-        Optional.ofNullable(builder.matcherBuilder).map(Matcher.Builder::build).orElse(null);
-    this.parserConfig = builder.parserConfig;
+    //TODO 注释,重复匹配?tip,sheet可选是否必须匹配
+    Validator<Workbook> validator=new BaseValidator<>(sheetConfigs.stream().collect(ImmutableMap.toImmutableMap(sheetConfig -> {
+      Predicate<Workbook> predicate = workbook -> ExcelUtil.getSheets(workbook)
+          .filter(sheetConfig.getMatcher()::test).findAny().isPresent();
+      return predicate;
+    }, sheetConfig->{
+      Function<Workbook, String> function=workbook->sheetConfig+"没有匹配到任何结果";
+      return function;
+    })));
+    validators = Streams.concat(Stream.of(validator),builder.validators.stream()).collect(ImmutableList.toImmutableList());
+    parserConfig = builder.parserConfig;
   }
 
   public WorkbookParseResult parse(Workbook workbook) {
@@ -80,12 +93,12 @@ public class WorkbookConfig {
     return sheetConfigs;
   }
 
-  public Matcher<Workbook> getMatcher() {
-    return matcher;
-  }
-
   public ParserConfig getParserConfig() {
     return parserConfig;
+  }
+
+  public ImmutableList<Validator<Workbook>> getValidators() {
+    return validators;
   }
 
 }

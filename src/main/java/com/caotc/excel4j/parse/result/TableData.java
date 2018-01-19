@@ -47,20 +47,24 @@ public class TableData {
       }
     }
 
-    menuToValueCells = menuTodatas.stream()
-        .filter(map -> map.values().stream().map(StandardCell::getValue).filter(Objects::nonNull).findAny().isPresent())
+    menuToValueCells = menuTodatas
+        .stream().filter(map -> map.values().stream().map(StandardCell::getValue)
+            .filter(Objects::nonNull).findAny().isPresent())
         .collect(ImmutableList.toImmutableList());
 
     Stream<ValidationError<TableData>> menuMatcherErrors =
         menuToValueCells.stream().map(Map::entrySet).flatMap(Collection::stream)
-            .map(entry -> entry.getKey().getData().getConfig().getMatcher().match(entry.getValue()))
-            .filter(Optional::isPresent).map(Optional::get)
-            .map(message -> new ValidationError<TableData>(this, message));
+            .flatMap(entry -> entry.getKey().getData().getConfig().getValidators().stream()
+                .map(validator -> validator.validate(entry.getValue())).flatMap(Collection::stream))
+            .map(error -> new ValidationError<>(this, error.getMessage()));
+
+
     Stream<ValidationError<TableData>> tableDataMatcherErrors = Optional.ofNullable(config)
-        .map(TableDataConfig::getMatcher)
-        .map(macher -> menuToValueCells.stream().map(macher::match).filter(Optional::isPresent)
-            .map(Optional::get).map(message -> new ValidationError<TableData>(this, message)))
-        .orElse(Stream.empty());
+        .map(TableDataConfig::getValidators).orElse(ImmutableList.of()).stream()
+        .flatMap(validator -> menuToValueCells.stream().map(map -> validator.validate(map))
+            .flatMap(Collection::stream))
+        .map(error -> new ValidationError<>(this, error.getMessage()));
+
     this.errors = Streams.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }

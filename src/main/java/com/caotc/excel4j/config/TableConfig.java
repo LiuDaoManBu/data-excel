@@ -16,6 +16,7 @@ import com.google.common.graph.Traverser;
 // TODO classType?
 public class TableConfig {
   public static class Builder {
+    private Object id;
     private List<MenuConfig.Builder> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
     private Matcher.Builder<Table> matcherBuilder;
@@ -26,6 +27,15 @@ public class TableConfig {
 
     public TableConfig build() {
       return new TableConfig(this);
+    }
+
+    public Object getId() {
+      return id;
+    }
+
+    public Builder setId(Object id) {
+      this.id = id;
+      return this;
     }
 
     public SheetConfig getSheetConfig() {
@@ -98,6 +108,7 @@ public class TableConfig {
     return new Builder();
   }
 
+  private final Object id;
   private final SheetConfig sheetConfig;
   private final Direction fixedMenuDirection;
   private final Direction unFixedMenuDirection;
@@ -115,6 +126,7 @@ public class TableConfig {
       });
 
   private TableConfig(Builder builder) {
+    id=builder.id;
     sheetConfig = builder.sheetConfig;
     fixedMenuDirection = builder.fixedMenuDirection;
     unFixedMenuDirection = builder.unFixedMenuDirection;
@@ -177,6 +189,10 @@ public class TableConfig {
 
   public Matcher<Table> getMatcher() {
     return matcher;
+  }
+
+  public Object getId() {
+    return id;
   }
 
 }

@@ -31,9 +31,5 @@ public interface Matcher<T> extends Predicate<T> {
     Matcher<T> build();
   }
 
-  Optional<String> match(T value);
-
-  Function<T, String> getEffectiveMessageFunction();
-
   List<Predicate<T>> getPredicates();
 }

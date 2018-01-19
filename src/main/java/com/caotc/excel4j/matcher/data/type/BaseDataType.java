@@ -238,6 +238,18 @@ public enum BaseDataType implements DataType {
    public boolean test(Object t) {
      return STRING.test(t) || POSITIVE_WHOLE_NUMBER.test(t);
    }
+ },
+  //natural
+  NATURAL() {
+   @Override
+   public <T> boolean canCast(TypeToken<T> type) {
+     return true;
+   }
+   
+   @Override
+   public boolean test(Object t) {
+     return true;
+   }
  };
 
   private static final String WORD_REGEX = "^(\\w|[\\u0391-\\uFFE5])*$";
@@ -250,11 +262,6 @@ public enum BaseDataType implements DataType {
   private static final String TELEPHONE_REGEX =
       "^1(3[0-9]|4[57]|5[0-35-9]|7[0135678]|8[0-9])\\d{8}$";
   private static final String ID_CARD_NUMBER_REGEX = "(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)";
-  private static final ImmutableCollection<TypeToken<?>> INT_TYPES =
-      Stream
-          .of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
-              long.class, Long.class, BigInteger.class)
-          .map(TypeToken::of).collect(ImmutableSet.toImmutableSet());
   private final ImmutableCollection<TypeToken<?>> types;
 
   private BaseDataType(ImmutableCollection<TypeToken<?>> types) {
@@ -287,10 +294,6 @@ public enum BaseDataType implements DataType {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T cast(Object value, TypeToken<T> type) {
-    // TODO remove?
-    if (INT_TYPES.contains(type)) {
-      value = TypeUtils.castToBigDecimal(value).toBigIntegerExact();
-    }
     return (T) TypeUtils.castToJavaBean(value, type.getRawType());
   }
 }
