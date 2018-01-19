@@ -3,12 +3,12 @@ package com.caotc.excel4j.parse.result;
 import java.util.Optional;
 import com.caotc.excel4j.config.MenuDataConfig;
 import com.google.common.collect.ImmutableList;
-import com.caotc.excel4j.parse.error.Error;
+import com.caotc.excel4j.parse.error.ConstraintViolation;
 
 public class MenuData {
   private final Menu menu;
   private final MenuDataConfig config;
-  private final ImmutableList<Error<MenuData>> errors;
+  private final ImmutableList<ConstraintViolation<MenuData>> errors;
   private final ImmutableList<StandardCell> valueCells;
 
   public MenuData(Menu menu) {
@@ -21,7 +21,7 @@ public class MenuData {
     // TODO is DataError?
     errors = valueCells.stream().map(config.getMatcher()::match)
         .filter(Optional::isPresent).map(Optional::get)
-        .map(message -> new Error<MenuData>(this, message)).collect(ImmutableList.toImmutableList());
+        .map(message -> new ConstraintViolation<MenuData>(this, message)).collect(ImmutableList.toImmutableList());
   }
 
   // TODO
@@ -87,7 +87,7 @@ public class MenuData {
     return valueCells;
   }
 
-  public ImmutableList<Error<MenuData>> getErrors() {
+  public ImmutableList<ConstraintViolation<MenuData>> getErrors() {
     return errors;
   }
 

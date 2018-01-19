@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.TableDataConfig;
-import com.caotc.excel4j.parse.error.Error;
+import com.caotc.excel4j.parse.error.ConstraintViolation;
 import com.caotc.excel4j.util.ClassUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -22,7 +22,7 @@ public class TableData {
   private final Table table;
   private final TableDataConfig config;
   private final ImmutableList<Map<Menu, StandardCell>> menuToValueCells;
-  private final ImmutableList<Error<TableData>> errors;
+  private final ImmutableList<ConstraintViolation<TableData>> errors;
 
   public TableData(Table table) {
     this.table = table;
@@ -49,14 +49,14 @@ public class TableData {
     menuToValueCells =
         menuTodatas.stream().filter(map -> !map.isEmpty()).collect(ImmutableList.toImmutableList());
 
-    Stream<Error<TableData>> menuMatcherErrors = menuToValueCells.stream().map(Map::entrySet)
+    Stream<ConstraintViolation<TableData>> menuMatcherErrors = menuToValueCells.stream().map(Map::entrySet)
         .flatMap(Collection::stream)
         .map(entry -> entry.getKey().getData().getConfig().getMatcher().match(entry.getValue()))
         .filter(Optional::isPresent).map(Optional::get)
-        .map(message -> new Error<TableData>(this, message));
-    Stream<Error<TableData>> tableDataMatcherErrors = menuToValueCells.stream()
+        .map(message -> new ConstraintViolation<TableData>(this, message));
+    Stream<ConstraintViolation<TableData>> tableDataMatcherErrors = menuToValueCells.stream()
         .map(map -> config.getMatcher().match(map)).filter(Optional::isPresent)
-        .map(Optional::get).map(message -> new Error<TableData>(this, message));
+        .map(Optional::get).map(message -> new ConstraintViolation<TableData>(this, message));
     this.errors = Streams.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }
@@ -73,7 +73,7 @@ public class TableData {
     return menuToValueCells;
   }
 
-  public ImmutableList<Error<TableData>> getErrors() {
+  public ImmutableList<ConstraintViolation<TableData>> getErrors() {
     return errors;
   }
 

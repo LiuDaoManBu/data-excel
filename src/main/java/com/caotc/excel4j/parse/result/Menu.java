@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
-import com.caotc.excel4j.parse.error.Error;
+import com.caotc.excel4j.parse.error.ConstraintViolation;
 
 public class Menu {
   public static class Builder {
@@ -83,7 +83,7 @@ public class Menu {
 
   private final StandardCell cell;
   private final MenuConfig config;
-  private final ImmutableList<Error<Menu>> errors;
+  private final ImmutableList<ConstraintViolation<Menu>> errors;
   private final Table table;
   private final Menu parent;
   private final ImmutableList<Menu> childrens;
@@ -105,7 +105,7 @@ public class Menu {
 
     // TODO dataError? is MenuError?
     errors = config.getChildrens().stream().filter(config -> !matchesMenuConfigs.contains(config))
-        .map(config -> new Error<Menu>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+        .map(config -> new ConstraintViolation<Menu>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -188,12 +188,12 @@ public class Menu {
     return childrens.stream().anyMatch(childrenMenu -> childrenMenu.getCell().equals(cell));
   }
 
-  public ImmutableList<Error<Menu>> getAllErrors() {
+  public ImmutableList<ConstraintViolation<Menu>> getAllErrors() {
     return Streams
         .concat(errors.stream(),
             childrens.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
-                .map(error -> new Error<Menu>(this, error.getMessage())),
-            data.getErrors().stream().map(error -> new Error<Menu>(this, error.getMessage())))
+                .map(error -> new ConstraintViolation<Menu>(this, error.getMessage())),
+            data.getErrors().stream().map(error -> new ConstraintViolation<Menu>(this, error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -264,7 +264,7 @@ public class Menu {
     return data;
   }
 
-  public ImmutableList<Error<Menu>> getErrors() {
+  public ImmutableList<ConstraintViolation<Menu>> getErrors() {
     return errors;
   }
 

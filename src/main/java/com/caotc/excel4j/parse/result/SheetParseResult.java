@@ -6,17 +6,17 @@ import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.SheetConfig;
-import com.caotc.excel4j.parse.error.Error;
+import com.caotc.excel4j.parse.error.ConstraintViolation;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.caotc.excel4j.parse.error.Error;
+import com.caotc.excel4j.parse.error.ConstraintViolation;
 
 public class SheetParseResult {
   public static class Builder {
     private WorkbookParseResult workbookParseResult;
     private Sheet sheet;
     private SheetConfig config;
-    private List<Error<Sheet>> errors;
+    private List<ConstraintViolation<Sheet>> errors;
     private List<Table.Builder> tableBuilders;
 
     public SheetParseResult build() {
@@ -51,11 +51,11 @@ public class SheetParseResult {
       return this;
     }
 
-    public List<Error<Sheet>> getErrors() {
+    public List<ConstraintViolation<Sheet>> getErrors() {
       return errors;
     }
 
-    public Builder setErrors(List<Error<Sheet>> errors) {
+    public Builder setErrors(List<ConstraintViolation<Sheet>> errors) {
       this.errors = errors;
       return this;
     }
@@ -78,7 +78,7 @@ public class SheetParseResult {
   private final WorkbookParseResult workbookParseResult;
   private final Sheet sheet;
   private final SheetConfig config;
-  private final ImmutableList<Error<Sheet>> errors;
+  private final ImmutableList<ConstraintViolation<Sheet>> errors;
   private final ImmutableList<Table> tables;
 
   public SheetParseResult(Builder builder) {
@@ -89,7 +89,7 @@ public class SheetParseResult {
     // this.errors = builder.errors.stream().collect(ImmutableList.toImmutableList());
     this.errors =
         Optional.of(sheet).filter(sheet -> sheet.getLastRowNum() <= sheet.getFirstRowNum())
-            .map(sheet -> new Error<Sheet>(sheet, "don't have any data")).map(ImmutableList::of)
+            .map(sheet -> new ConstraintViolation<Sheet>(sheet, "don't have any data")).map(ImmutableList::of)
             .orElse(ImmutableList.of());
     this.tables =
         builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
@@ -104,7 +104,7 @@ public class SheetParseResult {
     return config;
   }
 
-  public ImmutableList<Error<Sheet>> getErrors() {
+  public ImmutableList<ConstraintViolation<Sheet>> getErrors() {
     return errors;
   }
 
@@ -116,10 +116,10 @@ public class SheetParseResult {
     return workbookParseResult;
   }
 
-  public ImmutableList<Error<Sheet>> getAllErrors() {
+  public ImmutableList<ConstraintViolation<Sheet>> getAllErrors() {
     return Streams.concat(errors.stream(),
         tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
-        .map(error -> new Error<Sheet>(sheet, error.getMessage())))
+        .map(error -> new ConstraintViolation<Sheet>(sheet, error.getMessage())))
     .collect(ImmutableList.toImmutableList());
   }
 }
