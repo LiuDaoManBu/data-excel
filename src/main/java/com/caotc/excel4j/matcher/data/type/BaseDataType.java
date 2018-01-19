@@ -265,7 +265,6 @@ public enum BaseDataType implements DataType {
     this.types = Arrays.stream(types).map(TypeToken::of).collect(ImmutableSet.toImmutableSet());
   }
 
-  @Override
   public ImmutableCollection<TypeToken<?>> canCastTypes() {
     return types;
   }
