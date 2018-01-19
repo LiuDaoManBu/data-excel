@@ -46,17 +46,20 @@ public class TableData {
       }
     }
 
-    menuToValueCells =
-        menuTodatas.stream().filter(map -> !map.isEmpty()).collect(ImmutableList.toImmutableList());
+    menuToValueCells = menuTodatas.stream()
+        .filter(map -> !map.values().stream().map(StandardCell::getValue).findAny().isPresent())
+        .collect(ImmutableList.toImmutableList());
 
-    Stream<ConstraintViolation<TableData>> menuMatcherErrors = menuToValueCells.stream().map(Map::entrySet)
-        .flatMap(Collection::stream)
-        .map(entry -> entry.getKey().getData().getConfig().getMatcher().match(entry.getValue()))
-        .filter(Optional::isPresent).map(Optional::get)
-        .map(message -> new ConstraintViolation<TableData>(this, message));
-    Stream<ConstraintViolation<TableData>> tableDataMatcherErrors = Optional.ofNullable(config).map(TableDataConfig::getMatcher)
-        .map(macher->menuToValueCells.stream().map(macher::match).filter(Optional::isPresent).map(Optional::get)
-            .map(message -> new ConstraintViolation<TableData>(this, message))).orElse(Stream.empty());
+    Stream<ConstraintViolation<TableData>> menuMatcherErrors =
+        menuToValueCells.stream().map(Map::entrySet).flatMap(Collection::stream)
+            .map(entry -> entry.getKey().getData().getConfig().getMatcher().match(entry.getValue()))
+            .filter(Optional::isPresent).map(Optional::get)
+            .map(message -> new ConstraintViolation<TableData>(this, message));
+    Stream<ConstraintViolation<TableData>> tableDataMatcherErrors = Optional.ofNullable(config)
+        .map(TableDataConfig::getMatcher)
+        .map(macher -> menuToValueCells.stream().map(macher::match).filter(Optional::isPresent)
+            .map(Optional::get).map(message -> new ConstraintViolation<TableData>(this, message)))
+        .orElse(Stream.empty());
     this.errors = Streams.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }
@@ -89,8 +92,8 @@ public class TableData {
               fields.stream().filter(f -> f.getName().equals(menu.getFieldName().get())).findAny();
         }
 
-        jsonObject.put(field.get().getName(), menu.getData().getConfig().getDataType()
-            .cast(cell.getValue(), field.get().getType()));
+        jsonObject.put(field.get().getName(),
+            menu.getData().getConfig().getDataType().cast(cell.getValue(), field.get().getType()));
       });
       return (T) jsonObject.toJavaObject(type.getRawType());
     }).collect(ImmutableList.toImmutableList());

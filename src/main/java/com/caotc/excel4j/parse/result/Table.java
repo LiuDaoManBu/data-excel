@@ -119,10 +119,6 @@ public class Table {
   // return optional.get();
   // }
 
-  public void getDataMap() {
-
-  }
-
   // public JSONObject getJSONObjectData() {
   // Map<String, Object> map = getDataMenus()
   // .collect(Collectors.toMap(Menu::getName, menu -> menu.getData().getCellValues()));
@@ -192,4 +188,7 @@ public class Table {
     return topMenus;
   }
 
+  public TableData getData() {
+    return data;
+  }
 }
