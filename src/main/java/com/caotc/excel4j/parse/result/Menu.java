@@ -105,7 +105,8 @@ public class Menu {
 
     // TODO dataError? is MenuError?
     errors = config.getChildrens().stream().filter(config -> !matchesMenuConfigs.contains(config))
-        .map(config -> new ConstraintViolation<Menu>(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+        .map(config -> new ConstraintViolation<Menu>(this,
+            MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -192,8 +193,7 @@ public class Menu {
     return Streams
         .concat(errors.stream(),
             childrens.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
-                .map(error -> new ConstraintViolation<Menu>(this, error.getMessage())),
-            data.getErrors().stream().map(error -> new ConstraintViolation<Menu>(this, error.getMessage())))
+                .map(error -> new ConstraintViolation<Menu>(this, error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 

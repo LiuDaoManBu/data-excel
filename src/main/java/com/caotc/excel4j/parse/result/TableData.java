@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import com.alibaba.fastjson.JSONObject;
@@ -47,7 +48,7 @@ public class TableData {
     }
 
     menuToValueCells = menuTodatas.stream()
-        .filter(map -> !map.values().stream().map(StandardCell::getValue).findAny().isPresent())
+        .filter(map -> map.values().stream().map(StandardCell::getValue).filter(Objects::nonNull).findAny().isPresent())
         .collect(ImmutableList.toImmutableList());
 
     Stream<ConstraintViolation<TableData>> menuMatcherErrors =
