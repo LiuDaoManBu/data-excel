@@ -7,7 +7,7 @@ import java.util.function.Function;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
-import com.caotc.excel4j.parse.error.ConstraintViolation;
+import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.parse.error.WorkbookError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
@@ -62,22 +62,22 @@ public class WorkbookParseResult {
 
   private final Workbook workbook;
   private final WorkbookConfig config;
-  private final ImmutableList<ConstraintViolation<Workbook>> errors;
+  private final ImmutableList<ValidationError<Workbook>> errors;
   private final ImmutableList<SheetParseResult> sheetParseResults;
 
   private WorkbookParseResult(Builder builder) {
     this.workbook = builder.workbook;
     this.config = builder.config;
-    ImmutableList.Builder<ConstraintViolation<Workbook>> errors = ImmutableList.builder();
-    Optional<ConstraintViolation<Workbook>> optional =
+    ImmutableList.Builder<ValidationError<Workbook>> errors = ImmutableList.builder();
+    Optional<ValidationError<Workbook>> optional =
         Optional.ofNullable(config.getMatcher()).map(m -> m.match(workbook).orElse(null))
-            .map(message -> new ConstraintViolation<Workbook>(workbook, message));
+            .map(message -> new ValidationError<Workbook>(workbook, message));
     optional.ifPresent(errors::add);
     if (!optional.isPresent()) {
       // TODO sheetConfig匹配不到假如matcher中直接返回所有error?
       config.getSheetConfigs().stream()
           .filter(config -> ExcelUtil.getSheets(workbook).noneMatch(config.getMatcher()::test))
-          .map(config -> new ConstraintViolation<Workbook>(workbook,
+          .map(config -> new ValidationError<Workbook>(workbook,
               SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
           .forEach(errors::add);
 
@@ -106,7 +106,7 @@ public class WorkbookParseResult {
     return config;
   }
 
-  public ImmutableList<com.caotc.excel4j.parse.error.ConstraintViolation<Workbook>> getErrors() {
+  public ImmutableList<com.caotc.excel4j.parse.error.ValidationError<Workbook>> getErrors() {
     return errors;
   }
 
@@ -114,10 +114,10 @@ public class WorkbookParseResult {
     return sheetParseResults;
   }
 
-  public ImmutableList<ConstraintViolation<Workbook>> getAllErrors() {
+  public ImmutableList<ValidationError<Workbook>> getAllErrors() {
     return Streams.concat(errors.stream(),
         sheetParseResults.stream().map(SheetParseResult::getAllErrors).flatMap(Collection::stream)
-            .map(error -> new ConstraintViolation<Workbook>(workbook, error.getMessage())))
+            .map(error -> new ValidationError<Workbook>(workbook, error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 }

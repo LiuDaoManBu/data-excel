@@ -3,7 +3,7 @@ package com.caotc.excel4j.parse.result;
 import java.util.Optional;
 import com.caotc.excel4j.config.MenuDataConfig;
 import com.google.common.collect.ImmutableList;
-import com.caotc.excel4j.parse.error.ConstraintViolation;
+import com.caotc.excel4j.parse.error.ValidationError;
 
 public class MenuData {
   private final Menu menu;

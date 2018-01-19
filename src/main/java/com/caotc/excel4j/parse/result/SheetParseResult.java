@@ -6,17 +6,17 @@ import java.util.Optional;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.SheetConfig;
-import com.caotc.excel4j.parse.error.ConstraintViolation;
+import com.caotc.excel4j.parse.error.ValidationError;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.caotc.excel4j.parse.error.ConstraintViolation;
+import com.caotc.excel4j.parse.error.ValidationError;
 
 public class SheetParseResult {
   public static class Builder {
     private WorkbookParseResult workbookParseResult;
     private Sheet sheet;
     private SheetConfig config;
-    private List<ConstraintViolation<Sheet>> errors;
+    private List<ValidationError<Sheet>> errors;
     private List<Table.Builder> tableBuilders;
 
     public SheetParseResult build() {
@@ -51,11 +51,11 @@ public class SheetParseResult {
       return this;
     }
 
-    public List<ConstraintViolation<Sheet>> getErrors() {
+    public List<ValidationError<Sheet>> getErrors() {
       return errors;
     }
 
-    public Builder setErrors(List<ConstraintViolation<Sheet>> errors) {
+    public Builder setErrors(List<ValidationError<Sheet>> errors) {
       this.errors = errors;
       return this;
     }
@@ -78,7 +78,7 @@ public class SheetParseResult {
   private final WorkbookParseResult workbookParseResult;
   private final Sheet sheet;
   private final SheetConfig config;
-  private final ImmutableList<ConstraintViolation<Sheet>> errors;
+  private final ImmutableList<ValidationError<Sheet>> errors;
   private final ImmutableList<Table> tables;
 
   public SheetParseResult(Builder builder) {
@@ -89,7 +89,7 @@ public class SheetParseResult {
     // this.errors = builder.errors.stream().collect(ImmutableList.toImmutableList());
     this.errors =
         Optional.of(sheet).filter(sheet -> sheet.getLastRowNum() <= sheet.getFirstRowNum())
-            .map(sheet -> new ConstraintViolation<Sheet>(sheet, "don't have any data")).map(ImmutableList::of)
+            .map(sheet -> new ValidationError<Sheet>(sheet, "don't have any data")).map(ImmutableList::of)
             .orElse(ImmutableList.of());
     this.tables =
         builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
@@ -104,7 +104,7 @@ public class SheetParseResult {
     return config;
   }
 
-  public ImmutableList<ConstraintViolation<Sheet>> getErrors() {
+  public ImmutableList<ValidationError<Sheet>> getErrors() {
     return errors;
   }
 
@@ -116,10 +116,10 @@ public class SheetParseResult {
     return workbookParseResult;
   }
 
-  public ImmutableList<ConstraintViolation<Sheet>> getAllErrors() {
+  public ImmutableList<ValidationError<Sheet>> getAllErrors() {
     return Streams.concat(errors.stream(),
         tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
-        .map(error -> new ConstraintViolation<Sheet>(sheet, error.getMessage())))
+        .map(error -> new ValidationError<Sheet>(sheet, error.getMessage())))
     .collect(ImmutableList.toImmutableList());
   }
 }

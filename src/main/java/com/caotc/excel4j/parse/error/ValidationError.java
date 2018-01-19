@@ -1,10 +1,10 @@
 package com.caotc.excel4j.parse.error;
 
-public class ConstraintViolation<T> {
+public class ValidationError<T> {
   private final T cause;
   private final String message;
 
-  public ConstraintViolation(T cause, String message) {
+  public ValidationError(T cause, String message) {
     super();
     this.cause = cause;
     this.message = message;
