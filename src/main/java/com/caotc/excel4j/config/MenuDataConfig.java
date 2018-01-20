@@ -16,6 +16,7 @@ import com.caotc.excel4j.validator.BaseValidator;
 import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -107,6 +108,20 @@ public class MenuDataConfig {
 
   private static final Joiner JOINER = Joiner.on("");
   private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
+  // TODO 可配置
+  private static final ImmutableBiMap<BaseDataType, String> DATA_TYPE_TO_TIPS =
+      ImmutableBiMap.<BaseDataType, String>builder().put(BaseDataType.BOOLEAN, "是否")
+          .put(BaseDataType.CHINESE, "中文").put(BaseDataType.DATE, "日期")
+          .put(BaseDataType.DATE_TIME, "日期时间").put(BaseDataType.DECIMAL, "小数")
+          .put(BaseDataType.EMAIL, "邮箱").put(BaseDataType.ENGLISH, "英语")
+          .put(BaseDataType.ENGLISH_OR_NUMBER, "英语或数字").put(BaseDataType.ENUM, "枚举")
+          .put(BaseDataType.ID_CARD_NUMBER, "身份证号码").put(BaseDataType.NATURAL_NUMBER, "自然数")
+          .put(BaseDataType.NEGATIVE_DECIMAL, "负小数").put(BaseDataType.NEGATIVE_NUMBER, "负数")
+          .put(BaseDataType.NEGATIVE_WHOLE_NUMBER, "负整数").put(BaseDataType.NUMBER, "数字")
+          .put(BaseDataType.PHONE, "电话号码").put(BaseDataType.POSITIVE_DECIMAL, "正小数")
+          .put(BaseDataType.POSITIVE_NUMBER, "正数").put(BaseDataType.POSITIVE_WHOLE_NUMBER, "正整数")
+          .put(BaseDataType.STRING, "字符串").put(BaseDataType.TELEPHONE, "手机号码")
+          .put(BaseDataType.TIME, "时间").put(BaseDataType.WHOLE_NUMBER, "整数").build();
 
   public static Builder builder() {
     return new Builder();
@@ -130,13 +145,16 @@ public class MenuDataConfig {
     // TODO tip
     Preconditions.checkState(Objects.nonNull(dataType));
 
-    validators = Stream.concat(
-        Stream.of(new BaseValidator<StandardCell>(
-            ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
-                .put(cell -> dataType.test(cell.getValue()),
-                    cell -> JOINER.join(cell.formatAsString(), "数据格式不正确"))//TODO tip
-                .build())),
-        builder.validators.stream()).collect(ImmutableList.toImmutableList());
+    validators =
+        Stream
+            .concat(Stream.of(new BaseValidator<StandardCell>(
+                ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
+                    .put(cell -> dataType.test(cell.getValue()),
+                        cell -> JOINER.join(cell.formatAsString(), "不符合",
+                            DATA_TYPE_TO_TIPS.get(dataType), "格式"))// TODO tip
+                    .build())),
+                builder.validators.stream())
+            .collect(ImmutableList.toImmutableList());
 
   }
 
