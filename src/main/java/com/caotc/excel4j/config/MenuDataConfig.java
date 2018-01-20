@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.matcher.BaseValidator;
 import com.caotc.excel4j.matcher.Validator;
@@ -30,22 +31,7 @@ public class MenuDataConfig {
     private LoadType loadType;
 
     public MenuDataConfig build() {
-      // TODO
-      // setType(Optional.ofNullable(field).map(Field::getType).map(type -> (Class) type)
-      // .map(TypeToken::of).orElse(null));
-
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
-      loadType = Optional.ofNullable(loadType).orElse(DEFAULT_LOAD_TYPE);
-
-      validators.add(new BaseValidator<StandardCell>(
-          ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
-              .put(cell -> dataType.test(cell.getValue()),
-                  cell -> JOINER.join(cell.formatAsString(), "数据格式不正确"))
-              .build()));
-      // TODO 提示语
-      Preconditions.checkState(Objects.nonNull(menuConfig));
-      Preconditions.checkState(Objects.nonNull(dataType));
-
       return new MenuDataConfig(this);
     }
 
@@ -130,11 +116,21 @@ public class MenuDataConfig {
 
   protected MenuDataConfig(Builder builder) {
     menuConfig = builder.menuConfig;
-    loadType = builder.loadType;
+    loadType = Optional.ofNullable(builder.loadType).orElse(DEFAULT_LOAD_TYPE);
     field = builder.field;
     fieldName = builder.fieldName;
     dataType = builder.dataType;
-    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
+
+    validators = Stream.concat(
+        Stream.of(new BaseValidator<StandardCell>(
+            ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
+                .put(cell -> dataType.test(cell.getValue()),
+                    cell -> JOINER.join(cell.formatAsString(), "数据格式不正确"))
+                .build())),
+        builder.validators.stream()).collect(ImmutableList.toImmutableList());
+    // TODO tip
+    Preconditions.checkState(Objects.nonNull(menuConfig));
+    Preconditions.checkState(Objects.nonNull(dataType));
   }
 
   public <T> T cast(Object value, TypeToken<T> type) {

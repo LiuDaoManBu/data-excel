@@ -15,7 +15,6 @@ import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.matcher.Validator;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
-import com.caotc.excel4j.parse.result.Table;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -39,19 +38,6 @@ public class MenuConfig {
     private ParserConfig parserConfig;
 
     public MenuConfig build() {
-      distance = Optional.ofNullable(distance).orElse(DEFAULT_DISTANCE);
-      necessity = Optional.ofNullable(necessity).orElse(DEFAULT_MENU_NECESSITY);
-      tableConfig = Optional.ofNullable(tableConfig)
-          .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
-      direction = Optional.ofNullable(direction).orElse(
-          Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(DEFAULT_DIRECTION));
-      childrenBuilders = Optional.ofNullable(childrenBuilders).orElse(ImmutableList.of());
-      // TODO tip
-      Preconditions.checkState(Objects.nonNull(tableConfig));
-      Preconditions.checkNotNull(matcher);
-      Preconditions.checkNotNull(necessity);
-      Preconditions.checkState(
-          !(!Iterables.isEmpty(childrenBuilders) && Objects.nonNull(dataConfigBuilder)));
       return new MenuConfig(this);
     }
 
@@ -169,16 +155,18 @@ public class MenuConfig {
   private final ParserConfig parserConfig;
 
   private MenuConfig(Builder builder) {
-    tableConfig = builder.tableConfig;
     matcher = builder.matcher.reduce();
-    distance = builder.distance;
-    necessity = builder.necessity;
-    direction = builder.direction;
+    distance = Optional.ofNullable(builder.distance).orElse(DEFAULT_DISTANCE);
     parent = builder.parent;
-    childrens = builder.childrenBuilders.stream()
+    direction = Optional.ofNullable(builder.direction).orElse(
+        Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(DEFAULT_DIRECTION));
+    necessity = Optional.ofNullable(builder.necessity).orElse(DEFAULT_MENU_NECESSITY);
+    tableConfig = Optional.ofNullable(builder.tableConfig)
+        .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
+    childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
-    // TODO 注释,重复匹配?tip,sheet可选是否必须匹配
+    // TODO 注释,重复匹配?tip
     Validator<Menu> validator =
         new BaseValidator<>(childrens.stream().collect(ImmutableMap.toImmutableMap(children -> {
           Predicate<Menu> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
@@ -192,6 +180,12 @@ public class MenuConfig {
         .collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
     parserConfig = builder.parserConfig;
+
+    // TODO tip
+    Preconditions.checkState(Objects.nonNull(tableConfig));
+    Preconditions.checkNotNull(matcher);
+    Preconditions.checkNotNull(necessity);
+    Preconditions.checkState(!(!Iterables.isEmpty(childrens) && Objects.nonNull(dataConfig)));
   }
 
   public Optional<Field> getField() {

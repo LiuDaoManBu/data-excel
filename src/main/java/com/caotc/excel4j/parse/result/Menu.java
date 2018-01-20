@@ -9,15 +9,13 @@ import java.util.stream.Stream;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
-import com.caotc.excel4j.parse.error.MenuValidationError;
+import com.caotc.excel4j.parse.error.ValidationError;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
-import com.caotc.excel4j.parse.error.ValidationError;
 
 public class Menu {
   public static class Builder {
@@ -27,12 +25,6 @@ public class Menu {
     private Menu parent;
 
     public Menu build() {
-      // table = Optional.ofNullable(table)
-      // .orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
-
-      // TODO tip
-      Preconditions.checkNotNull(cell);
-      Preconditions.checkNotNull(table);
       return new Menu(this);
     }
 
@@ -92,9 +84,9 @@ public class Menu {
   public Menu(Builder builder) {
     cell = builder.cell;
     config = builder.config;
-    table = builder.table;
     parent = builder.parent;
-
+    table = Optional.ofNullable(builder.table)
+        .orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
     childrens =
         loadChildrens().peek(childrenBuilder -> childrenBuilder.setParent(this).setTable(table))
             .map(Builder::build).collect(ImmutableList.toImmutableList());
@@ -108,6 +100,10 @@ public class Menu {
         .map(config -> new ValidationError<Menu>(this,
             MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
         .collect(ImmutableList.toImmutableList());
+
+    // TODO tip
+    Preconditions.checkNotNull(cell);
+    Preconditions.checkNotNull(table);
   }
 
   private Stream<Builder> loadChildrens() {

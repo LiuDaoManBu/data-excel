@@ -149,7 +149,7 @@ public class TableConfig {
           return function;
         })));
 
-    validators = Stream.concat(builder.validators.stream(), Stream.of(validator))
+    validators = Stream.concat(Stream.of(validator), builder.validators.stream())
         .collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfig;
     parserConfig = builder.parserConfig;

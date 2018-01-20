@@ -15,11 +15,9 @@ public class SheetParseResult {
     private WorkbookParseResult workbookParseResult;
     private Sheet sheet;
     private SheetConfig config;
-    private List<ValidationError<Sheet>> errors;
     private List<Table.Builder> tableBuilders;
 
     public SheetParseResult build() {
-      errors = Optional.ofNullable(errors).orElse(ImmutableList.of());
       return new SheetParseResult(this);
     }
 
@@ -50,15 +48,6 @@ public class SheetParseResult {
       return this;
     }
 
-    public List<ValidationError<Sheet>> getErrors() {
-      return errors;
-    }
-
-    public Builder setErrors(List<ValidationError<Sheet>> errors) {
-      this.errors = errors;
-      return this;
-    }
-
     public List<Table.Builder> getTableBuilders() {
       return tableBuilders;
     }
@@ -84,12 +73,11 @@ public class SheetParseResult {
     this.workbookParseResult = builder.workbookParseResult;
     this.sheet = builder.sheet;
     this.config = builder.config;
-    // TODO builder.errors?
-    // this.errors = builder.errors.stream().collect(ImmutableList.toImmutableList());
+    // TODO need?
     this.errors =
         Optional.of(sheet).filter(sheet -> sheet.getLastRowNum() <= sheet.getFirstRowNum())
-            .map(sheet -> new ValidationError<Sheet>(sheet, "don't have any data")).map(ImmutableList::of)
-            .orElse(ImmutableList.of());
+            .map(sheet -> new ValidationError<Sheet>(sheet, "don't have any data"))
+            .map(ImmutableList::of).orElse(ImmutableList.of());
     this.tables =
         builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
             .map(Table.Builder::build).collect(ImmutableList.toImmutableList());
@@ -116,13 +104,15 @@ public class SheetParseResult {
   }
 
   public ImmutableList<ValidationError<Sheet>> getAllErrors() {
-    return Stream.concat(errors.stream(),
-        tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
-        .map(error -> new ValidationError<Sheet>(sheet, error.getMessage())))
-    .collect(ImmutableList.toImmutableList());
+    return Stream
+        .concat(errors.stream(),
+            tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
+                .map(error -> new ValidationError<Sheet>(sheet, error.getMessage())))
+        .collect(ImmutableList.toImmutableList());
   }
-  
+
   public Table getById(Object id) {
-    return tables.stream().filter(table->Objects.equals(table.getConfig().getId(), id)).findAny().orElse(null);
+    return tables.stream().filter(table -> Objects.equals(table.getConfig().getId(), id)).findAny()
+        .orElse(null);
   }
 }

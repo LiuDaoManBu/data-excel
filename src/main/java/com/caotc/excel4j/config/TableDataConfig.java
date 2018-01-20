@@ -10,16 +10,14 @@ import com.caotc.excel4j.parse.result.StandardCell;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-public class TableDataConfig{
+public class TableDataConfig {
 
-  public static class Builder{
+  public static class Builder {
     private TableConfig tableConfig;
     private ConstructType constructType;
     private List<Validator<Map<Menu, StandardCell>>> validators;
 
     public TableDataConfig build() {
-      // TODO 提示语
-      Preconditions.checkState(Objects.nonNull(tableConfig));
       return new TableDataConfig(this);
     }
 
@@ -59,7 +57,9 @@ public class TableDataConfig{
   protected TableDataConfig(Builder builder) {
     constructType = builder.constructType;
     tableConfig = builder.tableConfig;
-    validators=builder.validators.stream().collect(ImmutableList.toImmutableList());
+    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
+    // TODO tip
+    Preconditions.checkState(Objects.nonNull(tableConfig));
   }
 
   public ConstructType getConstructType() {
@@ -73,5 +73,5 @@ public class TableDataConfig{
   public ImmutableList<Validator<Map<Menu, StandardCell>>> getValidators() {
     return validators;
   }
-  
+
 }

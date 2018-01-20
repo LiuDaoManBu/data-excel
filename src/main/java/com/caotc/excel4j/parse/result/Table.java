@@ -1,34 +1,26 @@
 package com.caotc.excel4j.parse.result;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
-import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.parse.error.TableValidationError;
+import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
-import com.caotc.excel4j.parse.error.ValidationError;
 
 public class Table {
   public static class Builder {
     private TableConfig config;
     private SheetParseResult sheetParseResult;
-    private List<TableValidationError> errors;
 
     public Table build() {
       return new Table(this);
@@ -49,15 +41,6 @@ public class Table {
 
     public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
-      return this;
-    }
-
-    public List<TableValidationError> getErrors() {
-      return errors;
-    }
-
-    public Builder setErrors(List<TableValidationError> errors) {
-      this.errors = errors;
       return this;
     }
   }
