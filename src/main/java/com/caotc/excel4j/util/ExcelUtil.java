@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -43,13 +44,9 @@ import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
-import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
-import com.caotc.excel4j.validator.BaseValidator;
-import com.caotc.excel4j.validator.JavaxValidator;
-import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
@@ -66,6 +63,8 @@ public class ExcelUtil {
           .put(CellType.STRING, Cell::getStringCellValue)
           .put(CellType.BOOLEAN, Cell::getBooleanCellValue).build();
 
+  private static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
+  
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
@@ -96,7 +95,7 @@ public class ExcelUtil {
           TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
               .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
       // TODO
-      builder.getDataConfigBuilder().addJavaxValidator(JavaxValidator.FACTORY.getValidator(), type);
+      builder.getDataConfigBuilder().addJavaxValidator(FACTORY.getValidator(), type);
       return builder;
     }).orElse(null);
   }
