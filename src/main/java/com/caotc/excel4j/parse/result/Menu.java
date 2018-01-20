@@ -127,7 +127,7 @@ public class Menu {
               .filter(children::equals).findAny().isPresent();
           return predicate;
         }, children -> {
-          Function<Menu, String> function = table -> children.getId() + "没有匹配到任何结果";
+          Function<Menu, String> function = table -> "没有匹配到" + children.getId() + "对应的菜单";
           return function;
         })));
   }

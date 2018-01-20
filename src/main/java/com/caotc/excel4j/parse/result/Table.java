@@ -100,7 +100,7 @@ public class Table {
               .filter(topMenuConfig::equals).findAny().isPresent();
           return predicate;
         }, topMenuConfig -> {
-          Function<Table, String> function = table -> topMenuConfig.getId() + "没有匹配到任何结果";
+          Function<Table, String> function = table -> "没有匹配到" + topMenuConfig.getId() + "对应的菜单";
           return function;
         })));
   }
