@@ -10,10 +10,13 @@ import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.parse.error.ValidationError;
+import com.caotc.excel4j.validator.BaseValidator;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -66,9 +69,6 @@ public class Menu {
 
   }
 
-  private final Function<MenuConfig, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
-      config -> config + "don't have any matches cell";
-
   public static Builder builder() {
     return new Builder();
   }
@@ -92,13 +92,8 @@ public class Menu {
             .map(Builder::build).collect(ImmutableList.toImmutableList());
     data = new MenuData(this);
 
-    ImmutableCollection<MenuConfig> matchesMenuConfigs =
-        childrens.stream().map(Menu::getConfig).collect(ImmutableSet.toImmutableSet());
-
     // TODO dataError? is MenuError?
-    errors = config.getChildrens().stream().filter(config -> !matchesMenuConfigs.contains(config))
-        .map(config -> new ValidationError<Menu>(this,
-            MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
+    errors = createMenuConfigValidator().validate(this).stream()
         .collect(ImmutableList.toImmutableList());
 
     // TODO tip
@@ -122,6 +117,19 @@ public class Menu {
     } else {
       return Stream.empty();
     }
+  }
+
+  private Validator<Menu> createMenuConfigValidator() {
+    // TODO 注释,重复匹配?tip
+    return new BaseValidator<>(
+        config.getChildrens().stream().collect(ImmutableMap.toImmutableMap(children -> {
+          Predicate<Menu> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
+              .filter(children::equals).findAny().isPresent();
+          return predicate;
+        }, children -> {
+          Function<Menu, String> function = table -> children.getId() + "没有匹配到任何结果";
+          return function;
+        })));
   }
 
   public Optional<Menu> getSuper(Predicate<? super Menu> predicate) {

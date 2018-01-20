@@ -4,26 +4,23 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+import com.caotc.excel4j.config.Config.Builder;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.Necessity;
 import com.caotc.excel4j.matcher.Matcher;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
-import com.caotc.excel4j.validator.BaseValidator;
 import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-public class MenuConfig {
-  public static class Builder {
+public class MenuConfig extends Config {
+  public static class Builder extends Config.Builder {
     private TableConfig tableConfig;
     private MenuConfig parent;
     private MenuDataConfig.Builder dataConfigBuilder;
@@ -44,6 +41,12 @@ public class MenuConfig {
 
     public MenuConfig build() {
       return new MenuConfig(this);
+    }
+
+    @Override
+    public Builder setId(Object id) {
+      super.setId(id);
+      return this;
     }
 
     public TableConfig getTableConfig() {
@@ -159,6 +162,7 @@ public class MenuConfig {
   private final ParserConfig parserConfig;
 
   private MenuConfig(Builder builder) {
+    super(builder);
     // TODO tip
     Preconditions.checkNotNull(builder.matcher);
     matcher = builder.matcher.reduce();
@@ -176,18 +180,7 @@ public class MenuConfig {
     childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
-    // TODO 注释,重复匹配?tip
-    Validator<Menu> validator =
-        new BaseValidator<>(childrens.stream().collect(ImmutableMap.toImmutableMap(children -> {
-          Predicate<Menu> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
-              .filter(children::equals).findAny().isPresent();
-          return predicate;
-        }, children -> {
-          Function<Menu, String> function = table -> children + "没有匹配到任何结果";
-          return function;
-        })));
-    validators = Stream.concat(builder.validators.stream(), Stream.of(validator))
-        .collect(ImmutableList.toImmutableList());
+    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
     parserConfig = builder.parserConfig;
 

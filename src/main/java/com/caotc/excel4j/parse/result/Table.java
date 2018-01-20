@@ -3,15 +3,21 @@ package com.caotc.excel4j.parse.result;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import com.caotc.excel4j.config.MenuConfig;
 import com.caotc.excel4j.config.TableConfig;
+import com.caotc.excel4j.constant.Necessity;
 import com.caotc.excel4j.parse.error.TableValidationError;
 import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.util.ExcelUtil;
+import com.caotc.excel4j.validator.BaseValidator;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
@@ -60,7 +66,7 @@ public class Table {
   }
 
   private final TableConfig config;
-  private final ImmutableList<TableValidationError> errors;
+  private final ImmutableList<ValidationError<Table>> errors;
   private final SheetParseResult sheetParseResult;
   private final ImmutableCollection<Menu> topMenus;
   private final TableData data;
@@ -69,17 +75,8 @@ public class Table {
     config = builder.config;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
-
-    // new TableError(this, tableConfig.getMatcher().getMessageFunction().apply(this));
-    // TODO 顺序问题?
-    ImmutableCollection<MenuConfig> matchesMenuConfigs =
-        topMenus.stream().map(Menu::getConfig).collect(ImmutableSet.toImmutableSet());
-
-    errors =
-        config.getTopMenuConfigs().stream().filter(config -> !matchesMenuConfigs.contains(config))
-            .map(
-                config -> new TableValidationError(this, MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION.apply(config)))
-            .collect(ImmutableList.toImmutableList());
+    errors = createMenuConfigValidator().validate(this).stream()
+        .collect(ImmutableList.toImmutableList());
     this.data = new TableData(this);
   }
 
@@ -93,6 +90,19 @@ public class Table {
       // TODO safe
       return optional.map(t -> new Menu.Builder().setCell(cell).setConfig(t).setTable(this));
     }).filter(Optional::isPresent).map(Optional::get);
+  }
+
+  private Validator<Table> createMenuConfigValidator() {
+    // TODO 注释,重复匹配?tip
+    return new BaseValidator<>(
+        config.getTopMenuConfigs().stream().collect(ImmutableMap.toImmutableMap(topMenuConfig -> {
+          Predicate<Table> predicate = table -> table.getTopMenus().stream().map(Menu::getConfig)
+              .filter(topMenuConfig::equals).findAny().isPresent();
+          return predicate;
+        }, topMenuConfig -> {
+          Function<Table, String> function = table -> topMenuConfig.getId() + "没有匹配到任何结果";
+          return function;
+        })));
   }
 
   // public <T> T get(Class<T> type) {
@@ -160,7 +170,7 @@ public class Table {
     return config;
   }
 
-  public ImmutableList<TableValidationError> getErrors() {
+  public ImmutableList<ValidationError<Table>> getErrors() {
     return errors;
   }
 

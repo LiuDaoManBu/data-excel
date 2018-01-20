@@ -83,7 +83,7 @@ public class ExcelUtil {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
       SheetConfig.Builder builder = SheetConfig.builder();
       if (!Strings.isNullOrEmpty(t.value())) {
-        builder.setMatcher(
+        builder.setId(t.value()).setMatcher(
             new SheetMatcher().add(t.valueMatcherType(), t.value(), Sheet::getSheetName));
       }
       return builder;
@@ -120,10 +120,11 @@ public class ExcelUtil {
     return jsonObject.toJavaObject(type);
   }
 
+  // TODO
   public static MenuConfig.Builder toConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
       ExcelMenu excelMenu = f.menu();
-      MenuConfig.Builder builder = MenuConfig.builder()
+      MenuConfig.Builder builder = MenuConfig.builder().setId(excelMenu.value())
           .setMatcher(new StandardCellMatcher().addDataPredicate(excelMenu.valueMatcherType(),
               excelMenu.value(), value -> BaseDataType.STRING.cast(value, String.class)))
           .setDirection(excelMenu.direction()).setDistance(excelMenu.distance())

@@ -73,14 +73,14 @@ public class SheetParseResult {
     this.workbookParseResult = builder.workbookParseResult;
     this.sheet = builder.sheet;
     this.config = builder.config;
+    this.tables =
+        builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
+            .map(Table.Builder::build).collect(ImmutableList.toImmutableList());
     // TODO need?
     this.errors =
         Optional.of(sheet).filter(sheet -> sheet.getLastRowNum() <= sheet.getFirstRowNum())
             .map(sheet -> new ValidationError<Sheet>(sheet, "don't have any data"))
             .map(ImmutableList::of).orElse(ImmutableList.of());
-    this.tables =
-        builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
-            .map(Table.Builder::build).collect(ImmutableList.toImmutableList());
   }
 
   public Sheet getSheet() {
