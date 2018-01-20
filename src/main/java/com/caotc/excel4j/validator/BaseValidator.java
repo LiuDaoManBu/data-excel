@@ -8,14 +8,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 public class BaseValidator<T> implements Validator<T> {
-  private final ImmutableMap<? extends Predicate<T>,? extends  Function<T, String>> predicateToMessageFunctions;
+  private final ImmutableMap<? extends Predicate<T>, ? extends Function<T, String>> predicateToMessageFunctions;
 
-  public BaseValidator(Predicate<T> predicate,Function<T, String> messageFunction) {
-    this.predicateToMessageFunctions=ImmutableMap.of(predicate,messageFunction);
+  public BaseValidator(Predicate<T> predicate, Function<T, String> messageFunction) {
+    this.predicateToMessageFunctions = ImmutableMap.of(predicate, messageFunction);
   }
-  
+
   public BaseValidator(
-      ImmutableMap<Predicate<T>,Function<T, String>> predicateToMessageFunctions) {
+      ImmutableMap<Predicate<T>, Function<T, String>> predicateToMessageFunctions) {
     super();
     this.predicateToMessageFunctions = predicateToMessageFunctions;
   }

@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -16,8 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import javax.validation.Validation;
-import javax.validation.constraints.NotNull;
+import javax.validation.ConstraintViolation;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.annotation.ExcelField;
 import com.caotc.excel4j.annotation.ExcelSheet;
 import com.caotc.excel4j.annotation.ExcelTable;
@@ -42,12 +43,17 @@ import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
+import com.caotc.excel4j.parse.error.ValidationError;
+import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.caotc.excel4j.validator.BaseValidator;
 import com.caotc.excel4j.validator.JavaxValidator;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 
@@ -90,9 +96,28 @@ public class ExcelUtil {
           TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
               .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
       // TODO
-      builder.getValidators().add(new JavaxValidator<>());
+      builder.getDataConfigBuilder().addJavaxValidator(JavaxValidator.FACTORY.getValidator(), type);
       return builder;
     }).orElse(null);
+  }
+
+  // TODO
+  public static <T> T toJavaObject(Map<Menu, StandardCell> menuToValueCell, Class<T> type) {
+    ImmutableCollection<Field> fields =
+        ClassUtil.getAllFields(type).collect(ImmutableSet.toImmutableSet());
+
+    JSONObject jsonObject = new JSONObject();
+    menuToValueCell.forEach((menu, cell) -> {
+      Field field = menu.getField();
+      if (Objects.isNull(field)) {
+        field =
+            fields.stream().filter(f -> f.getName().equals(menu.getFieldName())).findAny().get();
+      }
+
+      jsonObject.put(field.getName(),
+          menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType()));
+    });
+    return jsonObject.toJavaObject(type);
   }
 
   public static MenuConfig.Builder toConfig(Field field) {

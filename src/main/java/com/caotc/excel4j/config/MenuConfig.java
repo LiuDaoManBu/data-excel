@@ -195,12 +195,12 @@ public class MenuConfig {
     Preconditions.checkState(!(!childrens.isEmpty() && Objects.nonNull(dataConfig)));
   }
 
-  public Optional<Field> getField() {
-    return Optional.ofNullable(dataConfig).map(MenuDataConfig::getField);
+  public Field getField() {
+    return Optional.ofNullable(dataConfig).map(MenuDataConfig::getField).orElse(null);
   }
 
-  public Optional<String> getFieldName() {
-    return Optional.ofNullable(dataConfig).map(MenuDataConfig::getFieldName);
+  public String getFieldName() {
+    return Optional.ofNullable(dataConfig).map(MenuDataConfig::getFieldName).orElse(null);
   }
 
   public boolean isTopMenu() {

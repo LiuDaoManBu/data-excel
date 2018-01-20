@@ -9,11 +9,11 @@ import com.google.common.collect.ImmutableSet;
 
 public class JavaxValidator<T> implements Validator<T> {
   // TODO
-  private static final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+  public static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
   private final javax.validation.Validator validator;
 
   public JavaxValidator() {
-    this.validator = factory.getValidator();
+    this.validator = FACTORY.getValidator();
   }
 
   @Override

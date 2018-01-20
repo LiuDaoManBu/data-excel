@@ -133,7 +133,7 @@ public class Menu {
   }
 
   public Optional<Menu> getFieldParent() {
-    return getSuper(menu -> menu.getFieldName().isPresent());
+    return getSuper(menu -> Objects.nonNull(menu.getFieldName()));
   }
 
   public ImmutableList<Menu> getSubs(Predicate<? super Menu> predicate) {
@@ -148,19 +148,19 @@ public class Menu {
   }
 
   public ImmutableList<Menu> getFieldChildrens() {
-    return getSubs(menu -> menu.getFieldName().isPresent());
+    return getSubs(menu -> Objects.nonNull(menu.getFieldName()));
   }
 
   public ImmutableList<Field> getFields() {
-    if (!getField().isPresent()) {
+    if (Objects.isNull(getField())) {
       return ImmutableList.of();
     }
     com.google.common.collect.ImmutableList.Builder<Field> builder = ImmutableList.builder();
-    builder.add(getField().get());
+    builder.add(getField());
     Optional<Menu> optional = getFieldParent();
     while (optional.isPresent()) {
       Menu menu = optional.get();
-      builder.add(menu.getField().get());
+      builder.add(menu.getField());
       optional = menu.getFieldParent();
     }
     return builder.build().reverse();
@@ -197,11 +197,11 @@ public class Menu {
     return BaseDataType.STRING.cast(cell.getValueCell(), String.class);
   }
 
-  public Optional<Field> getField() {
+  public Field getField() {
     return config.getField();
   }
 
-  public Optional<String> getFieldName() {
+  public String getFieldName() {
     return config.getFieldName();
   }
 

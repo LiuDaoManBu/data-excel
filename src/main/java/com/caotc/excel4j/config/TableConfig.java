@@ -28,7 +28,7 @@ public class TableConfig {
     private SheetConfig sheetConfig;
     private Direction fixedMenuDirection;
     private Direction unFixedMenuDirection;
-    private TableDataConfig dataConfig;
+    private TableDataConfig.Builder dataConfigBuilder;
     private List<Validator<Table>> validators;
     private ParserConfig parserConfig;
 
@@ -36,7 +36,7 @@ public class TableConfig {
       topMenuConfigBuilders = Lists.newLinkedList();
       validators = Lists.newLinkedList();
     }
-    
+
     public TableConfig build() {
       return new TableConfig(this);
     }
@@ -95,12 +95,12 @@ public class TableConfig {
       return this;
     }
 
-    public TableDataConfig getDataConfig() {
-      return dataConfig;
+    public TableDataConfig.Builder getDataConfigBuilder() {
+      return dataConfigBuilder;
     }
 
-    public Builder setDataConfig(TableDataConfig dataConfig) {
-      this.dataConfig = dataConfig;
+    public Builder setDataConfigBuilder(TableDataConfig.Builder dataConfigBuilder) {
+      this.dataConfigBuilder = dataConfigBuilder;
       return this;
     }
 
@@ -157,7 +157,7 @@ public class TableConfig {
 
     validators = Stream.concat(Stream.of(validator), builder.validators.stream())
         .collect(ImmutableList.toImmutableList());
-    dataConfig = builder.dataConfig;
+    dataConfig = builder.dataConfigBuilder.build();
     parserConfig = builder.parserConfig;
   }
 

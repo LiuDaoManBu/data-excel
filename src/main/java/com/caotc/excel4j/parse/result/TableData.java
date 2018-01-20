@@ -90,14 +90,14 @@ public class TableData {
     return menuToValueCells.stream().map(map -> {
       JSONObject jsonObject = new JSONObject();
       map.forEach((menu, cell) -> {
-        Optional<Field> field = menu.getField();
-        if (!field.isPresent()) {
+        Field field = menu.getField();
+        if (Objects.isNull(field)) {
           field =
-              fields.stream().filter(f -> f.getName().equals(menu.getFieldName().get())).findAny();
+              fields.stream().filter(f -> f.getName().equals(menu.getFieldName())).findAny().get();
         }
 
-        jsonObject.put(field.get().getName(),
-            menu.getData().getConfig().getDataType().cast(cell.getValue(), field.get().getType()));
+        jsonObject.put(field.getName(),
+            menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType()));
       });
       return (T) jsonObject.toJavaObject(type.getRawType());
     }).collect(ImmutableList.toImmutableList());
