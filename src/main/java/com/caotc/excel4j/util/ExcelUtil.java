@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -41,7 +46,6 @@ import com.caotc.excel4j.config.MenuDataConfig;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
-import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
@@ -53,6 +57,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 
 
 public class ExcelUtil {
@@ -130,9 +135,46 @@ public class ExcelUtil {
           .setDirection(excelMenu.direction()).setDistance(excelMenu.distance())
           .setNecessity(excelMenu.necessity())
           .setDataConfigBuilder(MenuDataConfig.builder().setLoadType(f.loadType())
-              .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
+              .setDataType(findDataType(f.dataType(), field)).setField(field)
+              .setFieldName(field.getName()));
       return builder;
     }).orElse(null);
+  }
+
+  private static BaseDataType findDataType(BaseDataType dataType, Field field) {
+    if (field.getType().equals(String.class) && BaseDataType.STRING.equals(dataType)) {
+      return dataType;
+    }
+    ImmutableCollection<Class<?>> wholeNumbers =
+        ImmutableSet.of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,
+            long.class, Long.class, BigInteger.class);
+    if (wholeNumbers.contains(field.getType())) {
+      return BaseDataType.WHOLE_NUMBER;
+    }
+
+    ImmutableCollection<Class<?>> decimals =
+        ImmutableSet.of(float.class, Float.class, double.class, Double.class, BigDecimal.class);
+    if (decimals.contains(field.getType())) {
+      return BaseDataType.DECIMAL;
+    }
+
+    if (boolean.class.equals(field.getType()) || Boolean.class.equals(field.getType())) {
+      return BaseDataType.BOOLEAN;
+    }
+
+    if (Date.class.equals(field.getType()) || LocalDateTime.class.equals(field.getType())) {
+      return BaseDataType.DATE_TIME;
+    }
+
+    if (LocalDate.class.equals(field.getType())) {
+      return BaseDataType.DATE;
+    }
+
+    if (LocalTime.class.equals(field.getType())) {
+      return BaseDataType.TIME;
+    }
+
+    throw new IllegalArgumentException();
   }
 
   @Nullable
