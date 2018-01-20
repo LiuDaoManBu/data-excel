@@ -6,20 +6,26 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Workbook;
-import com.caotc.excel4j.matcher.BaseValidator;
-import com.caotc.excel4j.matcher.Validator;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
 import com.caotc.excel4j.util.ExcelUtil;
+import com.caotc.excel4j.validator.BaseValidator;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 public class WorkbookConfig {
   public static class Builder {
     private List<SheetConfig.Builder> sheetConfigBuilders;
     private List<Validator<Workbook>> validators;
     private ParserConfig parserConfig;
+
+    public Builder() {
+      sheetConfigBuilders = Lists.newLinkedList();
+      validators = Lists.newLinkedList();
+    }
 
     public WorkbookConfig build() {
       return new WorkbookConfig(this);

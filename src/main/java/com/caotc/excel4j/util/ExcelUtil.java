@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import javax.validation.Validation;
 import javax.validation.constraints.NotNull;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -37,13 +38,14 @@ import com.caotc.excel4j.config.MenuDataConfig;
 import com.caotc.excel4j.config.SheetConfig;
 import com.caotc.excel4j.config.TableConfig;
 import com.caotc.excel4j.config.WorkbookConfig;
-import com.caotc.excel4j.matcher.BaseValidator;
 import com.caotc.excel4j.matcher.constant.StringMatcherType;
 import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.matcher.usermodel.SheetMatcher;
 import com.caotc.excel4j.matcher.usermodel.StandardCellMatcher;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.parse.result.WorkbookParseResult;
+import com.caotc.excel4j.validator.BaseValidator;
+import com.caotc.excel4j.validator.JavaxValidator;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -84,8 +86,12 @@ public class ExcelUtil {
 
   public static <V> TableConfig.Builder toTableConfig(Class<V> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
-      return TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
-          .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
+      TableConfig.Builder builder =
+          TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
+              .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
+      // TODO
+      builder.getValidators().add(new JavaxValidator<>());
+      return builder;
     }).orElse(null);
   }
 
@@ -97,11 +103,6 @@ public class ExcelUtil {
           .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
           .setDataConfigBuilder(MenuDataConfig.builder().setLoadType(f.loadType())
               .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
-      Optional.ofNullable(field.getAnnotation(NotNull.class)).ifPresent(t -> {
-        // TODO tip
-        builder.getDataConfigBuilder().getValidators().add(0,
-            new BaseValidator<>(Objects::nonNull, cell -> cell.formatAsString()));
-      });
       return builder;
     }).orElse(null);
   }

@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import com.caotc.excel4j.constant.ConstructType;
-import com.caotc.excel4j.matcher.Validator;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 public class TableDataConfig {
 
@@ -17,6 +18,10 @@ public class TableDataConfig {
     private ConstructType constructType;
     private List<Validator<Map<Menu, StandardCell>>> validators;
 
+    public Builder() {
+      validators = Lists.newLinkedList();
+    }
+    
     public TableDataConfig build() {
       return new TableDataConfig(this);
     }
@@ -57,9 +62,9 @@ public class TableDataConfig {
   protected TableDataConfig(Builder builder) {
     constructType = builder.constructType;
     tableConfig = builder.tableConfig;
-    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
     // TODO tip
     Preconditions.checkState(Objects.nonNull(tableConfig));
+    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
 
   public ConstructType getConstructType() {

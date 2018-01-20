@@ -7,14 +7,15 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.caotc.excel4j.constant.Direction;
-import com.caotc.excel4j.matcher.BaseValidator;
-import com.caotc.excel4j.matcher.Validator;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.Table;
+import com.caotc.excel4j.validator.BaseValidator;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
@@ -31,6 +32,11 @@ public class TableConfig {
     private List<Validator<Table>> validators;
     private ParserConfig parserConfig;
 
+    public Builder() {
+      topMenuConfigBuilders = Lists.newLinkedList();
+      validators = Lists.newLinkedList();
+    }
+    
     public TableConfig build() {
       return new TableConfig(this);
     }

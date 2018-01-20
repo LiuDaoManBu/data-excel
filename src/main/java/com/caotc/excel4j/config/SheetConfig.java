@@ -10,6 +10,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 public class SheetConfig {
   public static class Builder {
@@ -18,6 +19,10 @@ public class SheetConfig {
     private Matcher<Sheet> matcher;
     private ParserConfig parserConfig;
 
+    public Builder() {
+      tableConfigBuilders = Lists.newLinkedList();
+    }
+    
     public SheetConfig build() {
       return new SheetConfig(this);
     }

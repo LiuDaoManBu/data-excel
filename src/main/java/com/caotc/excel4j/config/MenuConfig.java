@@ -10,17 +10,17 @@ import java.util.stream.Stream;
 import com.caotc.excel4j.constant.Direction;
 import com.caotc.excel4j.constant.LoadType;
 import com.caotc.excel4j.constant.Necessity;
-import com.caotc.excel4j.matcher.BaseValidator;
 import com.caotc.excel4j.matcher.Matcher;
-import com.caotc.excel4j.matcher.Validator;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
+import com.caotc.excel4j.validator.BaseValidator;
+import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class MenuConfig {
   public static class Builder {
@@ -36,6 +36,11 @@ public class MenuConfig {
     private Necessity necessity;
     private Direction direction;
     private ParserConfig parserConfig;
+
+    public Builder() {
+      childrenBuilders = Lists.newLinkedList();
+      validators = Lists.newLinkedList();
+    }
 
     public MenuConfig build() {
       return new MenuConfig(this);
@@ -155,7 +160,11 @@ public class MenuConfig {
   private final ParserConfig parserConfig;
 
   private MenuConfig(Builder builder) {
+    // TODO tip
+    Preconditions.checkNotNull(builder.matcher);
     matcher = builder.matcher.reduce();
+
+
     distance = Optional.ofNullable(builder.distance).orElse(DEFAULT_DISTANCE);
     parent = builder.parent;
     direction = Optional.ofNullable(builder.direction).orElse(
@@ -163,6 +172,8 @@ public class MenuConfig {
     necessity = Optional.ofNullable(builder.necessity).orElse(DEFAULT_MENU_NECESSITY);
     tableConfig = Optional.ofNullable(builder.tableConfig)
         .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
+    // TODO tip
+    Preconditions.checkState(Objects.nonNull(tableConfig));
     childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
@@ -181,11 +192,7 @@ public class MenuConfig {
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
     parserConfig = builder.parserConfig;
 
-    // TODO tip
-    Preconditions.checkState(Objects.nonNull(tableConfig));
-    Preconditions.checkNotNull(matcher);
-    Preconditions.checkNotNull(necessity);
-    Preconditions.checkState(!(!Iterables.isEmpty(childrens) && Objects.nonNull(dataConfig)));
+    Preconditions.checkState(!(!childrens.isEmpty() && Objects.nonNull(dataConfig)));
   }
 
   public Optional<Field> getField() {
