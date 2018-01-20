@@ -34,7 +34,7 @@ public class MenuDataConfig {
     public Builder() {
       validators = Lists.newLinkedList();
     }
-    
+
     public MenuDataConfig build() {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
       return new MenuDataConfig(this);
@@ -125,7 +125,7 @@ public class MenuDataConfig {
     Preconditions.checkState(Objects.nonNull(menuConfig));
     loadType = Optional.ofNullable(builder.loadType).orElse(DEFAULT_LOAD_TYPE);
     field = builder.field;
-    fieldName = builder.fieldName;
+    fieldName = Optional.ofNullable(builder.fieldName).orElse(field.getName());
     dataType = builder.dataType;
     // TODO tip
     Preconditions.checkState(Objects.nonNull(dataType));
@@ -134,10 +134,10 @@ public class MenuDataConfig {
         Stream.of(new BaseValidator<StandardCell>(
             ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
                 .put(cell -> dataType.test(cell.getValue()),
-                    cell -> JOINER.join(cell.formatAsString(), "数据格式不正确"))
+                    cell -> JOINER.join(cell.formatAsString(), "数据格式不正确"))//TODO tip
                 .build())),
         builder.validators.stream()).collect(ImmutableList.toImmutableList());
-    
+
   }
 
   public <T> T cast(Object value, TypeToken<T> type) {

@@ -33,6 +33,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.annotation.ExcelField;
+import com.caotc.excel4j.annotation.ExcelMenu;
 import com.caotc.excel4j.annotation.ExcelSheet;
 import com.caotc.excel4j.annotation.ExcelTable;
 import com.caotc.excel4j.config.MenuConfig;
@@ -64,7 +65,7 @@ public class ExcelUtil {
           .put(CellType.BOOLEAN, Cell::getBooleanCellValue).build();
 
   private static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
-  
+
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
@@ -81,9 +82,9 @@ public class ExcelUtil {
   public static SheetConfig.Builder toSheetConfig(Class<?> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
       SheetConfig.Builder builder = SheetConfig.builder();
-      if (!Strings.isNullOrEmpty(t.name())) {
+      if (!Strings.isNullOrEmpty(t.value())) {
         builder.setMatcher(
-            new SheetMatcher().add(StringMatcherType.EQUALS, t.name(), Sheet::getSheetName));
+            new SheetMatcher().add(t.valueMatcherType(), t.value(), Sheet::getSheetName));
       }
       return builder;
     }).orElse(null);
@@ -121,10 +122,12 @@ public class ExcelUtil {
 
   public static MenuConfig.Builder toConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
+      ExcelMenu excelMenu = f.menu();
       MenuConfig.Builder builder = MenuConfig.builder()
-          .setMatcher(new StandardCellMatcher().addDataPredicate(StringMatcherType.EQUALS,
-              f.menuName(), value -> BaseDataType.STRING.cast(value, String.class)))
-          .setDirection(f.direction()).setDistance(f.distance()).setNecessity(f.necessity())
+          .setMatcher(new StandardCellMatcher().addDataPredicate(excelMenu.valueMatcherType(),
+              excelMenu.value(), value -> BaseDataType.STRING.cast(value, String.class)))
+          .setDirection(excelMenu.direction()).setDistance(excelMenu.distance())
+          .setNecessity(excelMenu.necessity())
           .setDataConfigBuilder(MenuDataConfig.builder().setLoadType(f.loadType())
               .setDataType(f.dataType()).setField(field).setFieldName(field.getName()));
       return builder;

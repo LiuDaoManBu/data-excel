@@ -26,8 +26,7 @@ public class TableConfig {
     private Object id;
     private List<MenuConfig.Builder> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
-    private Direction fixedMenuDirection;
-    private Direction unFixedMenuDirection;
+    private Direction menuDirection;
     private TableDataConfig.Builder dataConfigBuilder;
     private List<Validator<Table>> validators;
     private ParserConfig parserConfig;
@@ -59,21 +58,12 @@ public class TableConfig {
       return this;
     }
 
-    public Direction getFixedMenuDirection() {
-      return fixedMenuDirection;
+    public Direction getMenuDirection() {
+      return menuDirection;
     }
 
-    public Builder setFixedMenuDirection(Direction fixedMenuDirection) {
-      this.fixedMenuDirection = fixedMenuDirection;
-      return this;
-    }
-
-    public Direction getUnFixedMenuDirection() {
-      return unFixedMenuDirection;
-    }
-
-    public Builder setUnFixedMenuDirection(Direction unFixedMenuDirection) {
-      this.unFixedMenuDirection = unFixedMenuDirection;
+    public Builder setMenuDirection(Direction menuDirection) {
+      this.menuDirection = menuDirection;
       return this;
     }
 
@@ -115,14 +105,15 @@ public class TableConfig {
 
   }
 
+  public static final Direction DEFAULT_MENU_DIRECTION = Direction.BOTTOM;
+
   public static Builder builder() {
     return new Builder();
   }
 
   private final Object id;
   private final SheetConfig sheetConfig;
-  private final Direction fixedMenuDirection;
-  private final Direction unFixedMenuDirection;
+  private final Direction menuDirection;
   private final ImmutableCollection<MenuConfig> topMenuConfigs;
   private final ImmutableList<Validator<Table>> validators;
   private final TableDataConfig dataConfig;
@@ -139,8 +130,7 @@ public class TableConfig {
   private TableConfig(Builder builder) {
     id = builder.id;
     sheetConfig = builder.sheetConfig;
-    fixedMenuDirection = builder.fixedMenuDirection;
-    unFixedMenuDirection = builder.unFixedMenuDirection;
+    menuDirection = Optional.ofNullable(builder.menuDirection).orElse(DEFAULT_MENU_DIRECTION);
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
@@ -189,12 +179,9 @@ public class TableConfig {
     return topMenuConfigs;
   }
 
-  public Direction getFixedMenuDirection() {
-    return fixedMenuDirection;
-  }
 
-  public Direction getUnFixedMenuDirection() {
-    return unFixedMenuDirection;
+  public Direction getMenuDirection() {
+    return menuDirection;
   }
 
   public ParserConfig getParserConfig() {

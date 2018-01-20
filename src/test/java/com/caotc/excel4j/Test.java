@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.caotc.excel4j.annotation.ExcelField;
+import com.caotc.excel4j.annotation.ExcelMenu;
 import com.caotc.excel4j.constant.ConstructType;
 import com.caotc.excel4j.matcher.ComparableMatcher;
 import com.caotc.excel4j.matcher.data.DataTypeMatcher;
@@ -103,6 +105,7 @@ class C {
 
 class User {
   public final String a;
+  @ExcelField(menu = @ExcelMenu(""))
   private String userName;
   private String passWord;
   private String region;

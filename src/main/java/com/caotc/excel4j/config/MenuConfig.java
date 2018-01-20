@@ -140,7 +140,6 @@ public class MenuConfig {
 
   public static final int DEFAULT_DISTANCE = 1;
   private static final Necessity DEFAULT_MENU_NECESSITY = Necessity.MUST;
-  public static final Direction DEFAULT_DIRECTION = Direction.BOTTOM;
 
   public static Builder builder() {
     return new Builder();
@@ -167,13 +166,13 @@ public class MenuConfig {
 
     distance = Optional.ofNullable(builder.distance).orElse(DEFAULT_DISTANCE);
     parent = builder.parent;
-    direction = Optional.ofNullable(builder.direction).orElse(
-        Optional.ofNullable(parent).map(MenuConfig::getDirection).orElse(DEFAULT_DIRECTION));
     necessity = Optional.ofNullable(builder.necessity).orElse(DEFAULT_MENU_NECESSITY);
     tableConfig = Optional.ofNullable(builder.tableConfig)
         .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
     // TODO tip
     Preconditions.checkState(Objects.nonNull(tableConfig));
+    direction = Optional.ofNullable(builder.direction).orElse(Optional.ofNullable(parent)
+        .map(MenuConfig::getDirection).orElse(tableConfig.getMenuDirection()));
     childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
