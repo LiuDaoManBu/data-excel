@@ -54,8 +54,9 @@ public class TableData {
     Stream<ValidationError<TableData>> menuMatcherErrors =
         menuToValueCells.stream().map(Map::entrySet).flatMap(Collection::stream)
             .flatMap(entry -> entry.getKey().getData().getConfig().getValidators().stream()
-                .map(validator -> validator.validate(entry.getValue())).flatMap(Collection::stream))
-            .map(error -> new ValidationError<>(this, error.getMessage()));
+                .map(validator -> validator.validate(entry.getValue())).flatMap(Collection::stream)
+                .map(error -> entry.getKey().getFullName() + error.getMessage()))
+            .map(message -> new ValidationError<>(this, message));
 
 
     Stream<ValidationError<TableData>> tableDataMatcherErrors = Optional.ofNullable(config)

@@ -2,6 +2,7 @@ package com.caotc.excel4j.parse.result;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -12,6 +13,7 @@ import com.caotc.excel4j.matcher.data.type.BaseDataType;
 import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.validator.BaseValidator;
 import com.caotc.excel4j.validator.Validator;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableCollection;
@@ -19,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class Menu {
   public static class Builder {
@@ -127,7 +130,7 @@ public class Menu {
               .filter(children::equals).findAny().isPresent();
           return predicate;
         }, children -> {
-          Function<Menu, String> function = table -> "没有匹配到" + children.getId() + "对应的菜单";
+          Function<Menu, String> function = menu -> "没有匹配到" + children.getId() + "对应的菜单";
           return function;
         })));
   }
@@ -163,7 +166,7 @@ public class Menu {
     if (Objects.isNull(getField())) {
       return ImmutableList.of();
     }
-    com.google.common.collect.ImmutableList.Builder<Field> builder = ImmutableList.builder();
+    ImmutableList.Builder<Field> builder = ImmutableList.builder();
     builder.add(getField());
     Optional<Menu> optional = getFieldParent();
     while (optional.isPresent()) {
@@ -203,6 +206,15 @@ public class Menu {
 
   public String getName() {
     return BaseDataType.STRING.cast(cell.getValueCell(), String.class);
+  }
+
+  public String getFullName() {
+    ImmutableList.Builder<Menu> supers = ImmutableList.builder();
+    for (Menu menu = this; Objects.nonNull(menu.parent); menu = menu.parent) {
+      supers.add(menu.parent);
+    }
+    return Joiner.on("-").join(supers.build().reverse().stream().map(Menu::getName)
+        .collect(ImmutableList.toImmutableList()));
   }
 
   public Field getField() {

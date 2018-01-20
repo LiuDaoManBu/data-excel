@@ -107,7 +107,8 @@ public class SheetParseResult {
     return Stream
         .concat(errors.stream(),
             tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
-                .map(error -> new ValidationError<Sheet>(sheet, error.getMessage())))
+                .map(error -> new ValidationError<Sheet>(sheet,
+                    sheet.getSheetName() + error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 
