@@ -106,7 +106,7 @@ public class MenuDataConfig {
 
   }
 
-  private static final Joiner JOINER = Joiner.on("");
+  private static final Joiner JOINER = Joiner.on("").skipNulls();
   private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
   // TODO 可配置
   private static final ImmutableBiMap<BaseDataType, String> DATA_TYPE_TO_TIPS =
