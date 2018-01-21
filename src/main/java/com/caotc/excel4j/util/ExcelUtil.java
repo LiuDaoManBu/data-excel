@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -57,7 +55,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.common.reflect.TypeToken;
 
 
 public class ExcelUtil {
@@ -69,7 +66,7 @@ public class ExcelUtil {
           .put(CellType.STRING, Cell::getStringCellValue)
           .put(CellType.BOOLEAN, Cell::getBooleanCellValue).build();
 
-  private static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
+//  private static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
 
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
@@ -101,7 +98,7 @@ public class ExcelUtil {
           TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
               .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
       // TODO
-      builder.getDataConfigBuilder().addJavaxValidator(FACTORY.getValidator(), type);
+//      builder.getDataConfigBuilder().addJavaxValidator(FACTORY.getValidator(), type);
       return builder;
     }).orElse(null);
   }
@@ -111,20 +108,27 @@ public class ExcelUtil {
     ImmutableCollection<Field> fields =
         ClassUtil.getAllFields(type).collect(ImmutableSet.toImmutableSet());
 
-    JSONObject jsonObject = new JSONObject();
-    menuToValueCell.forEach((menu, cell) -> {
-      Field field = menu.getField();
-      if (Objects.isNull(field)) {
-        field =
-            fields.stream().filter(f -> f.getName().equals(menu.getFieldName())).findAny().get();
-      }
-
-      jsonObject.put(field.getName(),
-          menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType()));
-    });
+    JSONObject jsonObject = toJsonObject(menuToValueCell);
     return jsonObject.toJavaObject(type);
   }
 
+//TODO
+ public static JSONObject toJsonObject(Map<Menu, StandardCell> menuToValueCell) {
+   JSONObject jsonObject = new JSONObject();
+   menuToValueCell.forEach((menu, cell) -> {
+     Field field = menu.getField();
+     Object value=null;
+     if (Objects.isNull(field)) {
+       value=cell.getValue();
+     }else {
+       value=menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType());
+     }
+
+     jsonObject.put(menu.getFieldName(),value);
+   });
+   return jsonObject;
+ }
+  
   // TODO
   public static MenuConfig.Builder toConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {

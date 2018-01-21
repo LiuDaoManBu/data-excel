@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.caotc.excel4j.config.TableDataConfig;
 import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.util.ClassUtil;
+import com.caotc.excel4j.util.ExcelUtil;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -85,21 +87,12 @@ public class TableData {
   }
 
   public <T> ImmutableList<T> getDatas(TypeToken<T> type) {
-    ImmutableCollection<Field> fields =
-        ClassUtil.getAllFields(type).collect(ImmutableSet.toImmutableSet());
-    return menuToValueCells.stream().map(map -> {
-      JSONObject jsonObject = new JSONObject();
-      map.forEach((menu, cell) -> {
-        Field field = menu.getField();
-        if (Objects.isNull(field)) {
-          field =
-              fields.stream().filter(f -> f.getName().equals(menu.getFieldName())).findAny().get();
-        }
-
-        jsonObject.put(field.getName(),
-            menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType()));
-      });
-      return (T) jsonObject.toJavaObject(type.getRawType());
-    }).collect(ImmutableList.toImmutableList());
+    return menuToValueCells.stream().map(map->(T)ExcelUtil.toJavaObject(map, type.getRawType())).collect(ImmutableList.toImmutableList());
+  }
+  
+  public JSONArray getJsonDatas() {
+    JSONArray array=new JSONArray();
+    menuToValueCells.forEach(map->array.add(ExcelUtil.toJsonObject(map)));
+    return  array;
   }
 }
