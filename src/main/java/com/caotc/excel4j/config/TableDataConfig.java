@@ -9,6 +9,7 @@ import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
 import com.caotc.excel4j.util.ExcelUtil;
+import com.caotc.excel4j.validator.JavaxValidator;
 import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
@@ -34,27 +35,7 @@ public class TableDataConfig {
 
     public <T> Builder addJavaxValidator(javax.validation.Validator validator, Class<T> type,
         Class<?>... groups) {
-      validators.add(new Validator<Map<Menu, StandardCell>>() {
-        @Override
-        public ImmutableCollection<ValidationError<Map<Menu, StandardCell>>> validate(
-            Map<Menu, StandardCell> object) {
-          T v = ExcelUtil.toJavaObject(object, type);
-          ImmutableMap<Menu, String> menuToMessages =
-              validator.validate(v, groups).stream()
-                  .collect(
-                      ImmutableMap.toImmutableMap(
-                          t -> object.keySet().stream()
-                              .filter(menu -> t.getPropertyPath().toString()
-                                  .equals(menu.getFieldName()))
-                              .findAny().get(),
-                          ConstraintViolation::getMessage));
-          return menuToMessages.entrySet().stream()
-              .map(entry -> entry.getKey().getName() + object.get(entry.getKey()).formatAsString()
-                  + entry.getValue())
-              .map(message -> new ValidationError<>(object, message))
-              .collect(ImmutableSet.toImmutableSet());
-        }
-      });
+      validators.add(new JavaxValidator<>(validator, type, groups));
       return this;
     }
 

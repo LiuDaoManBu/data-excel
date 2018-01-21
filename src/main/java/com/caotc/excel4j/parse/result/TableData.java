@@ -69,7 +69,7 @@ public class TableData {
     this.errors = Stream.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }
-  
+
   public Table getTable() {
     return table;
   }
@@ -87,12 +87,13 @@ public class TableData {
   }
 
   public <T> ImmutableList<T> getDatas(TypeToken<T> type) {
-    return menuToValueCells.stream().map(map->(T)ExcelUtil.toJavaObject(map, type.getRawType())).collect(ImmutableList.toImmutableList());
+    return menuToValueCells.stream().map(map -> (T) ExcelUtil.toJavaObject(map, type.getRawType()))
+        .collect(ImmutableList.toImmutableList());
   }
-  
+
   public JSONArray getJsonDatas() {
-    JSONArray array=new JSONArray();
-    menuToValueCells.forEach(map->array.add(ExcelUtil.toJsonObject(map)));
-    return  array;
+    JSONArray array = new JSONArray();
+    menuToValueCells.forEach(map -> array.add(ExcelUtil.toJsonObject(map)));
+    return array;
   }
 }
