@@ -1,132 +1,63 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>com.caotc.excel4j</groupId>
+	<groupId>com.github.liudaomanbu</groupId>
 	<artifactId>data-excel</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
-
-	<name>${project.groupId}:${project.artifactId}</name>
-	<url>https://github.com/cao19920425/data-excel</url>
-	<description>data-excel</description>
-
-	<licenses>
-     <license>
-       <name>The Apache License, Version 2.0</name>
-       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-     </license>
-   	</licenses>
-
-	<developers>
-	    <developer>
-	        <name>caotc</name>
-	        <email>250622148@qq.com</email>
-	    </developer>
-	</developers>
-
-	<scm>
-	    <connection>scm:git:https://github.com/cao19920425/data-excel.git</connection>
-	    <developerConnection>scm:git:https://github.com/cao19920425/data-excel.git</developerConnection>
-	    <url>https://github.com/cao19920425/data-excel</url>
-	    <tag>${project.version}</tag>
-	</scm>
+	
+	<name>${project.artifactId}</name>
+	<url>https://github.com/liudaomanbu/data-excel</url>
+	<description>excel for data</description>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-<!-- 		    <plugin>
-		        <groupId>org.sonatype.plugins</groupId>
-		        <artifactId>nexus-staging-maven-plugin</artifactId>
-		        <version>1.6.3</version>
-		        <extensions>true</extensions>
-		        <configuration>
-		            <serverId>ossrh</serverId>
-		            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-		            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-		        </configuration>
-		    </plugin> -->
-		    <plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-javadoc-plugin</artifactId>
-		        <version>2.9.1</version>
-		        <executions>
-		            <execution>
-		                <id>attach-javadocs</id>
-		                <goals>
-		                    <goal>jar</goal>
-		                </goals>
-		            </execution>
-		        </executions>
-		    </plugin>
-		    <plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-source-plugin</artifactId>
-		        <version>2.2.1</version>
-		        <executions>
-		            <execution>
-		                <id>attach-sources</id>
-		                <goals>
-		                    <goal>jar-no-fork</goal>
-		                </goals>
-		            </execution>
-		        </executions>
-		    </plugin>
-		    <plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-gpg-plugin</artifactId>
-		        <version>1.6</version>
-		        <executions>
-		            <execution>
-		                <id>sign-artifacts</id>
-		                <phase>verify</phase>
-		                <goals>
-		                    <goal>sign</goal>
-		                </goals>
-		            </execution>
-		        </executions>
-		    </plugin>				
-		</plugins>
-	</build>
+        <slf4j.version>1.7.25</slf4j.version>
+        <poi.version>3.17</poi.version>
+        <fastjson.version>1.2.44</fastjson.version>
+        <guava.version>23.6-jre</guava.version>
+        <aviator.version>3.3.0</aviator.version>
+        <validation-api.version>1.1.0.Final</validation-api.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
 	<dependencies>
-		<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
-			<version>3.8.1</version> <scope>test</scope> </dependency> -->
+		<!-- slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        
+        <!-- poi -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.44</version>
+			<version>${fastjson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>23.6-jre</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.17</version>
+			<version>${guava.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.aviator</groupId>
 			<artifactId>aviator</artifactId>
-			<version>3.3.0</version>
+			<version>${aviator.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>javax.validation</groupId>
 		    <artifactId>validation-api</artifactId>
-		    <version>1.1.0.Final</version>
+		    <version>${validation-api.version}</version>
 		</dependency>
 <!-- 		<dependency>
 		    <groupId>org.hibernate.validator</groupId>
@@ -149,16 +80,106 @@
 		    <version>11.8.1</version>
 		</dependency> -->
 	</dependencies>
-	
-	<distributionManagement>
-	    <snapshotRepository>
-	        <id>snapshots</id>
-	        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-	    </snapshotRepository>
-	    <repository>
-	        <id>release</id>
-	        <name>Maven Central Staging Repository</name>
-	        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-	    </repository>
-	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<licenses>
+     <license>
+       <name>The Apache License, Version 2.0</name>
+       <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+     </license>
+   	</licenses>
+
+	<scm>
+		<tag>${project.version}</tag>
+		<url>https://github.com/liudaomanbu/data-excel</url>
+	    <connection>scm:git:https://github.com/liudaomanbu/data-excel.git</connection>
+	    <developerConnection>scm:git:git@github.com:liudaomanbu/data-excel.git</developerConnection>
+	</scm>
+
+	<developers>
+	    <developer>
+	        <name>liudaomanbu</name>
+	        <email>250622148@qq.com</email>
+	    </developer>
+	</developers>
+
+	<profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- GPG -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <useAgent>false</useAgent>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+			<distributionManagement>
+			    <snapshotRepository>
+			        <id>oss</id>
+			        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			    </snapshotRepository>
+			    <repository>
+			        <id>oss</id>
+			        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			    </repository>
+			</distributionManagement>
+        </profile>
+    </profiles>
+
 </project>
