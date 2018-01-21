@@ -29,8 +29,7 @@ public class TableData {
     this.config = table.getConfig().getDataConfig();
     List<Map<Menu, StandardCell>> menuTodatas = Lists.newArrayList();
     ImmutableList<Menu> menus = table.getDataMenus().collect(ImmutableList.toImmutableList());
-    for (int i = 0; i < menus.size(); i++) {
-      Menu menu = menus.get(i);
+    menus.forEach(menu -> {
       ImmutableList<StandardCell> valueCells = menu.getData().getValueCells();
       for (int j = 0; j < valueCells.size(); j++) {
         StandardCell valueCell = valueCells.get(j);
@@ -44,7 +43,7 @@ public class TableData {
         }
         map.put(menu, valueCell);
       }
-    }
+    });
 
     menuToValueCells = menuTodatas
         .stream().filter(map -> map.values().stream().map(StandardCell::getValue)
@@ -68,7 +67,7 @@ public class TableData {
     this.errors = Stream.concat(menuMatcherErrors, tableDataMatcherErrors)
         .collect(ImmutableList.toImmutableList());
   }
-
+  
   public Table getTable() {
     return table;
   }
