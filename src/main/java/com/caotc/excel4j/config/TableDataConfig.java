@@ -3,19 +3,13 @@ package com.caotc.excel4j.config;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.validation.ConstraintViolation;
 import com.caotc.excel4j.constant.ConstructType;
-import com.caotc.excel4j.parse.error.ValidationError;
 import com.caotc.excel4j.parse.result.Menu;
 import com.caotc.excel4j.parse.result.StandardCell;
-import com.caotc.excel4j.util.ExcelUtil;
 import com.caotc.excel4j.validator.JavaxValidator;
 import com.caotc.excel4j.validator.Validator;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 public class TableDataConfig {
