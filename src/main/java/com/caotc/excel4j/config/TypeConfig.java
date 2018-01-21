@@ -7,7 +7,6 @@ public abstract class TypeConfig<T> {
 
   public TypeConfig() {
     TypeToken<? extends TypeConfig> type = TypeToken.of(getClass());
-    
   }
 
   public TypeToken<T> getType() {
