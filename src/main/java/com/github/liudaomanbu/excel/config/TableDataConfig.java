@@ -2,7 +2,6 @@ package com.github.liudaomanbu.excel.config;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import com.github.liudaomanbu.excel.constant.ConstructType;
 import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
