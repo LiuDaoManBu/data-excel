@@ -21,9 +21,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
-public class MenuDataConfig {
-  public static class Builder {
-    private MenuConfig menuConfig;
+public class MenuDataConfig<T> {
+  public static class Builder<T> {
+    private MenuConfig<T> menuConfig;
     private Field field;
     private BaseDataType baseDataType;
     private DataType dataType;
@@ -35,16 +35,16 @@ public class MenuDataConfig {
       validators = Lists.newLinkedList();
     }
 
-    public MenuDataConfig build() {
+    public MenuDataConfig<T> build() {
       dataType = Optional.ofNullable(dataType).orElse(baseDataType);
-      return new MenuDataConfig(this);
+      return new MenuDataConfig<>(this);
     }
 
-    public MenuConfig getMenuConfig() {
+    public MenuConfig<T> getMenuConfig() {
       return menuConfig;
     }
 
-    public Builder setMenuConfig(MenuConfig menuConfig) {
+    public Builder<T> setMenuConfig(MenuConfig<T> menuConfig) {
       this.menuConfig = menuConfig;
       return this;
     }
@@ -53,7 +53,7 @@ public class MenuDataConfig {
       return field;
     }
 
-    public Builder setField(Field field) {
+    public Builder<T> setField(Field field) {
       this.field = field;
       return this;
     }
@@ -62,7 +62,7 @@ public class MenuDataConfig {
       return baseDataType;
     }
 
-    public Builder setBaseDataType(BaseDataType baseDataType) {
+    public Builder<T> setBaseDataType(BaseDataType baseDataType) {
       this.baseDataType = baseDataType;
       return this;
     }
@@ -71,7 +71,7 @@ public class MenuDataConfig {
       return dataType;
     }
 
-    public Builder setDataType(DataType dataType) {
+    public Builder<T> setDataType(DataType dataType) {
       this.dataType = dataType;
       return this;
     }
@@ -80,7 +80,7 @@ public class MenuDataConfig {
       return fieldName;
     }
 
-    public Builder setFieldName(String fieldName) {
+    public Builder<T> setFieldName(String fieldName) {
       this.fieldName = fieldName;
       return this;
     }
@@ -89,7 +89,7 @@ public class MenuDataConfig {
       return loadType;
     }
 
-    public Builder setLoadType(LoadType loadType) {
+    public Builder<T> setLoadType(LoadType loadType) {
       this.loadType = loadType;
       return this;
     }
@@ -98,7 +98,7 @@ public class MenuDataConfig {
       return validators;
     }
 
-    public Builder setValidators(List<Validator<StandardCell>> validators) {
+    public Builder<T> setValidators(List<Validator<StandardCell>> validators) {
       this.validators = validators;
       return this;
     }
@@ -121,18 +121,18 @@ public class MenuDataConfig {
           .put(BaseDataType.STRING, "字符串").put(BaseDataType.TELEPHONE, "手机号码")
           .put(BaseDataType.TIME, "时间").put(BaseDataType.WHOLE_NUMBER, "整数").build();
 
-  public static Builder builder() {
-    return new Builder();
+  public static <T> Builder<T> builder() {
+    return new Builder<>();
   }
 
-  private final MenuConfig menuConfig;
+  private final MenuConfig<T> menuConfig;
   private final LoadType loadType;
   private final Field field;
   private final String fieldName;
   private final DataType dataType;
   private final ImmutableList<Validator<StandardCell>> validators;
 
-  protected MenuDataConfig(Builder builder) {
+  protected MenuDataConfig(Builder<T> builder) {
     menuConfig = builder.menuConfig;
     Preconditions.checkNotNull(menuConfig, "menuConfig can't be null");
     loadType = Optional.ofNullable(builder.loadType).orElse(DEFAULT_LOAD_TYPE);
@@ -154,11 +154,11 @@ public class MenuDataConfig {
             .build());
   }
 
-  public <T> T cast(Object value, TypeToken<T> type) {
+  public <V> V cast(Object value, TypeToken<V> type) {
     return dataType.cast(value, type);
   }
 
-  public ImmutableList<StandardCell> getDataCells(Menu menu) {
+  public ImmutableList<StandardCell> getDataCells(Menu<T> menu) {
     return loadType.getDataCells(menu);
   }
 
@@ -174,7 +174,7 @@ public class MenuDataConfig {
     return fieldName;
   }
 
-  public MenuConfig getMenuConfig() {
+  public MenuConfig<T> getMenuConfig() {
     return menuConfig;
   }
 

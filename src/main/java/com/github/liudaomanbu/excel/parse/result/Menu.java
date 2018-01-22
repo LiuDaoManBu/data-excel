@@ -15,74 +15,71 @@ import com.github.liudaomanbu.excel.validator.Validator;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 
-public class Menu {
-  public static class Builder {
+public class Menu<T> {
+  public static class Builder<T> {
     private StandardCell cell;
-    private MenuConfig config;
-    private Table table;
-    private Menu parent;
+    private MenuConfig<T> config;
+    private Table<T> table;
+    private Menu<T> parent;
 
-    public Menu build() {
-      return new Menu(this);
+    public Menu<T> build() {
+      return new Menu<>(this);
     }
 
     public StandardCell getCell() {
       return cell;
     }
 
-    public Builder setCell(StandardCell cell) {
+    public Builder<T> setCell(StandardCell cell) {
       this.cell = cell;
       return this;
     }
 
-    public MenuConfig getConfig() {
+    public MenuConfig<T> getConfig() {
       return config;
     }
 
-    public Builder setConfig(MenuConfig config) {
+    public Builder<T> setConfig(MenuConfig<T> config) {
       this.config = config;
       return this;
     }
 
-    public Table getTable() {
+    public Table<T> getTable() {
       return table;
     }
 
-    public Builder setTable(Table table) {
+    public Builder<T> setTable(Table<T> table) {
       this.table = table;
       return this;
     }
 
-    public Menu getParent() {
+    public Menu<T> getParent() {
       return parent;
     }
 
-    public Builder setParent(Menu parent) {
+    public Builder<T> setParent(Menu<T> parent) {
       this.parent = parent;
       return this;
     }
 
   }
 
-  public static Builder builder() {
-    return new Builder();
+  public static <T> Builder<T> builder() {
+    return new Builder<>();
   }
 
   private final StandardCell cell;
-  private final MenuConfig config;
-  private final ImmutableList<ValidationError<Menu>> errors;
-  private final Table table;
-  private final Menu parent;
-  private final ImmutableList<Menu> childrens;
-  private final MenuData data;
+  private final MenuConfig<T> config;
+  private final ImmutableList<ValidationError<Menu<T>>> errors;
+  private final Table<T> table;
+  private final Menu<T> parent;
+  private final ImmutableList<Menu<T>> childrens;
+  private final MenuData<T> data;
 
-  public Menu(Builder builder) {
+  public Menu(Builder<T> builder) {
     cell = builder.cell;
     Preconditions.checkNotNull(cell, "cell can't be null");
     config = builder.config;
@@ -93,34 +90,34 @@ public class Menu {
     childrens =
         loadChildrens().peek(childrenBuilder -> childrenBuilder.setParent(this).setTable(table))
             .map(Builder::build).collect(ImmutableList.toImmutableList());
-    data = new MenuData(this);
+    data = new MenuData<>(this);
 
     errors = createMenuConfigValidator().validate(this).stream()
         .collect(ImmutableList.toImmutableList());
   }
 
-  private Stream<Builder> loadChildrens() {
+  private Stream<Builder<T>> loadChildrens() {
     ImmutableList<StandardCell> menuCells =
         config.getDirection().get(getCell(), config.getDistance());
     return config.getChildrens().stream()
         .map(t -> menuCells.stream().filter(t::matches).findAny()
-            .map(cell -> builder().setCell(cell).setParent(this).setConfig(t)))
+            .map(cell -> Menu.<T>builder().setCell(cell).setParent(this).setConfig(t)))
         .filter(Optional::isPresent).map(Optional::get);
   }
 
-  private Validator<Menu> createMenuConfigValidator() {
+  private Validator<Menu<T>> createMenuConfigValidator() {
     return new BaseValidator<>(
         config.getChildrens().stream().collect(ImmutableMap.toImmutableMap(children -> {
-          Predicate<Menu> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
+          Predicate<Menu<T>> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
               .filter(children::equals).findAny().isPresent();
           return predicate;
         }, children -> {
-          Function<Menu, String> function = menu -> "没有匹配到" + children.getId() + "对应的菜单";
+          Function<Menu<T>, String> function = menu -> "没有匹配到" + children.getId() + "对应的菜单";
           return function;
         })));
   }
 
-  public Optional<Menu> getSuper(Predicate<? super Menu> predicate) {
+  public Optional<Menu<T>> getSuper(Predicate<? super Menu<T>> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isTopMenu()) {
       return Optional.empty();
@@ -128,22 +125,22 @@ public class Menu {
     return predicate.apply(parent) ? Optional.of(parent) : parent.getSuper(predicate);
   }
 
-  public Optional<Menu> getFieldParent() {
+  public Optional<Menu<T>> getFieldParent() {
     return getSuper(menu -> Objects.nonNull(menu.getFieldName()));
   }
 
-  public ImmutableList<Menu> getSubs(Predicate<? super Menu> predicate) {
+  public ImmutableList<Menu<T>> getSubs(Predicate<? super Menu<T>> predicate) {
     Preconditions.checkNotNull(predicate);
     if (isDataMenu()) {
       return ImmutableList.of();
     }
-    ImmutableList<Menu> subs =
+    ImmutableList<Menu<T>> subs =
         childrens.stream().filter(predicate).collect(ImmutableList.toImmutableList());
     return subs.isEmpty() ? childrens.stream().flatMap(menu -> menu.getSubs(predicate).stream())
         .collect(ImmutableList.toImmutableList()) : subs;
   }
 
-  public ImmutableList<Menu> getFieldChildrens() {
+  public ImmutableList<Menu<T>> getFieldChildrens() {
     return getSubs(menu -> Objects.nonNull(menu.getFieldName()));
   }
 
@@ -153,9 +150,9 @@ public class Menu {
     }
     ImmutableList.Builder<Field> builder = ImmutableList.builder();
     builder.add(getField());
-    Optional<Menu> optional = getFieldParent();
+    Optional<Menu<T>> optional = getFieldParent();
     while (optional.isPresent()) {
-      Menu menu = optional.get();
+      Menu<T> menu = optional.get();
       builder.add(menu.getField());
       optional = menu.getFieldParent();
     }
@@ -173,7 +170,7 @@ public class Menu {
         : direction.nextCell(cell);
   }
 
-  public boolean hasChildren(Menu childrenMenu) {
+  public boolean hasChildren(Menu<T> childrenMenu) {
     return childrens.contains(childrenMenu);
   }
 
@@ -181,11 +178,11 @@ public class Menu {
     return childrens.stream().anyMatch(childrenMenu -> childrenMenu.getCell().equals(cell));
   }
 
-  public ImmutableList<ValidationError<Menu>> getAllErrors() {
+  public ImmutableList<ValidationError<Menu<T>>> getAllErrors() {
     return Stream
         .concat(errors.stream(),
             childrens.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
-                .map(error -> new ValidationError<Menu>(this, error.getMessage())))
+                .map(error -> new ValidationError<>(this, error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -194,8 +191,8 @@ public class Menu {
   }
 
   public String getFullName() {
-    ImmutableList.Builder<Menu> supers = ImmutableList.builder();
-    for (Menu menu = this; Objects.nonNull(menu.parent); menu = menu.parent) {
+    ImmutableList.Builder<Menu<T>> supers = ImmutableList.builder();
+    for (Menu<T> menu = this; Objects.nonNull(menu.parent); menu = menu.parent) {
       supers.add(menu.parent);
     }
     return Joiner.on("-").join(supers.build().reverse().stream().map(Menu::getName)
@@ -245,27 +242,27 @@ public class Menu {
     return cell;
   }
 
-  public MenuConfig getConfig() {
+  public MenuConfig<T> getConfig() {
     return config;
   }
 
-  public Menu getParent() {
+  public Menu<T> getParent() {
     return parent;
   }
 
-  public Table getTable() {
+  public Table<T> getTable() {
     return table;
   }
 
-  public ImmutableList<Menu> getChildrens() {
+  public ImmutableList<Menu<T>> getChildrens() {
     return childrens;
   }
 
-  public MenuData getData() {
+  public MenuData<T> getData() {
     return data;
   }
 
-  public ImmutableList<ValidationError<Menu>> getErrors() {
+  public ImmutableList<ValidationError<Menu<T>>> getErrors() {
     return errors;
   }
 

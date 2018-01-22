@@ -1,6 +1,5 @@
 package com.github.liudaomanbu.excel.parse.result;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -8,35 +7,30 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.github.liudaomanbu.excel.config.TableDataConfig;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
-import com.github.liudaomanbu.excel.util.ClassUtil;
 import com.github.liudaomanbu.excel.util.ExcelUtil;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 
-public class TableData {
-  private final Table table;
-  private final TableDataConfig config;
-  private final ImmutableList<Map<Menu, StandardCell>> menuToValueCells;
-  private final ImmutableList<ValidationError<TableData>> errors;
+public class TableData<T> {
+  private final Table<T> table;
+  private final TableDataConfig<T> config;
+  private final ImmutableList<Map<Menu<T>, StandardCell>> menuToValueCells;
+  private final ImmutableList<ValidationError<TableData<T>>> errors;
 
-  public TableData(Table table) {
+  public TableData(Table<T> table) {
     this.table = table;
     this.config = table.getConfig().getDataConfig();
-    List<Map<Menu, StandardCell>> menuTodatas = Lists.newArrayList();
-    ImmutableList<Menu> menus = table.getDataMenus().collect(ImmutableList.toImmutableList());
+    List<Map<Menu<T>, StandardCell>> menuTodatas = Lists.newArrayList();
+    ImmutableList<Menu<T>> menus = table.getDataMenus().collect(ImmutableList.toImmutableList());
     menus.forEach(menu -> {
       ImmutableList<StandardCell> valueCells = menu.getData().getValueCells();
       for (int j = 0; j < valueCells.size(); j++) {
         StandardCell valueCell = valueCells.get(j);
 
-        Map<Menu, StandardCell> map = null;
+        Map<Menu<T>, StandardCell> map = null;
         if (j < menuTodatas.size()) {
           map = menuTodatas.get(j);
         } else {
@@ -52,7 +46,7 @@ public class TableData {
             .filter(Objects::nonNull).findAny().isPresent())
         .collect(ImmutableList.toImmutableList());
 
-    Stream<ValidationError<TableData>> menuMatcherErrors =
+    Stream<ValidationError<TableData<T>>> menuMatcherErrors =
         menuToValueCells.stream().map(Map::entrySet).flatMap(Collection::stream)
             .flatMap(entry -> entry.getKey().getData().getConfig().getValidators().stream()
                 .map(validator -> validator.validate(entry.getValue())).flatMap(Collection::stream)
@@ -60,7 +54,7 @@ public class TableData {
             .map(message -> new ValidationError<>(this, message));
 
 
-    Stream<ValidationError<TableData>> tableDataMatcherErrors = Optional.ofNullable(config)
+    Stream<ValidationError<TableData<T>>> tableDataMatcherErrors = Optional.ofNullable(config)
         .map(TableDataConfig::getValidators).orElse(ImmutableList.of()).stream()
         .flatMap(validator -> menuToValueCells.stream().map(map -> validator.validate(map))
             .flatMap(Collection::stream))
@@ -70,24 +64,24 @@ public class TableData {
         .collect(ImmutableList.toImmutableList());
   }
 
-  public Table getTable() {
+  public Table<T> getTable() {
     return table;
   }
 
-  public TableDataConfig getConfig() {
+  public TableDataConfig<T> getConfig() {
     return config;
   }
 
-  public ImmutableList<Map<Menu, StandardCell>> getMenuToValueCells() {
+  public ImmutableList<Map<Menu<T>, StandardCell>> getMenuToValueCells() {
     return menuToValueCells;
   }
 
-  public ImmutableList<ValidationError<TableData>> getErrors() {
+  public ImmutableList<ValidationError<TableData<T>>> getErrors() {
     return errors;
   }
 
-  public <T> ImmutableList<T> getDatas(TypeToken<T> type) {
-    return menuToValueCells.stream().map(map -> (T) ExcelUtil.toJavaObject(map, type.getRawType()))
+  public ImmutableList<T> getDatas(Class<T> type) {
+    return menuToValueCells.stream().map(map -> (T) ExcelUtil.toJavaObject(map, type))
         .collect(ImmutableList.toImmutableList());
   }
 

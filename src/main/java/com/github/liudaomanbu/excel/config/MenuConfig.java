@@ -18,15 +18,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-public class MenuConfig extends Config {
-  public static class Builder extends Config.Builder {
-    private TableConfig tableConfig;
-    private MenuConfig parent;
-    private MenuDataConfig.Builder dataConfigBuilder;
-    private List<MenuConfig.Builder> childrenBuilders;
+public class MenuConfig<T> extends Config {
+  public static class Builder<T> extends Config.Builder {
+    private TableConfig<T> tableConfig;
+    private MenuConfig<T> parent;
+    private MenuDataConfig.Builder<T> dataConfigBuilder;
+    private List<MenuConfig.Builder<T>> childrenBuilders;
     // 菜单匹配器
     private Matcher<StandardCell> matcher;
-    private List<Validator<Menu>> validators;
+    private List<Validator<Menu<T>>> validators;
     // 第一个数据单元格相对于菜单单元格的单元格距离
     private Integer distance;
     private Necessity necessity;
@@ -38,30 +38,30 @@ public class MenuConfig extends Config {
       validators = Lists.newLinkedList();
     }
 
-    public MenuConfig build() {
-      return new MenuConfig(this);
+    public MenuConfig<T> build() {
+      return new MenuConfig<>(this);
     }
 
     @Override
-    public Builder setId(Object id) {
+    public Builder<T> setId(Object id) {
       super.setId(id);
       return this;
     }
 
-    public TableConfig getTableConfig() {
+    public TableConfig<T> getTableConfig() {
       return tableConfig;
     }
 
-    public List<Validator<Menu>> getValidators() {
+    public List<Validator<Menu<T>>> getValidators() {
       return validators;
     }
 
-    public Builder setValidators(List<Validator<Menu>> validators) {
+    public Builder<T> setValidators(List<Validator<Menu<T>>> validators) {
       this.validators = validators;
       return this;
     }
 
-    public Builder setTableConfig(TableConfig tableConfig) {
+    public Builder<T> setTableConfig(TableConfig<T> tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -74,7 +74,7 @@ public class MenuConfig extends Config {
       return necessity;
     }
 
-    public Builder setNecessity(Necessity necessity) {
+    public Builder<T> setNecessity(Necessity necessity) {
       this.necessity = necessity;
       return this;
     }
@@ -83,34 +83,34 @@ public class MenuConfig extends Config {
       return direction;
     }
 
-    public Builder setDirection(Direction direction) {
+    public Builder<T> setDirection(Direction direction) {
       this.direction = direction;
       return this;
     }
 
-    public MenuConfig getParent() {
+    public MenuConfig<T> getParent() {
       return parent;
     }
 
-    public Builder setParent(MenuConfig parent) {
+    public Builder<T> setParent(MenuConfig<T> parent) {
       this.parent = parent;
       return this;
     }
 
-    public MenuDataConfig.Builder getDataConfigBuilder() {
+    public MenuDataConfig.Builder<T> getDataConfigBuilder() {
       return dataConfigBuilder;
     }
 
-    public Builder setDataConfigBuilder(MenuDataConfig.Builder dataConfigBuilder) {
+    public Builder<T> setDataConfigBuilder(MenuDataConfig.Builder<T> dataConfigBuilder) {
       this.dataConfigBuilder = dataConfigBuilder;
       return this;
     }
 
-    public List<MenuConfig.Builder> getChildrenBuilders() {
+    public List<MenuConfig.Builder<T>> getChildrenBuilders() {
       return childrenBuilders;
     }
 
-    public Builder setChildrenBuilders(List<MenuConfig.Builder> childrenBuilders) {
+    public Builder<T> setChildrenBuilders(List<MenuConfig.Builder<T>> childrenBuilders) {
       this.childrenBuilders = childrenBuilders;
       return this;
     }
@@ -119,12 +119,12 @@ public class MenuConfig extends Config {
       return matcher;
     }
 
-    public Builder setMatcher(Matcher<StandardCell> matcher) {
+    public Builder<T> setMatcher(Matcher<StandardCell> matcher) {
       this.matcher = matcher;
       return this;
     }
 
-    public Builder setDistance(Integer distance) {
+    public Builder<T> setDistance(Integer distance) {
       this.distance = distance;
       return this;
     }
@@ -133,7 +133,7 @@ public class MenuConfig extends Config {
       return parserConfig;
     }
 
-    public Builder setParserConfig(ParserConfig parserConfig) {
+    public Builder<T> setParserConfig(ParserConfig parserConfig) {
       this.parserConfig = parserConfig;
       return this;
     }
@@ -143,24 +143,24 @@ public class MenuConfig extends Config {
   public static final int DEFAULT_DISTANCE = 1;
   private static final Necessity DEFAULT_MENU_NECESSITY = Necessity.MUST;
 
-  public static Builder builder() {
-    return new Builder();
+  public static <T> Builder<T> builder() {
+    return new Builder<>();
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig<T> tableConfig;
   // 菜单匹配器
   private final Predicate<StandardCell> matcher;
   // 第一个数据单元格相对于菜单单元格的单元格距离
   private final int distance;
   private final Necessity necessity;
   private final Direction direction;
-  private final MenuConfig parent;
-  private final ImmutableCollection<MenuConfig> childrens;
-  private final ImmutableList<Validator<Menu>> validators;
-  private final MenuDataConfig dataConfig;
+  private final MenuConfig<T> parent;
+  private final ImmutableCollection<MenuConfig<T>> childrens;
+  private final ImmutableList<Validator<Menu<T>>> validators;
+  private final MenuDataConfig<T> dataConfig;
   private final ParserConfig parserConfig;
 
-  private MenuConfig(Builder builder) {
+  private MenuConfig(Builder<T> builder) {
     super(builder);
     Preconditions.checkNotNull(builder.matcher, "matcher can't be null");
     matcher = builder.matcher.reduce();
@@ -241,7 +241,7 @@ public class MenuConfig extends Config {
     return distance;
   }
 
-  public MenuConfig getParent() {
+  public MenuConfig<T> getParent() {
     return parent;
   }
 
@@ -253,15 +253,15 @@ public class MenuConfig extends Config {
     return necessity;
   }
 
-  public MenuDataConfig getDataConfig() {
+  public MenuDataConfig<T> getDataConfig() {
     return dataConfig;
   }
 
-  public ImmutableCollection<MenuConfig> getChildrens() {
+  public ImmutableCollection<MenuConfig<T>> getChildrens() {
     return childrens;
   }
 
-  public TableConfig getTableConfig() {
+  public TableConfig<T> getTableConfig() {
     return tableConfig;
   }
 
@@ -269,7 +269,7 @@ public class MenuConfig extends Config {
     return parserConfig;
   }
 
-  public ImmutableList<Validator<Menu>> getValidators() {
+  public ImmutableList<Validator<Menu<T>>> getValidators() {
     return validators;
   }
 

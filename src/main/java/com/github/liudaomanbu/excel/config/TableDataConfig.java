@@ -11,32 +11,32 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-public class TableDataConfig {
+public class TableDataConfig<T> {
 
-  public static class Builder {
-    private TableConfig tableConfig;
+  public static class Builder<T> {
+    private TableConfig<T> tableConfig;
     private ConstructType constructType;
-    private List<Validator<Map<Menu, StandardCell>>> validators;
+    private List<Validator<Map<Menu<T>, StandardCell>>> validators;
 
     public Builder() {
       validators = Lists.newLinkedList();
     }
 
-    public TableDataConfig build() {
-      return new TableDataConfig(this);
+    public TableDataConfig<T> build() {
+      return new TableDataConfig<>(this);
     }
 
-    public <T> Builder addJavaxValidator(javax.validation.Validator validator, Class<T> type,
+    public Builder<T> addJavaxValidator(javax.validation.Validator validator, Class<T> type,
         Class<?>... groups) {
       validators.add(new JavaxValidator<>(validator, type, groups));
       return this;
     }
 
-    public TableConfig getTableConfig() {
+    public TableConfig<T> getTableConfig() {
       return tableConfig;
     }
 
-    public Builder setTableConfig(TableConfig tableConfig) {
+    public Builder<T> setTableConfig(TableConfig<T> tableConfig) {
       this.tableConfig = tableConfig;
       return this;
     }
@@ -45,27 +45,27 @@ public class TableDataConfig {
       return constructType;
     }
 
-    public Builder setConstructType(ConstructType constructType) {
+    public Builder<T> setConstructType(ConstructType constructType) {
       this.constructType = constructType;
       return this;
     }
 
-    public List<Validator<Map<Menu, StandardCell>>> getValidators() {
+    public List<Validator<Map<Menu<T>, StandardCell>>> getValidators() {
       return validators;
     }
 
-    public Builder setValidators(List<Validator<Map<Menu, StandardCell>>> validators) {
+    public Builder<T> setValidators(List<Validator<Map<Menu<T>, StandardCell>>> validators) {
       this.validators = validators;
       return this;
     }
 
   }
 
-  private final TableConfig tableConfig;
+  private final TableConfig<T> tableConfig;
   private final ConstructType constructType;
-  private final ImmutableList<Validator<Map<Menu, StandardCell>>> validators;
+  private final ImmutableList<Validator<Map<Menu<T>, StandardCell>>> validators;
 
-  protected TableDataConfig(Builder builder) {
+  protected TableDataConfig(Builder<T> builder) {
     constructType = builder.constructType;
     tableConfig = builder.tableConfig;
     Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");
@@ -76,11 +76,11 @@ public class TableDataConfig {
     return constructType;
   }
 
-  public TableConfig getTableConfig() {
+  public TableConfig<T> getTableConfig() {
     return tableConfig;
   }
 
-  public ImmutableList<Validator<Map<Menu, StandardCell>>> getValidators() {
+  public ImmutableList<Validator<Map<Menu<T>, StandardCell>>> getValidators() {
     return validators;
   }
 

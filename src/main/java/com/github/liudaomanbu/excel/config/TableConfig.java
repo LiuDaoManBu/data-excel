@@ -15,13 +15,13 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
-public class TableConfig extends Config {
-  public static class Builder extends Config.Builder {
-    private List<MenuConfig.Builder> topMenuConfigBuilders;
+public class TableConfig<T> extends Config {
+  public static class Builder<T> extends Config.Builder {
+    private List<MenuConfig.Builder<T>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
     private Direction menuDirection;
-    private TableDataConfig.Builder dataConfigBuilder;
-    private List<Validator<Table>> validators;
+    private TableDataConfig.Builder<T> dataConfigBuilder;
+    private List<Validator<Table<T>>> validators;
     private ParserConfig parserConfig;
 
     public Builder() {
@@ -29,12 +29,12 @@ public class TableConfig extends Config {
       validators = Lists.newLinkedList();
     }
 
-    public TableConfig build() {
-      return new TableConfig(this);
+    public TableConfig<T> build() {
+      return new TableConfig<>(this);
     }
 
     @Override
-    public Builder setId(Object id) {
+    public Builder<T> setId(Object id) {
       super.setId(id);
       return this;
     }
@@ -43,7 +43,7 @@ public class TableConfig extends Config {
       return sheetConfig;
     }
 
-    public Builder setSheetConfig(SheetConfig sheetConfig) {
+    public Builder<T> setSheetConfig(SheetConfig sheetConfig) {
       this.sheetConfig = sheetConfig;
       return this;
     }
@@ -52,16 +52,16 @@ public class TableConfig extends Config {
       return menuDirection;
     }
 
-    public Builder setMenuDirection(Direction menuDirection) {
+    public Builder<T> setMenuDirection(Direction menuDirection) {
       this.menuDirection = menuDirection;
       return this;
     }
 
-    public List<MenuConfig.Builder> getTopMenuConfigBuilders() {
+    public List<MenuConfig.Builder<T>> getTopMenuConfigBuilders() {
       return topMenuConfigBuilders;
     }
 
-    public Builder setTopMenuConfigBuilders(List<MenuConfig.Builder> topMenuConfigBuilders) {
+    public Builder<T> setTopMenuConfigBuilders(List<MenuConfig.Builder<T>> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }
@@ -70,25 +70,25 @@ public class TableConfig extends Config {
       return parserConfig;
     }
 
-    public Builder setParserConfig(ParserConfig parserConfig) {
+    public Builder<T> setParserConfig(ParserConfig parserConfig) {
       this.parserConfig = parserConfig;
       return this;
     }
 
-    public TableDataConfig.Builder getDataConfigBuilder() {
+    public TableDataConfig.Builder<T> getDataConfigBuilder() {
       return dataConfigBuilder;
     }
 
-    public Builder setDataConfigBuilder(TableDataConfig.Builder dataConfigBuilder) {
+    public Builder<T> setDataConfigBuilder(TableDataConfig.Builder<T> dataConfigBuilder) {
       this.dataConfigBuilder = dataConfigBuilder;
       return this;
     }
 
-    public List<Validator<Table>> getValidators() {
+    public List<Validator<Table<T>>> getValidators() {
       return validators;
     }
 
-    public Builder setValidators(List<Validator<Table>> validators) {
+    public Builder<T> setValidators(List<Validator<Table<T>>> validators) {
       this.validators = validators;
       return this;
     }
@@ -97,26 +97,26 @@ public class TableConfig extends Config {
 
   public static final Direction DEFAULT_MENU_DIRECTION = Direction.BOTTOM;
 
-  public static Builder builder() {
-    return new Builder();
+  public static <T> Builder<T> builder() {
+    return new Builder<>();
   }
 
   private final SheetConfig sheetConfig;
   private final Direction menuDirection;
-  private final ImmutableCollection<MenuConfig> topMenuConfigs;
-  private final ImmutableList<Validator<Table>> validators;
-  private final TableDataConfig dataConfig;
+  private final ImmutableCollection<MenuConfig<T>> topMenuConfigs;
+  private final ImmutableList<Validator<Table<T>>> validators;
+  private final TableDataConfig<T> dataConfig;
   private final ParserConfig parserConfig;
 
-  private final Traverser<MenuConfig> MENU_CONFIG_TRAVERSER =
-      Traverser.forTree(new SuccessorsFunction<MenuConfig>() {
+  private final Traverser<MenuConfig<T>> MENU_CONFIG_TRAVERSER =
+      Traverser.forTree(new SuccessorsFunction<MenuConfig<T>>() {
         @Override
-        public Iterable<? extends MenuConfig> successors(MenuConfig node) {
+        public Iterable<? extends MenuConfig<T>> successors(MenuConfig<T> node) {
           return node.getChildrens();
         }
       });
 
-  private TableConfig(Builder builder) {
+  private TableConfig(Builder<T> builder) {
     super(builder);
     sheetConfig = builder.sheetConfig;
     menuDirection = Optional.ofNullable(builder.menuDirection).orElse(DEFAULT_MENU_DIRECTION);
@@ -128,14 +128,8 @@ public class TableConfig extends Config {
     parserConfig = builder.parserConfig;
   }
 
-  public Table.Builder parse(Sheet sheet) {
-    Table.Builder builder = Table.builder().setConfig(this);
-
-    // if (matcher.test(sheet)) {
-    // builder.setTableBuilders(tableBuilders);
-    // } else {
-    // builder.setErrors(ImmutableList.of(new SheetError(sheet, matcher.getMessage(sheet))));
-    // }
+  public Table.Builder<T> parse(Sheet sheet) {
+    Table.Builder<T> builder = Table.<T>builder().setConfig(this);
     return builder;
   }
 
@@ -143,7 +137,7 @@ public class TableConfig extends Config {
     return Optional.ofNullable(parserConfig).orElse(sheetConfig.getEffectiveParserConfig());
   }
 
-  public Stream<MenuConfig> getMenuConfigs() {
+  public Stream<MenuConfig<T>> getMenuConfigs() {
     return topMenuConfigs.stream().map(MENU_CONFIG_TRAVERSER::breadthFirst)
         .flatMap(Streams::stream);
   }
@@ -152,7 +146,7 @@ public class TableConfig extends Config {
     return sheetConfig;
   }
 
-  public ImmutableCollection<MenuConfig> getTopMenuConfigs() {
+  public ImmutableCollection<MenuConfig<T>> getTopMenuConfigs() {
     return topMenuConfigs;
   }
 
@@ -165,11 +159,11 @@ public class TableConfig extends Config {
     return parserConfig;
   }
 
-  public TableDataConfig getDataConfig() {
+  public TableDataConfig<T> getDataConfig() {
     return dataConfig;
   }
 
-  public ImmutableList<Validator<Table>> getValidators() {
+  public ImmutableList<Validator<Table<T>>> getValidators() {
     return validators;
   }
 

@@ -13,7 +13,7 @@ public class SheetParseResult {
     private WorkbookParseResult workbookParseResult;
     private Sheet sheet;
     private SheetConfig config;
-    private List<Table.Builder> tableBuilders;
+    private List<Table.Builder<?>> tableBuilders;
 
     public SheetParseResult build() {
       return new SheetParseResult(this);
@@ -46,11 +46,11 @@ public class SheetParseResult {
       return this;
     }
 
-    public List<Table.Builder> getTableBuilders() {
+    public List<Table.Builder<?>> getTableBuilders() {
       return tableBuilders;
     }
 
-    public Builder setTableBuilders(List<Table.Builder> tableBuilders) {
+    public Builder setTableBuilders(List<Table.Builder<?>> tableBuilders) {
       this.tableBuilders = tableBuilders;
       return this;
     }
@@ -64,7 +64,7 @@ public class SheetParseResult {
   private final WorkbookParseResult workbookParseResult;
   private final Sheet sheet;
   private final SheetConfig config;
-  private final ImmutableList<Table> tables;
+  private final ImmutableList<Table<?>> tables;
 
   public SheetParseResult(Builder builder) {
     this.workbookParseResult = builder.workbookParseResult;
@@ -83,7 +83,7 @@ public class SheetParseResult {
     return config;
   }
 
-  public ImmutableList<Table> getTables() {
+  public ImmutableList<Table<?>> getTables() {
     return tables;
   }
 
@@ -97,7 +97,7 @@ public class SheetParseResult {
         .collect(ImmutableList.toImmutableList());
   }
 
-  public Table getById(Object id) {
+  public Table<?> getById(Object id) {
     return tables.stream().filter(table -> Objects.equals(table.getConfig().getId(), id)).findAny()
         .orElse(null);
   }

@@ -3,12 +3,12 @@ package com.github.liudaomanbu.excel.parse.result;
 import com.github.liudaomanbu.excel.config.MenuDataConfig;
 import com.google.common.collect.ImmutableList;
 
-public class MenuData {
-  private final Menu menu;
-  private final MenuDataConfig config;
+public class MenuData<T> {
+  private final Menu<T> menu;
+  private final MenuDataConfig<T> config;
   private final ImmutableList<StandardCell> valueCells;
 
-  public MenuData(Menu menu) {
+  public MenuData(Menu<T> menu) {
     super();
     this.menu = menu;
     this.config = menu.getConfig().getDataConfig();
@@ -16,17 +16,17 @@ public class MenuData {
         : ImmutableList.of();
   }
 
-//  public ImmutableList getCellValues() {
-//    // cell不是必然有值,为null时ImmutableList会无法放入null而报错
-//    return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
-//        .collect(ImmutableList.toImmutableList());
-//  }
+  // public ImmutableList getCellValues() {
+  // // cell不是必然有值,为null时ImmutableList会无法放入null而报错
+  // return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
+  // .collect(ImmutableList.toImmutableList());
+  // }
 
-  public Menu getMenu() {
+  public Menu<T> getMenu() {
     return menu;
   }
 
-  public MenuDataConfig getConfig() {
+  public MenuDataConfig<T> getConfig() {
     return config;
   }
 

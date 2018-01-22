@@ -6,11 +6,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import com.github.liudaomanbu.excel.config.MenuConfig;
 import com.github.liudaomanbu.excel.config.TableConfig;
-import com.github.liudaomanbu.excel.constant.Necessity;
-import com.github.liudaomanbu.excel.parse.error.TableValidationError;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
 import com.github.liudaomanbu.excel.util.ExcelUtil;
 import com.github.liudaomanbu.excel.validator.BaseValidator;
@@ -23,20 +20,20 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
-public class Table {
-  public static class Builder {
-    private TableConfig config;
+public class Table<T> {
+  public static class Builder<T> {
+    private TableConfig<T> config;
     private SheetParseResult sheetParseResult;
 
-    public Table build() {
-      return new Table(this);
+    public Table<T> build() {
+      return new Table<>(this);
     }
 
-    public TableConfig getConfig() {
+    public TableConfig<T> getConfig() {
       return config;
     }
 
-    public Builder setConfig(TableConfig config) {
+    public Builder<T> setConfig(TableConfig<T> config) {
       this.config = config;
       return this;
     }
@@ -45,72 +42,69 @@ public class Table {
       return sheetParseResult;
     }
 
-    public Builder setSheetParseResult(SheetParseResult sheetParseResult) {
+    public Builder<T> setSheetParseResult(SheetParseResult sheetParseResult) {
       this.sheetParseResult = sheetParseResult;
       return this;
     }
   }
 
-  private final Traverser<Menu> MENU_TRAVERSER = Traverser.forTree(new SuccessorsFunction<Menu>() {
+  private final Traverser<Menu<T>> MENU_TRAVERSER = Traverser.forTree(new SuccessorsFunction<Menu<T>>() {
     @Override
-    public Iterable<? extends Menu> successors(Menu node) {
+    public Iterable<? extends Menu<T>> successors(Menu<T> node) {
       return node.getChildrens();
     }
   });
 
-  private final Function<MenuConfig, String> MENU_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
-      config -> config + "don't have any matches cell";
-
-  public static Builder builder() {
-    return new Builder();
+  public static <T> Builder<T> builder() {
+    return new Builder<>();
   }
 
-  private final TableConfig config;
-  private final ImmutableList<ValidationError<Table>> errors;
+  private final TableConfig<T> config;
+  private final ImmutableList<ValidationError<Table<T>>> errors;
   private final SheetParseResult sheetParseResult;
-  private final ImmutableCollection<Menu> topMenus;
-  private final TableData data;
+  private final ImmutableCollection<Menu<T>> topMenus;
+  private final TableData<T> data;
 
-  public Table(Builder builder) {
+  public Table(Builder<T> builder) {
     config = builder.config;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
     errors = createMenuConfigValidator().validate(this).stream()
         .collect(ImmutableList.toImmutableList());
-    this.data = new TableData(this);
+    this.data = new TableData<>(this);
   }
 
-  private Stream<Menu.Builder> loadTopMenus() {
-    ImmutableCollection<MenuConfig> menuConfigs = config.getTopMenuConfigs();
+  private Stream<Menu.Builder<T>> loadTopMenus() {
+    ImmutableCollection<MenuConfig<T>> menuConfigs = config.getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
     return ExcelUtil.getCells(sheet).map(StandardCell::valueOf).map(cell -> {
-      Optional<MenuConfig> optional =
+      Optional<MenuConfig<T>> optional =
           menuConfigs.stream().filter(menuConfig -> menuConfig.getMatcher().test(cell)).findAny();
-      return optional.map(t -> Menu.builder().setCell(cell).setConfig(t).setTable(this));
+      return optional.map(t -> Menu.<T>builder().setCell(cell).setConfig(t).setTable(this));
     }).filter(Optional::isPresent).map(Optional::get);
   }
 
-  private Validator<Table> createMenuConfigValidator() {
+  private Validator<Table<T>> createMenuConfigValidator() {
     return new BaseValidator<>(
         config.getTopMenuConfigs().stream().collect(ImmutableMap.toImmutableMap(topMenuConfig -> {
-          Predicate<Table> predicate = table -> table.getTopMenus().stream().map(Menu::getConfig)
+          Predicate<Table<T>> predicate = table -> table.getTopMenus().stream().map(Menu::getConfig)
               .filter(topMenuConfig::equals).findAny().isPresent();
           return predicate;
         }, topMenuConfig -> {
-          Function<Table, String> function = table -> "没有匹配到" + topMenuConfig.getId() + "对应的菜单";
+          Function<Table<T>, String> function = table -> "没有匹配到" + topMenuConfig.getId() + "对应的菜单";
           return function;
         })));
   }
 
-  public Optional<Menu> findMenu(String menuName) {
+  public Optional<Menu<T>> findMenu(String menuName) {
     return getMenus().filter(menu -> menu.getName().equals(menuName)).findAny();
   }
 
-  public Stream<Menu> getMenus() {
+  public Stream<Menu<T>> getMenus() {
     return topMenus.stream().map(MENU_TRAVERSER::breadthFirst).flatMap(Streams::stream);
   }
 
-  public Stream<Menu> getDataMenus() {
+  public Stream<Menu<T>> getDataMenus() {
     return getMenus().filter(Menu::isDataMenu);
   }
 
@@ -118,37 +112,37 @@ public class Table {
   // return getDataMenus().filter(Menu::isFixedDataMenu);
   // }
 
-  public Stream<Menu> getFixedDataMenus() {
+  public Stream<Menu<T>> getFixedDataMenus() {
     return getDataMenus().filter(Menu::isSingleDataMenu);
   }
 
-  public Stream<Menu> getUnFixedDataMenus() {
+  public Stream<Menu<T>> getUnFixedDataMenus() {
     return getDataMenus().filter(Menu::isUnFixedDataMenu);
   }
 
-  public Stream<Menu> getMustMenus() {
+  public Stream<Menu<T>> getMustMenus() {
     return getMenus().filter(Menu::isMustMenu);
   }
 
-  public Stream<Menu> getNotMustMenus() {
+  public Stream<Menu<T>> getNotMustMenus() {
     return getMenus().filter(Menu::isNotMustMenu);
   }
 
-  public ImmutableList<ValidationError<Table>> getAllErrors() {
+  public ImmutableList<ValidationError<Table<T>>> getAllErrors() {
     return Streams
         .concat(errors.stream(),
             topMenus.stream().map(Menu::getAllErrors).flatMap(Collection::stream)
-                .map(error -> new ValidationError<Table>(this, error.getMessage())),
+                .map(error -> new ValidationError<Table<T>>(this, error.getMessage())),
             data.getErrors().stream()
-                .map(error -> new ValidationError<Table>(this, error.getMessage())))
+                .map(error -> new ValidationError<Table<T>>(this, error.getMessage())))
         .collect(ImmutableList.toImmutableList());
   }
 
-  public TableConfig getConfig() {
+  public TableConfig<T> getConfig() {
     return config;
   }
 
-  public ImmutableList<ValidationError<Table>> getErrors() {
+  public ImmutableList<ValidationError<Table<T>>> getErrors() {
     return errors;
   }
 
@@ -156,11 +150,11 @@ public class Table {
     return sheetParseResult;
   }
 
-  public ImmutableCollection<Menu> getTopMenus() {
+  public ImmutableCollection<Menu<T>> getTopMenus() {
     return topMenus;
   }
 
-  public TableData getData() {
+  public TableData<T> getData() {
     return data;
   }
 }

@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 
 public class SheetConfig extends Config {
   public static class Builder extends Config.Builder {
-    private List<TableConfig.Builder> tableConfigBuilders;
+    private List<TableConfig.Builder<?>> tableConfigBuilders;
     private WorkbookConfig workbookConfig;
     private Matcher<Sheet> matcher;
     private Necessity necessity;
@@ -44,11 +44,11 @@ public class SheetConfig extends Config {
       return this;
     }
 
-    public List<TableConfig.Builder> getTableConfigBuilders() {
+    public List<TableConfig.Builder<?>> getTableConfigBuilders() {
       return tableConfigBuilders;
     }
 
-    public Builder setTableConfigBuilders(List<TableConfig.Builder> tableConfigBuilders) {
+    public Builder setTableConfigBuilders(List<TableConfig.Builder<?>> tableConfigBuilders) {
       this.tableConfigBuilders = tableConfigBuilders;
       return this;
     }
@@ -89,7 +89,7 @@ public class SheetConfig extends Config {
     return new Builder();
   }
 
-  private final ImmutableCollection<TableConfig> tableConfigs;
+  private final ImmutableCollection<TableConfig<?>> tableConfigs;
   private final WorkbookConfig workbookConfig;
   private final Predicate<Sheet> matcher;
   private final Necessity necessity;
@@ -115,7 +115,7 @@ public class SheetConfig extends Config {
     return Optional.ofNullable(parserConfig).orElse(workbookConfig.getEffectiveParserConfig());
   }
 
-  public ImmutableCollection<TableConfig> getTableConfigs() {
+  public ImmutableCollection<TableConfig<?>> getTableConfigs() {
     return tableConfigs;
   }
 

@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class JavaxValidator<T> implements Validator<Map<Menu, StandardCell>> {
+public class JavaxValidator<T> implements Validator<Map<Menu<T>, StandardCell>> {
 
   private final javax.validation.Validator validator;
   private final Class<T> type;
@@ -24,10 +24,10 @@ public class JavaxValidator<T> implements Validator<Map<Menu, StandardCell>> {
   }
 
   @Override
-  public ImmutableCollection<ValidationError<Map<Menu, StandardCell>>> validate(
-      Map<Menu, StandardCell> object) {
+  public ImmutableCollection<ValidationError<Map<Menu<T>, StandardCell>>> validate(
+      Map<Menu<T>, StandardCell> object) {
     T value = ExcelUtil.toJavaObject(object, type);
-    ImmutableMap<Menu, String> menuToMessages =
+    ImmutableMap<Menu<T>, String> menuToMessages =
         validator
             .validate(value,
                 groups)

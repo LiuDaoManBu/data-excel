@@ -86,21 +86,22 @@ public class ExcelUtil {
     }).orElse(null);
   }
 
-  public static <V> TableConfig.Builder parseToTableConfig(Class<V> type) {
+  public static <T> TableConfig.Builder<T> parseToTableConfig(Class<T> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
-      TableConfig.Builder builder =
-          TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
-              .map(ExcelUtil::parseToMenuConfig).filter(Objects::nonNull).collect(Collectors.toList()));
+      TableConfig.Builder<T> builder =
+          TableConfig.<T>builder().setId(type).setTopMenuConfigBuilders(
+              ClassUtil.getAllFields(type).map(f -> ExcelUtil.<T>parseToMenuConfig(f))
+                  .filter(Objects::nonNull).collect(Collectors.toList()));
       return builder;
     }).orElse(null);
   }
 
-  public static <T> T toJavaObject(Map<Menu, StandardCell> menuToValueCell, Class<T> type) {
+  public static <T> T toJavaObject(Map<Menu<T>, StandardCell> menuToValueCell, Class<T> type) {
     JSONObject jsonObject = toJsonObject(menuToValueCell);
     return jsonObject.toJavaObject(type);
   }
 
-  public static JSONObject toJsonObject(Map<Menu, StandardCell> menuToValueCell) {
+  public static <T> JSONObject toJsonObject(Map<Menu<T>, StandardCell> menuToValueCell) {
     JSONObject jsonObject = new JSONObject();
     menuToValueCell.forEach((menu, cell) -> {
       Field field = menu.getField();
@@ -116,15 +117,15 @@ public class ExcelUtil {
     return jsonObject;
   }
 
-  public static MenuConfig.Builder parseToMenuConfig(Field field) {
+  public static <T> MenuConfig.Builder<T> parseToMenuConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
       ExcelMenu excelMenu = f.menu();
-      MenuConfig.Builder builder = MenuConfig.builder().setId(excelMenu.value())
+      MenuConfig.Builder<T> builder = MenuConfig.<T>builder().setId(excelMenu.value())
           .setMatcher(new StandardCellMatcher().addDataPredicate(excelMenu.valueMatcherType(),
               excelMenu.value(), value -> BaseDataType.STRING.cast(value, String.class)))
           .setDirection(excelMenu.direction()).setDistance(excelMenu.distance())
           .setNecessity(excelMenu.necessity())
-          .setDataConfigBuilder(MenuDataConfig.builder().setLoadType(f.loadType())
+          .setDataConfigBuilder(MenuDataConfig.<T>builder().setLoadType(f.loadType())
               .setDataType(findDataType(f.dataType(), field)).setField(field)
               .setFieldName(field.getName()));
       return builder;
@@ -226,131 +227,131 @@ public class ExcelUtil {
     });
   }
 
-//  public static void moveCell(Collection<Cell> cells, int rowMoveNumber, int columnMoveNumber) {
-//    Set<CellRangeAddress> addresses = Sets.newHashSet();
-//    for (Cell cell : cells) {
-//      Optional<CellRangeAddress> address = getMergedRegion(cell);
-//      if (address.isPresent()) {
-//        addresses.add(address.get());
-//      } else {
-//        moveCell(cell, rowMoveNumber, columnMoveNumber);
-//      }
-//    }
-//    Sheet sheet = cells.iterator().next().getSheet();
-//    for (CellRangeAddress address : addresses) {
-//      moveCell(sheet, address, rowMoveNumber, columnMoveNumber);
-//    }
-//  }
+  // public static void moveCell(Collection<Cell> cells, int rowMoveNumber, int columnMoveNumber) {
+  // Set<CellRangeAddress> addresses = Sets.newHashSet();
+  // for (Cell cell : cells) {
+  // Optional<CellRangeAddress> address = getMergedRegion(cell);
+  // if (address.isPresent()) {
+  // addresses.add(address.get());
+  // } else {
+  // moveCell(cell, rowMoveNumber, columnMoveNumber);
+  // }
+  // }
+  // Sheet sheet = cells.iterator().next().getSheet();
+  // for (CellRangeAddress address : addresses) {
+  // moveCell(sheet, address, rowMoveNumber, columnMoveNumber);
+  // }
+  // }
 
-//  public static void moveCell(Cell cell, int rowMoveNumber, int columnMoveNumber) {
-//    int rowIndex = cell.getRowIndex();
-//    int columnIndex = cell.getColumnIndex();
-//    Cell targetCell =
-//        getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
-//    removeCell(targetCell);
-//    targetCell =
-//        getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
-//    copyCell(cell, targetCell, true);
-//    removeCell(cell);
-//  }
+  // public static void moveCell(Cell cell, int rowMoveNumber, int columnMoveNumber) {
+  // int rowIndex = cell.getRowIndex();
+  // int columnIndex = cell.getColumnIndex();
+  // Cell targetCell =
+  // getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
+  // removeCell(targetCell);
+  // targetCell =
+  // getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
+  // copyCell(cell, targetCell, true);
+  // removeCell(cell);
+  // }
 
-//  public static void moveCell(Sheet sheet, CellRangeAddress address, int rowMoveNumber,
-//      int columnMoveNumber) {
-//    int firstRow = address.getFirstRow();
-//    int lastRow = address.getLastRow();
-//    int firstColumn = address.getFirstColumn();
-//    int lastColumn = address.getLastColumn();
-//    for (int row = firstRow; row <= lastRow; row++) {
-//      for (int column = firstColumn; column <= lastColumn; column++) {
-//        Cell moveCell = getCellByIndex(sheet, row, column);
-//        Cell targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
-//        removeCell(targetCell);
-//        targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
-//        copyCell(moveCell, targetCell, true);
-//        removeCell(moveCell);
-//      }
-//    }
-//
-//    CellRangeAddress targetAddress = new CellRangeAddress(firstRow + rowMoveNumber,
-//        lastRow + rowMoveNumber, firstColumn + columnMoveNumber, lastColumn + columnMoveNumber);
-//    sheet.addMergedRegion(targetAddress);
-//  }
+  // public static void moveCell(Sheet sheet, CellRangeAddress address, int rowMoveNumber,
+  // int columnMoveNumber) {
+  // int firstRow = address.getFirstRow();
+  // int lastRow = address.getLastRow();
+  // int firstColumn = address.getFirstColumn();
+  // int lastColumn = address.getLastColumn();
+  // for (int row = firstRow; row <= lastRow; row++) {
+  // for (int column = firstColumn; column <= lastColumn; column++) {
+  // Cell moveCell = getCellByIndex(sheet, row, column);
+  // Cell targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
+  // removeCell(targetCell);
+  // targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
+  // copyCell(moveCell, targetCell, true);
+  // removeCell(moveCell);
+  // }
+  // }
+  //
+  // CellRangeAddress targetAddress = new CellRangeAddress(firstRow + rowMoveNumber,
+  // lastRow + rowMoveNumber, firstColumn + columnMoveNumber, lastColumn + columnMoveNumber);
+  // sheet.addMergedRegion(targetAddress);
+  // }
 
-//  public static void removeCell(@Nullable Cell cell) {
-//    Optional<CellRangeAddress> address = getMergedRegion(cell);
-//    if (address.isPresent()) {
-//      removeCell(cell.getSheet(), address.get());
-//    } else {
-//      cell.getRow()
-//          .removeCell(getCellByIndex(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()));
-//    }
-//  }
+  // public static void removeCell(@Nullable Cell cell) {
+  // Optional<CellRangeAddress> address = getMergedRegion(cell);
+  // if (address.isPresent()) {
+  // removeCell(cell.getSheet(), address.get());
+  // } else {
+  // cell.getRow()
+  // .removeCell(getCellByIndex(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()));
+  // }
+  // }
 
-//  public static void removeCell(@Nullable Sheet sheet, @Nullable CellRangeAddress address) {
-//    int sheetMergeCount = sheet.getNumMergedRegions();
-//    for (int i = sheetMergeCount - 1; i >= 0; i--) {
-//      CellRangeAddress range = sheet.getMergedRegion(i);
-//      if (range.getFirstRow() == address.getFirstRow() && range.getLastRow() == address.getLastRow()
-//          && range.getFirstColumn() == address.getFirstColumn()
-//          && range.getLastColumn() == address.getLastColumn()) {
-//        sheet.removeMergedRegion(i);
-//        for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
-//          for (int columnIndex = address.getFirstColumn(); columnIndex <= address
-//              .getLastColumn(); columnIndex++) {
-//            removeCell(getCellByIndex(sheet, rowIndex, columnIndex));
-//          }
-//        }
-//      }
-//    }
-//  }
+  // public static void removeCell(@Nullable Sheet sheet, @Nullable CellRangeAddress address) {
+  // int sheetMergeCount = sheet.getNumMergedRegions();
+  // for (int i = sheetMergeCount - 1; i >= 0; i--) {
+  // CellRangeAddress range = sheet.getMergedRegion(i);
+  // if (range.getFirstRow() == address.getFirstRow() && range.getLastRow() == address.getLastRow()
+  // && range.getFirstColumn() == address.getFirstColumn()
+  // && range.getLastColumn() == address.getLastColumn()) {
+  // sheet.removeMergedRegion(i);
+  // for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
+  // for (int columnIndex = address.getFirstColumn(); columnIndex <= address
+  // .getLastColumn(); columnIndex++) {
+  // removeCell(getCellByIndex(sheet, rowIndex, columnIndex));
+  // }
+  // }
+  // }
+  // }
+  // }
 
-//  public static void setCellStyle(Cell cell, CellStyle style) {
-//    Optional<CellRangeAddress> optional = getMergedRegion(cell);
-//    if (optional.isPresent()) {
-//      CellRangeAddress address = optional.get();
-//      for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
-//        for (int columnIndex = address.getFirstColumn(); columnIndex <= address
-//            .getLastColumn(); columnIndex++) {
-//          Cell c = getCellByIndex(cell.getSheet(), rowIndex, columnIndex);
-//          c.setCellStyle(style);
-//        }
-//      }
-//    } else {
-//      cell.setCellStyle(style);
-//    }
-//  }
+  // public static void setCellStyle(Cell cell, CellStyle style) {
+  // Optional<CellRangeAddress> optional = getMergedRegion(cell);
+  // if (optional.isPresent()) {
+  // CellRangeAddress address = optional.get();
+  // for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
+  // for (int columnIndex = address.getFirstColumn(); columnIndex <= address
+  // .getLastColumn(); columnIndex++) {
+  // Cell c = getCellByIndex(cell.getSheet(), rowIndex, columnIndex);
+  // c.setCellStyle(style);
+  // }
+  // }
+  // } else {
+  // cell.setCellStyle(style);
+  // }
+  // }
 
-//  public static void copyCell(Cell srcCell, Cell targetCell, boolean copyValueFlag) {
-//    // 样式
-//    targetCell.setCellStyle(srcCell.getCellStyle());
-//    // 评论
-//    if (srcCell.getCellComment() != null) {
-//      targetCell.setCellComment(srcCell.getCellComment());
-//    }
-//    // 不同数据类型处理
-//    CellType srcCellType = srcCell.getCellTypeEnum();
-//    targetCell.setCellType(srcCellType);
-//    if (copyValueFlag) {
-//      if (srcCellType == CellType.NUMERIC) {
-//        if (DateUtil.isCellDateFormatted(srcCell)) {
-//          targetCell.setCellValue(srcCell.getDateCellValue());
-//        } else {
-//          targetCell.setCellValue(srcCell.getNumericCellValue());
-//        }
-//      } else if (srcCellType == CellType.STRING) {
-//        targetCell.setCellValue(srcCell.getRichStringCellValue());
-//      } else if (srcCellType == CellType.BLANK) {
-//        // nothing21
-//      } else if (srcCellType == CellType.BOOLEAN) {
-//        targetCell.setCellValue(srcCell.getBooleanCellValue());
-//      } else if (srcCellType == CellType.ERROR) {
-//        targetCell.setCellErrorValue(srcCell.getErrorCellValue());
-//      } else if (srcCellType == CellType.FORMULA) {
-//        targetCell.setCellFormula(srcCell.getCellFormula());
-//      } else { // nothing29
-//      }
-//    }
-//  }
+  // public static void copyCell(Cell srcCell, Cell targetCell, boolean copyValueFlag) {
+  // // 样式
+  // targetCell.setCellStyle(srcCell.getCellStyle());
+  // // 评论
+  // if (srcCell.getCellComment() != null) {
+  // targetCell.setCellComment(srcCell.getCellComment());
+  // }
+  // // 不同数据类型处理
+  // CellType srcCellType = srcCell.getCellTypeEnum();
+  // targetCell.setCellType(srcCellType);
+  // if (copyValueFlag) {
+  // if (srcCellType == CellType.NUMERIC) {
+  // if (DateUtil.isCellDateFormatted(srcCell)) {
+  // targetCell.setCellValue(srcCell.getDateCellValue());
+  // } else {
+  // targetCell.setCellValue(srcCell.getNumericCellValue());
+  // }
+  // } else if (srcCellType == CellType.STRING) {
+  // targetCell.setCellValue(srcCell.getRichStringCellValue());
+  // } else if (srcCellType == CellType.BLANK) {
+  // // nothing21
+  // } else if (srcCellType == CellType.BOOLEAN) {
+  // targetCell.setCellValue(srcCell.getBooleanCellValue());
+  // } else if (srcCellType == CellType.ERROR) {
+  // targetCell.setCellErrorValue(srcCell.getErrorCellValue());
+  // } else if (srcCellType == CellType.FORMULA) {
+  // targetCell.setCellFormula(srcCell.getCellFormula());
+  // } else { // nothing29
+  // }
+  // }
+  // }
 
   @Nullable
   public static Object getValue(@Nullable Cell cell) {
