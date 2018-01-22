@@ -84,7 +84,7 @@ interface Ib extends Ia {
 
 public class TestGuava {
   public static <T> void main(String[] args) throws Exception {
-    testFluentIterable();
+    testTypeToken(new TypeToken<List<String>>() {});
   }
 
   public static void testFluentIterable() {

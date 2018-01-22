@@ -71,16 +71,6 @@ class Config<T> extends TypeConfig<T>{
 
 public class TestBuilder {
   public static void main(String[] args) {
-    testGeneric();
-  }
-
-  public static void testGeneric() {
-    Config<String> config=create();
-    System.out.println(config.getType());
-  }
-  
-  public static <T> Config<T> create(){
-    return new Config<T>() {};
   }
   
   public static void testParent() {
