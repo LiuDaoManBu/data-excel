@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -122,19 +123,87 @@ public enum BaseDataType implements DataType {
   DATE(Date.class, Calendar.class, LocalDate.class, String.class) {
     @Override
     public boolean test(Object value) {
+      if(value instanceof Number || value instanceof Boolean) {
+        return false;
+      }
       try {
-        // TODO
+        // 检查是否有具体时间
         TypeUtils.castToDate(value);
         return true;
       } catch (RuntimeException e) {
         return false;
       }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T cast(Object value, TypeToken<T> type) {
+      Date date=TypeUtils.castToDate(value);
+      if(type.isSubtypeOf(Date.class)) {
+        return (T) TypeUtils.castToJavaBean(date, type.getRawType());
+      }
+      
+      if(type.isSubtypeOf(Calendar.class)) {
+        return (T) TypeUtils.castToJavaBean(date, type.getRawType());
+      }
+      
+      if(LocalDate.class.equals(type.getRawType())) {
+        return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
+      }
+      
+      if(String.class.equals(type.getRawType())) {
+        return (T) cast(date,LocalDate.class).toString();
+      }
+      
+      throw new IllegalArgumentException();
     }
   },
   // 时间
   TIME(Date.class, Calendar.class, LocalTime.class, String.class) {
     @Override
     public boolean test(Object value) {
+      if(value instanceof Number || value instanceof Boolean) {
+        return false;
+      }
+      try {
+        // 检查是否有日期
+        TypeUtils.castToDate(value);
+        return true;
+      } catch (RuntimeException e) {
+        return false;
+      }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T cast(Object value, TypeToken<T> type) {
+      Date date=TypeUtils.castToDate(value);
+      if(type.isSubtypeOf(Date.class)) {
+        return (T) TypeUtils.castToJavaBean(date, type.getRawType());
+      }
+      
+      if(type.isSubtypeOf(Calendar.class)) {
+        return (T) TypeUtils.castToJavaBean(date, type.getRawType());
+      }
+      
+      if(LocalTime.class.equals(type.getRawType())) {
+        return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalTime();
+      }
+      
+      if(String.class.equals(type.getRawType())) {
+        return (T) cast(date,LocalTime.class).toString();
+      }
+      
+      throw new IllegalArgumentException();
+    }
+  },
+  // 日期时间
+  DATE_TIME(Date.class, Calendar.class, LocalDateTime.class, String.class) {
+    @Override
+    public boolean test(Object value) {
+      if(value instanceof Number || value instanceof Boolean) {
+        return false;
+      }
       try {
         // TODO
         TypeUtils.castToDate(value);
@@ -143,18 +212,28 @@ public enum BaseDataType implements DataType {
         return false;
       }
     }
-  },
-  // 日期时间
-  DATE_TIME(Date.class, Calendar.class, LocalDateTime.class, String.class) {
+    
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean test(Object value) {
-      try {
-        // TODO
-        TypeUtils.castToDate(value);
-        return true;
-      } catch (RuntimeException e) {
-        return false;
+    public <T> T cast(Object value, TypeToken<T> type) {
+      Date date=TypeUtils.castToDate(value);
+      if(type.isSubtypeOf(Date.class)) {
+        return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
+      
+      if(type.isSubtypeOf(Calendar.class)) {
+        return (T) TypeUtils.castToJavaBean(date, type.getRawType());
+      }
+      
+      if(LocalDateTime.class.equals(type.getRawType())) {
+        return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+      }
+      
+      if(String.class.equals(type.getRawType())) {
+        return (T) cast(date,LocalDateTime.class).toString();
+      }
+      
+      throw new IllegalArgumentException();
     }
   },
   // 字符串
