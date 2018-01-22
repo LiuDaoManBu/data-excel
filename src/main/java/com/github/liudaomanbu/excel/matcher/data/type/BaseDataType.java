@@ -205,7 +205,6 @@ public enum BaseDataType implements DataType {
         return false;
       }
       try {
-        // TODO
         TypeUtils.castToDate(value);
         return true;
       } catch (RuntimeException e) {
