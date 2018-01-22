@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import com.github.liudaomanbu.excel.config.TypeConfig;
 import com.google.common.collect.ImmutableList;
 
 class ResultA {
@@ -64,12 +65,20 @@ class Node {
   }
 }
 
+class Config extends TypeConfig<String>{
+  
+}
 
 public class TestBuilder {
   public static void main(String[] args) {
-    testParent();
+    testGeneric();
   }
 
+  public static void testGeneric() {
+    Config config=new Config();
+    System.out.println(config.getType());
+  }
+  
   public static void testParent() {
     Node.Builder builder = new Node.Builder();
     builder.parent = builder.build();
