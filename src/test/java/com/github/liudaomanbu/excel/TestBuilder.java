@@ -65,7 +65,7 @@ class Node {
   }
 }
 
-class Config extends TypeConfig<String>{
+class Config<T> extends TypeConfig<T>{
   
 }
 
@@ -75,8 +75,12 @@ public class TestBuilder {
   }
 
   public static void testGeneric() {
-    Config config=new Config();
+    Config<String> config=create();
     System.out.println(config.getType());
+  }
+  
+  public static <T> Config<T> create(){
+    return new Config<T>() {};
   }
   
   public static void testParent() {
