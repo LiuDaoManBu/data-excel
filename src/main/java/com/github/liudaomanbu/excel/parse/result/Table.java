@@ -84,16 +84,13 @@ public class Table {
     ImmutableCollection<MenuConfig> menuConfigs = config.getTopMenuConfigs();
     Sheet sheet = sheetParseResult.getSheet();
     return ExcelUtil.getCells(sheet).map(StandardCell::valueOf).map(cell -> {
-      // TODO 重复匹配问题
       Optional<MenuConfig> optional =
           menuConfigs.stream().filter(menuConfig -> menuConfig.getMatcher().test(cell)).findAny();
-      // TODO safe
-      return optional.map(t -> new Menu.Builder().setCell(cell).setConfig(t).setTable(this));
+      return optional.map(t -> Menu.builder().setCell(cell).setConfig(t).setTable(this));
     }).filter(Optional::isPresent).map(Optional::get);
   }
 
   private Validator<Table> createMenuConfigValidator() {
-    // TODO 注释,重复匹配?tip
     return new BaseValidator<>(
         config.getTopMenuConfigs().stream().collect(ImmutableMap.toImmutableMap(topMenuConfig -> {
           Predicate<Table> predicate = table -> table.getTopMenus().stream().map(Menu::getConfig)
@@ -104,25 +101,6 @@ public class Table {
           return function;
         })));
   }
-
-  // public <T> T get(Class<T> type) {
-  // Optional<T> optional = tableConfig.getEffectiveParserConfig().newInstance(type);
-  // Preconditions.checkArgument(optional.isPresent());
-  // topMenus.forEach(menu -> menu.getData().setFieldValue(optional.get()));
-  // return optional.get();
-  // }
-
-  // public JSONObject getJSONObjectData() {
-  // Map<String, Object> map = getDataMenus()
-  // .collect(Collectors.toMap(Menu::getName, menu -> menu.getData().getCellValues()));
-  // return new JSONObject(map);
-  // }
-
-  // public JSONArray getJSONArrayData() {
-  // Map<String,Object> map=getDataMenus().collect(Collectors.toMap(Menu::getName,
-  // menu->menu.getData().getCellValues()));
-  // return new JSONObject(map);
-  // }
 
   public Optional<Menu> findMenu(String menuName) {
     return getMenus().filter(menu -> menu.getName().equals(menuName)).findAny();

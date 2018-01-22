@@ -40,7 +40,6 @@ public class ComparableMatcher<T extends Comparable<T>> extends BaseMatcher<T> {
     return this;
   }
 
-  // TODO between和其他type对于参数个数不同要求的处理?
   public ComparableMatcher<T> between(T lowValue, T highValue) {
     add(value -> ComparableMatcherType.LE.apply(value, highValue)
         && ComparableMatcherType.GE.apply(value, lowValue));

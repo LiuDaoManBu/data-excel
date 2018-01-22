@@ -15,7 +15,6 @@ import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
-// TODO classType?
 public class TableConfig extends Config {
   public static class Builder extends Config.Builder {
     private List<MenuConfig.Builder> topMenuConfigBuilders;

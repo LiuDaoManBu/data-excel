@@ -31,11 +31,11 @@ public class ParserConfig {
     setSupplier(Iterable.class, Lists::newArrayList);
     setSupplier(Multimap.class, ArrayListMultimap::create);
     setSupplier(Table.class, HashBasedTable::create);
-    
-    setConstructType(List.class,ConstructType.ITERABLE);
-    setConstructType(Set.class,ConstructType.ITERABLE);
-    setConstructType(Collection.class,ConstructType.ITERABLE);
-    setConstructType(Iterable.class,ConstructType.ITERABLE);
+
+    setConstructType(List.class, ConstructType.ITERABLE);
+    setConstructType(Set.class, ConstructType.ITERABLE);
+    setConstructType(Collection.class, ConstructType.ITERABLE);
+    setConstructType(Iterable.class, ConstructType.ITERABLE);
   }
 
   public <T> void setConstructType(Class<T> type, ConstructType constructType) {
@@ -47,12 +47,13 @@ public class ParserConfig {
   }
 
   public <T> ConstructType getConstructType(TypeToken<T> token) {
-    if(token.isArray()) {
+    if (token.isArray()) {
       return ConstructType.ITERABLE;
     }
-    // TODO 父子关系生效?
-    Optional<ConstructType> optional = token.getTypes().rawTypes().stream()
-        .filter(classToConstructTypes::containsKey).findFirst().map(classToConstructTypes::get);
+    // 父子关系生效?
+    Optional<ConstructType> optional = token.getTypes().rawTypes().stream().filter(
+        type -> classToConstructTypes.containsKey(type))
+        .findFirst().map(classToConstructTypes::get);
     return optional.orElse(ConstructType.OBJECT);
   }
 
@@ -66,7 +67,7 @@ public class ParserConfig {
 
   @SuppressWarnings("unchecked")
   public <T> Optional<Supplier<T>> getSupplier(TypeToken<T> token) {
-    // TODO 父子关系生效?
+    // 父子关系生效?
     Optional<Supplier<T>> optional =
         token.getTypes().rawTypes().stream().filter(classToSuppliers::containsKey).findFirst()
             .map(classToSuppliers::get).map(supplier -> (Supplier<T>) supplier);

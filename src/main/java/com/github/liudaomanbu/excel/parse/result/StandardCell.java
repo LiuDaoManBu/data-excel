@@ -25,14 +25,12 @@ public class StandardCell extends CellRangeAddress implements Cell {
   private static final int ONE = 1;
 
   public static StandardCell valueOf(Sheet sheet, CellRangeAddress cellRangeAddress) {
-    // TODO tip
     Preconditions.checkNotNull(sheet);
     Preconditions.checkNotNull(cellRangeAddress);
     return new StandardCell(sheet, cellRangeAddress);
   }
 
   public static StandardCell valueOf(Cell cell) {
-    // TODO tip
     Preconditions.checkNotNull(cell);
     return ExcelUtil.getMergedRegion(cell)
         .map(address -> new StandardCell(cell.getSheet(), address))
@@ -49,7 +47,6 @@ public class StandardCell extends CellRangeAddress implements Cell {
         cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
 
     this.sheet = sheet;
-    // TODO 是否需要出于安全性考虑复写一份私有方法在本类?
     this.valueCell = ExcelUtil.getCellByIndex(sheet, getFirstRow(), getFirstColumn());
     this.cells = ExcelUtil.getCells(sheet, this).collect(ImmutableSet.toImmutableSet());
   }
@@ -87,17 +84,14 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
 
   // delegate Cell methods start
-  // TODO 是否需要为了防止误用而抛错?
   public int getColumnIndex() {
     return valueCell.getColumnIndex();
   }
 
-  // TODO 是否需要为了防止误用而抛错?
   public int getRowIndex() {
     return valueCell.getRowIndex();
   }
 
-  // TODO 是否需要为了防止误用而抛错?
   public Row getRow() {
     return valueCell.getRow();
   }
@@ -202,7 +196,6 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
 
   public void setAsActiveCell() {
-    // TODO 为合并单元格时是否会选中整个合并单元格?
     valueCell.setAsActiveCell();
   }
 
@@ -211,7 +204,6 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
 
   public void setCellComment(Comment comment) {
-    // TODO 为合并单元格时是否需要为每个单元格都分配注释?
     valueCell.setCellComment(comment);
   }
 
@@ -220,7 +212,6 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
 
   public void removeCellComment() {
-    // TODO 为合并单元格时是否需要为每个单元格都删除注释?
     valueCell.removeCellComment();
   }
 
@@ -229,12 +220,10 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
 
   public void setHyperlink(Hyperlink link) {
-    // TODO 为合并单元格时是否需要为每个单元格都分配超链接?
     valueCell.setHyperlink(link);
   }
 
   public void removeHyperlink() {
-    // TODO 为合并单元格时是否需要为每个单元格都删除超链接?
     valueCell.removeHyperlink();
   }
 

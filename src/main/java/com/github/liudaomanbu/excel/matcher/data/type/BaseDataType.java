@@ -23,7 +23,7 @@ public enum BaseDataType implements DataType {
       try {
         return TypeUtils.castToBigDecimal(value).scale() > 0;
       } catch (NumberFormatException e) {
-        return Boolean.FALSE;
+        return false;
       }
     }
   },
@@ -37,9 +37,9 @@ public enum BaseDataType implements DataType {
     public boolean test(Object value) {
       try {
         TypeUtils.castToBigDecimal(value).toBigIntegerExact();
-        return Boolean.TRUE;
+        return true;
       } catch (ArithmeticException | NumberFormatException e) {
-        return Boolean.FALSE;
+        return false;
       }
     }
   },
@@ -58,7 +58,7 @@ public enum BaseDataType implements DataType {
         return NUMBER.test(value)
             && TypeUtils.castToBigDecimal(value).compareTo(BigDecimal.ZERO) > 0;
       } catch (NumberFormatException e) {
-        return Boolean.FALSE;
+        return false;
       }
     }
   },
@@ -70,7 +70,7 @@ public enum BaseDataType implements DataType {
         return NUMBER.test(value)
             && TypeUtils.castToBigDecimal(value).compareTo(BigDecimal.ZERO) < 0;
       } catch (NumberFormatException e) {
-        return Boolean.FALSE;
+        return false;
       }
     }
   },
@@ -98,7 +98,7 @@ public enum BaseDataType implements DataType {
         return POSITIVE_WHOLE_NUMBER.test(value)
             || WHOLE_NUMBER.cast(value, BigInteger.class).equals(BigInteger.ZERO);
       } catch (ArithmeticException | NumberFormatException e) {
-        return Boolean.FALSE;
+        return false;
       }
     }
   },
@@ -125,9 +125,9 @@ public enum BaseDataType implements DataType {
       try {
         // TODO
         TypeUtils.castToDate(value);
-        return Boolean.TRUE;
-      } catch (JSONException e) {
-        return Boolean.FALSE;
+        return true;
+      } catch (RuntimeException e) {
+        return false;
       }
     }
   },
@@ -138,9 +138,9 @@ public enum BaseDataType implements DataType {
       try {
         // TODO
         TypeUtils.castToDate(value);
-        return Boolean.TRUE;
-      } catch (JSONException e) {
-        return Boolean.FALSE;
+        return true;
+      } catch (RuntimeException e) {
+        return false;
       }
     }
   },
@@ -151,9 +151,9 @@ public enum BaseDataType implements DataType {
       try {
         // TODO
         TypeUtils.castToDate(value);
-        return Boolean.TRUE;
-      } catch (JSONException e) {
-        return Boolean.FALSE;
+        return true;
+      } catch (RuntimeException e) {
+        return false;
       }
     }
   },
@@ -164,7 +164,7 @@ public enum BaseDataType implements DataType {
       return true;
     }
   },
-  // 单词 TODO include chinese?
+  // 单词
   WORD(String.class) {
     @Override
     public boolean test(Object t) {
@@ -226,9 +226,9 @@ public enum BaseDataType implements DataType {
    public boolean test(Object t) {
      try {
        TypeUtils.castToBoolean(t);
-       return Boolean.TRUE;
+       return true;
      } catch (JSONException e) {
-       return Boolean.FALSE;
+       return false;
      }
    }
  },

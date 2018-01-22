@@ -184,8 +184,8 @@ public class Test {
   public static void testConstructType() {
     Object array = new String[] {"AAA", "BBB", "CCC"};
     // Object array = new int[] {2, 3, 1};
-    String[] strings = ConstructType.toArray(array);
-    System.out.println(Arrays.toString(strings));
+//    String[] strings = ConstructType.toArray(array);
+//    System.out.println(Arrays.toString(strings));
     // Array.class.cast(array);
   }
 

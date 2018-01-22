@@ -54,7 +54,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
-      Function<T, R> transformer) {
+      Function<T,? extends R> transformer) {
     return add(value -> type.apply(value, predicateValue), transformer);
   }
 
@@ -90,8 +90,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public Predicate<T> reduce() {
-    // TODO tip?
-    Preconditions.checkState(!predicates.isEmpty());
+    Preconditions.checkState(!predicates.isEmpty(),"predicates can't empty");
     return type.reduce(predicates);
   }
 

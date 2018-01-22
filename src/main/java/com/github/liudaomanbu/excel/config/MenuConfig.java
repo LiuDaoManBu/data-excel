@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import com.github.liudaomanbu.excel.config.Config.Builder;
 import com.github.liudaomanbu.excel.constant.Direction;
 import com.github.liudaomanbu.excel.constant.LoadType;
 import com.github.liudaomanbu.excel.constant.Necessity;
@@ -163,8 +162,7 @@ public class MenuConfig extends Config {
 
   private MenuConfig(Builder builder) {
     super(builder);
-    // TODO tip
-    Preconditions.checkNotNull(builder.matcher);
+    Preconditions.checkNotNull(builder.matcher, "matcher can't be null");
     matcher = builder.matcher.reduce();
 
 
@@ -173,8 +171,7 @@ public class MenuConfig extends Config {
     necessity = Optional.ofNullable(builder.necessity).orElse(DEFAULT_MENU_NECESSITY);
     tableConfig = Optional.ofNullable(builder.tableConfig)
         .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
-    // TODO tip
-    Preconditions.checkState(Objects.nonNull(tableConfig));
+    Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");
     direction = Optional.ofNullable(builder.direction).orElse(Optional.ofNullable(parent)
         .map(MenuConfig::getDirection).orElse(tableConfig.getMenuDirection()));
     childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()

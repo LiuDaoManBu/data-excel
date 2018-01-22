@@ -108,7 +108,6 @@ public class MenuDataConfig {
 
   private static final Joiner JOINER = Joiner.on("").skipNulls();
   private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
-  // TODO 可配置
   private static final ImmutableBiMap<BaseDataType, String> DATA_TYPE_TO_TIPS =
       ImmutableBiMap.<BaseDataType, String>builder().put(BaseDataType.BOOLEAN, "是否")
           .put(BaseDataType.CHINESE, "中文").put(BaseDataType.DATE, "日期")
@@ -136,26 +135,24 @@ public class MenuDataConfig {
 
   protected MenuDataConfig(Builder builder) {
     menuConfig = builder.menuConfig;
-    // TODO tip
-    Preconditions.checkState(Objects.nonNull(menuConfig));
+    Preconditions.checkNotNull(menuConfig, "menuConfig can't be null");
     loadType = Optional.ofNullable(builder.loadType).orElse(DEFAULT_LOAD_TYPE);
     field = builder.field;
     fieldName = Optional.ofNullable(builder.fieldName).orElse(field.getName());
     dataType = builder.dataType;
-    // TODO tip
-    Preconditions.checkState(Objects.nonNull(dataType));
+    Preconditions.checkNotNull(dataType, "dataType can't be null");
 
-    validators =
-        Stream
-            .concat(Stream.of(new BaseValidator<StandardCell>(
-                ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
-                    .put(cell -> dataType.test(cell.getValue()),
-                        cell -> JOINER.join(cell.formatAsString(), "不符合",
-                            DATA_TYPE_TO_TIPS.get(dataType), "格式"))// TODO tip
-                    .build())),
-                builder.validators.stream())
-            .collect(ImmutableList.toImmutableList());
+    validators = Stream.concat(Stream.of(createDataTypeValidator()), builder.validators.stream())
+        .collect(ImmutableList.toImmutableList());
 
+  }
+
+  private Validator<StandardCell> createDataTypeValidator() {
+    return new BaseValidator<StandardCell>(
+        ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
+            .put(cell -> dataType.test(cell.getValue()), cell -> JOINER.join(cell.formatAsString(),
+                "不符合", DATA_TYPE_TO_TIPS.get(dataType), "格式"))
+            .build());
   }
 
   public <T> T cast(Object value, TypeToken<T> type) {

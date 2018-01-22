@@ -15,7 +15,6 @@ public class InvokableSupplier<T> implements Supplier<T> {
     return of(Invokable.from(constructor));
   }
   
-  //TODO
   @SuppressWarnings("unchecked")
   public static <T> InvokableSupplier<T> of(Method method) {
     return of((Invokable<?, T>)Invokable.from(method));

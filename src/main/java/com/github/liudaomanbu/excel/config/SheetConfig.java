@@ -35,7 +35,7 @@ public class SheetConfig extends Config {
       super.setId(id);
       return this;
     }
-    
+
     public Necessity getNecessity() {
       return necessity;
     }
@@ -108,10 +108,8 @@ public class SheetConfig extends Config {
   }
 
   public SheetParseResult.Builder parse(Sheet sheet) {
-    SheetParseResult.Builder builder = SheetParseResult.builder().setSheet(sheet).setConfig(this);
-    builder.setTableBuilders(tableConfigs.stream().map(config -> config.parse(sheet))
-        .collect(ImmutableList.toImmutableList()));
-    return builder;
+    return SheetParseResult.builder().setSheet(sheet).setConfig(this).setTableBuilders(tableConfigs
+        .stream().map(config -> config.parse(sheet)).collect(ImmutableList.toImmutableList()));
   }
 
   public ParserConfig getEffectiveParserConfig() {

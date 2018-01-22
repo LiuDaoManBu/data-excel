@@ -2,7 +2,6 @@ package com.github.liudaomanbu.excel.parse.result;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -21,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class Menu {
   public static class Builder {
@@ -86,44 +84,31 @@ public class Menu {
 
   public Menu(Builder builder) {
     cell = builder.cell;
+    Preconditions.checkNotNull(cell, "cell can't be null");
     config = builder.config;
     parent = builder.parent;
     table = Optional.ofNullable(builder.table)
         .orElse(Optional.ofNullable(parent).map(Menu::getTable).orElse(null));
+    Preconditions.checkNotNull(table, "table can't be null");
     childrens =
         loadChildrens().peek(childrenBuilder -> childrenBuilder.setParent(this).setTable(table))
             .map(Builder::build).collect(ImmutableList.toImmutableList());
     data = new MenuData(this);
 
-    // TODO dataError? is MenuError?
     errors = createMenuConfigValidator().validate(this).stream()
         .collect(ImmutableList.toImmutableList());
-
-    // TODO tip
-    Preconditions.checkNotNull(cell);
-    Preconditions.checkNotNull(table);
   }
 
   private Stream<Builder> loadChildrens() {
-    ImmutableCollection<MenuConfig> childrenConfigs = config.getChildrens();
-
-    if (!childrenConfigs.isEmpty()) {
-      ImmutableList<StandardCell> menuCells =
-          config.getDirection().get(getCell(), config.getDistance());
-      return menuCells.stream().map(cell -> {
-        Builder builder = builder().setCell(cell).setParent(this);
-        // TODO Duplicate matching?
-        MenuConfig config = Iterables.getOnlyElement(childrenConfigs.stream()
-            .filter(c -> c.matches(cell)).collect(ImmutableSet.toImmutableSet()));
-        return builder.setConfig(config);
-      });
-    } else {
-      return Stream.empty();
-    }
+    ImmutableList<StandardCell> menuCells =
+        config.getDirection().get(getCell(), config.getDistance());
+    return config.getChildrens().stream()
+        .map(t -> menuCells.stream().filter(t::matches).findAny()
+            .map(cell -> builder().setCell(cell).setParent(this).setConfig(t)))
+        .filter(Optional::isPresent).map(Optional::get);
   }
 
   private Validator<Menu> createMenuConfigValidator() {
-    // TODO 注释,重复匹配?tip
     return new BaseValidator<>(
         config.getChildrens().stream().collect(ImmutableMap.toImmutableMap(children -> {
           Predicate<Menu> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)

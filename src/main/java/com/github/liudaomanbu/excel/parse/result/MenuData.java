@@ -17,7 +17,7 @@ public class MenuData {
   }
 
 //  public ImmutableList getCellValues() {
-//    // TODO
+//    // cell不是必然有值,为null时ImmutableList会无法放入null而报错
 //    return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
 //        .collect(ImmutableList.toImmutableList());
 //  }

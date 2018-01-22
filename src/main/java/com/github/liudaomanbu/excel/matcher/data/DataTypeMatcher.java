@@ -23,7 +23,7 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
   public <T extends Comparable<T>> DataTypeMatcher addDataPredicate(ComparableMatcherType type,
       T predicateValue) {
     // TODO safe?
-    add(type, predicateValue, value -> (T) dataType.cast(value, predicateValue.getClass()));
+    add(type, predicateValue, value ->(T)dataType.cast(value, predicateValue.getClass()));
     return this;
   }
 

@@ -121,7 +121,7 @@ public enum Direction {
     return cells.build();
   }
 
-  public ImmutableList<StandardCell> get(StandardCell cell, int distance) {// TODO distance名称不准确
+  public ImmutableList<StandardCell> get(StandardCell cell, int distance) {// distance名称不准确
     Preconditions.checkNotNull(cell);
     Preconditions.checkArgument(distance > 0);
 

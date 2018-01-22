@@ -10,12 +10,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,7 +23,6 @@ import javax.annotation.Nullable;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
@@ -54,7 +51,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 
 
 public class ExcelUtil {
@@ -65,8 +61,6 @@ public class ExcelUtil {
                   : cell.getNumericCellValue())
           .put(CellType.STRING, Cell::getStringCellValue)
           .put(CellType.BOOLEAN, Cell::getBooleanCellValue).build();
-
-//  private static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
 
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
@@ -81,7 +75,7 @@ public class ExcelUtil {
     return config.parse(WorkbookFactory.create(inputStream));
   }
 
-  public static SheetConfig.Builder toSheetConfig(Class<?> type) {
+  public static SheetConfig.Builder parseToSheetConfig(Class<?> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
       SheetConfig.Builder builder = SheetConfig.builder();
       if (!Strings.isNullOrEmpty(t.value())) {
@@ -92,45 +86,37 @@ public class ExcelUtil {
     }).orElse(null);
   }
 
-  public static <V> TableConfig.Builder toTableConfig(Class<V> type) {
+  public static <V> TableConfig.Builder parseToTableConfig(Class<V> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
       TableConfig.Builder builder =
           TableConfig.builder().setId(type).setTopMenuConfigBuilders(ClassUtil.getAllFields(type)
-              .map(ExcelUtil::toConfig).filter(Objects::nonNull).collect(Collectors.toList()));
-      // TODO
-//      builder.getDataConfigBuilder().addJavaxValidator(FACTORY.getValidator(), type);
+              .map(ExcelUtil::parseToMenuConfig).filter(Objects::nonNull).collect(Collectors.toList()));
       return builder;
     }).orElse(null);
   }
 
-  // TODO
   public static <T> T toJavaObject(Map<Menu, StandardCell> menuToValueCell, Class<T> type) {
-    ImmutableCollection<Field> fields =
-        ClassUtil.getAllFields(type).collect(ImmutableSet.toImmutableSet());
-
     JSONObject jsonObject = toJsonObject(menuToValueCell);
     return jsonObject.toJavaObject(type);
   }
 
-//TODO
- public static JSONObject toJsonObject(Map<Menu, StandardCell> menuToValueCell) {
-   JSONObject jsonObject = new JSONObject();
-   menuToValueCell.forEach((menu, cell) -> {
-     Field field = menu.getField();
-     Object value=null;
-     if (Objects.isNull(field)) {
-       value=cell.getValue();
-     }else {
-       value=menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType());
-     }
+  public static JSONObject toJsonObject(Map<Menu, StandardCell> menuToValueCell) {
+    JSONObject jsonObject = new JSONObject();
+    menuToValueCell.forEach((menu, cell) -> {
+      Field field = menu.getField();
+      Object value = null;
+      if (Objects.isNull(field)) {
+        value = cell.getValue();
+      } else {
+        value = menu.getData().getConfig().getDataType().cast(cell.getValue(), field.getType());
+      }
 
-     jsonObject.put(menu.getFieldName(),value);
-   });
-   return jsonObject;
- }
-  
-  // TODO
-  public static MenuConfig.Builder toConfig(Field field) {
+      jsonObject.put(menu.getFieldName(), value);
+    });
+    return jsonObject;
+  }
+
+  public static MenuConfig.Builder parseToMenuConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
       ExcelMenu excelMenu = f.menu();
       MenuConfig.Builder builder = MenuConfig.builder().setId(excelMenu.value())
@@ -217,7 +203,7 @@ public class ExcelUtil {
     return Optional.ofNullable(sheet).map(Sheet::getNumMergedRegions).map(n -> n > 0).orElse(false);
   }
 
-  // TODO 方法重写 指定cellType?
+  // 指定cellType?
   public static void setCellValue(@Nullable Cell cell, @Nullable Object value) {
     Optional.ofNullable(cell).ifPresent(t -> {
       if (Objects.isNull(value)) {
@@ -240,150 +226,131 @@ public class ExcelUtil {
     });
   }
 
-  // TODO 方法重写
-  public static void moveCell(Collection<Cell> cells, int rowMoveNumber, int columnMoveNumber) {
-    Set<CellRangeAddress> addresses = Sets.newHashSet();
-    for (Cell cell : cells) {
-      Optional<CellRangeAddress> address = getMergedRegion(cell);
-      if (address.isPresent()) {
-        addresses.add(address.get());
-      } else {
-        moveCell(cell, rowMoveNumber, columnMoveNumber);
-      }
-    }
-    Sheet sheet = cells.iterator().next().getSheet();
-    for (CellRangeAddress address : addresses) {
-      moveCell(sheet, address, rowMoveNumber, columnMoveNumber);
-    }
-  }
+//  public static void moveCell(Collection<Cell> cells, int rowMoveNumber, int columnMoveNumber) {
+//    Set<CellRangeAddress> addresses = Sets.newHashSet();
+//    for (Cell cell : cells) {
+//      Optional<CellRangeAddress> address = getMergedRegion(cell);
+//      if (address.isPresent()) {
+//        addresses.add(address.get());
+//      } else {
+//        moveCell(cell, rowMoveNumber, columnMoveNumber);
+//      }
+//    }
+//    Sheet sheet = cells.iterator().next().getSheet();
+//    for (CellRangeAddress address : addresses) {
+//      moveCell(sheet, address, rowMoveNumber, columnMoveNumber);
+//    }
+//  }
 
-  // TODO 方法重构
-  public static void moveCell(Cell cell, int rowMoveNumber, int columnMoveNumber) {
-    int rowIndex = cell.getRowIndex();
-    int columnIndex = cell.getColumnIndex();
-    Cell targetCell =
-        getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
-    removeCell(targetCell);
-    targetCell =
-        getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
-    copyCell(cell, targetCell, true);
-    removeCell(cell);
-  }
+//  public static void moveCell(Cell cell, int rowMoveNumber, int columnMoveNumber) {
+//    int rowIndex = cell.getRowIndex();
+//    int columnIndex = cell.getColumnIndex();
+//    Cell targetCell =
+//        getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
+//    removeCell(targetCell);
+//    targetCell =
+//        getCellByIndex(cell.getSheet(), rowIndex + rowMoveNumber, columnIndex + columnMoveNumber);
+//    copyCell(cell, targetCell, true);
+//    removeCell(cell);
+//  }
 
-  // TODO 方法重构
-  public static void moveCell(Sheet sheet, CellRangeAddress address, int rowMoveNumber,
-      int columnMoveNumber) {
-    int firstRow = address.getFirstRow();
-    int lastRow = address.getLastRow();
-    int firstColumn = address.getFirstColumn();
-    int lastColumn = address.getLastColumn();
-    for (int row = firstRow; row <= lastRow; row++) {
-      for (int column = firstColumn; column <= lastColumn; column++) {
-        Cell moveCell = getCellByIndex(sheet, row, column);
-        Cell targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
-        removeCell(targetCell);
-        targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
-        copyCell(moveCell, targetCell, true);
-        removeCell(moveCell);
-      }
-    }
+//  public static void moveCell(Sheet sheet, CellRangeAddress address, int rowMoveNumber,
+//      int columnMoveNumber) {
+//    int firstRow = address.getFirstRow();
+//    int lastRow = address.getLastRow();
+//    int firstColumn = address.getFirstColumn();
+//    int lastColumn = address.getLastColumn();
+//    for (int row = firstRow; row <= lastRow; row++) {
+//      for (int column = firstColumn; column <= lastColumn; column++) {
+//        Cell moveCell = getCellByIndex(sheet, row, column);
+//        Cell targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
+//        removeCell(targetCell);
+//        targetCell = getCellByIndex(sheet, row + rowMoveNumber, column + columnMoveNumber);
+//        copyCell(moveCell, targetCell, true);
+//        removeCell(moveCell);
+//      }
+//    }
+//
+//    CellRangeAddress targetAddress = new CellRangeAddress(firstRow + rowMoveNumber,
+//        lastRow + rowMoveNumber, firstColumn + columnMoveNumber, lastColumn + columnMoveNumber);
+//    sheet.addMergedRegion(targetAddress);
+//  }
 
-    CellRangeAddress targetAddress = new CellRangeAddress(firstRow + rowMoveNumber,
-        lastRow + rowMoveNumber, firstColumn + columnMoveNumber, lastColumn + columnMoveNumber);
-    sheet.addMergedRegion(targetAddress);
-  }
+//  public static void removeCell(@Nullable Cell cell) {
+//    Optional<CellRangeAddress> address = getMergedRegion(cell);
+//    if (address.isPresent()) {
+//      removeCell(cell.getSheet(), address.get());
+//    } else {
+//      cell.getRow()
+//          .removeCell(getCellByIndex(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()));
+//    }
+//  }
 
-  // TODO 方法重构
-  public static void removeCell(@Nullable Cell cell) {
-    Optional<CellRangeAddress> address = getMergedRegion(cell);
-    if (address.isPresent()) {
-      removeCell(cell.getSheet(), address.get());
-    } else {
-      cell.getRow()
-          .removeCell(getCellByIndex(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()));
-    }
-  }
+//  public static void removeCell(@Nullable Sheet sheet, @Nullable CellRangeAddress address) {
+//    int sheetMergeCount = sheet.getNumMergedRegions();
+//    for (int i = sheetMergeCount - 1; i >= 0; i--) {
+//      CellRangeAddress range = sheet.getMergedRegion(i);
+//      if (range.getFirstRow() == address.getFirstRow() && range.getLastRow() == address.getLastRow()
+//          && range.getFirstColumn() == address.getFirstColumn()
+//          && range.getLastColumn() == address.getLastColumn()) {
+//        sheet.removeMergedRegion(i);
+//        for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
+//          for (int columnIndex = address.getFirstColumn(); columnIndex <= address
+//              .getLastColumn(); columnIndex++) {
+//            removeCell(getCellByIndex(sheet, rowIndex, columnIndex));
+//          }
+//        }
+//      }
+//    }
+//  }
 
-  // TODO 方法重构
-  public static void removeCell(@Nullable Sheet sheet, @Nullable CellRangeAddress address) {
-    int sheetMergeCount = sheet.getNumMergedRegions();
-    for (int i = sheetMergeCount - 1; i >= 0; i--) {
-      CellRangeAddress range = sheet.getMergedRegion(i);
-      if (range.getFirstRow() == address.getFirstRow() && range.getLastRow() == address.getLastRow()
-          && range.getFirstColumn() == address.getFirstColumn()
-          && range.getLastColumn() == address.getLastColumn()) {
-        sheet.removeMergedRegion(i);
-        for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
-          for (int columnIndex = address.getFirstColumn(); columnIndex <= address
-              .getLastColumn(); columnIndex++) {
-            removeCell(getCellByIndex(sheet, rowIndex, columnIndex));
-          }
-        }
-      }
-    }
-  }
+//  public static void setCellStyle(Cell cell, CellStyle style) {
+//    Optional<CellRangeAddress> optional = getMergedRegion(cell);
+//    if (optional.isPresent()) {
+//      CellRangeAddress address = optional.get();
+//      for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
+//        for (int columnIndex = address.getFirstColumn(); columnIndex <= address
+//            .getLastColumn(); columnIndex++) {
+//          Cell c = getCellByIndex(cell.getSheet(), rowIndex, columnIndex);
+//          c.setCellStyle(style);
+//        }
+//      }
+//    } else {
+//      cell.setCellStyle(style);
+//    }
+//  }
 
-  // TODO 方法重构 定义为StandardCell方法?
-  public static void setCellStyle(Cell cell, CellStyle style) {
-    Optional<CellRangeAddress> optional = getMergedRegion(cell);
-    if (optional.isPresent()) {
-      CellRangeAddress address = optional.get();
-      for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
-        for (int columnIndex = address.getFirstColumn(); columnIndex <= address
-            .getLastColumn(); columnIndex++) {
-          Cell c = getCellByIndex(cell.getSheet(), rowIndex, columnIndex);
-          c.setCellStyle(style);
-        }
-      }
-    } else {
-      cell.setCellStyle(style);
-    }
-  }
-
-  // TODO 方法重构
-  public static void copyCell(Cell srcCell, Cell targetCell, boolean copyValueFlag) {
-    // 样式
-    targetCell.setCellStyle(srcCell.getCellStyle());
-    // 评论
-    if (srcCell.getCellComment() != null) {
-      targetCell.setCellComment(srcCell.getCellComment());
-    }
-    // 不同数据类型处理
-    CellType srcCellType = srcCell.getCellTypeEnum();
-    targetCell.setCellType(srcCellType);
-    if (copyValueFlag) {
-      if (srcCellType == CellType.NUMERIC) {
-        if (DateUtil.isCellDateFormatted(srcCell)) {
-          targetCell.setCellValue(srcCell.getDateCellValue());
-        } else {
-          targetCell.setCellValue(srcCell.getNumericCellValue());
-        }
-      } else if (srcCellType == CellType.STRING) {
-        targetCell.setCellValue(srcCell.getRichStringCellValue());
-      } else if (srcCellType == CellType.BLANK) {
-        // nothing21
-      } else if (srcCellType == CellType.BOOLEAN) {
-        targetCell.setCellValue(srcCell.getBooleanCellValue());
-      } else if (srcCellType == CellType.ERROR) {
-        targetCell.setCellErrorValue(srcCell.getErrorCellValue());
-      } else if (srcCellType == CellType.FORMULA) {
-        targetCell.setCellFormula(srcCell.getCellFormula());
-      } else { // nothing29
-      }
-    }
-  }
-
-  public static boolean isDateCell(@Nullable Cell cell) {
-    return Optional.ofNullable(cell).map(ExcelUtil::getValue).map(BaseDataType.DATE_TIME::test)
-        .orElse(false);
-  }
-
-  @Nullable
-  public static Date getDate(@Nullable Cell cell) {
-    // TODO not a DateCell throw?
-    return Optional.ofNullable(cell).map(ExcelUtil::getValue)
-        .map(value -> BaseDataType.DATE_TIME.cast(value, Date.class)).orElse(null);
-  }
+//  public static void copyCell(Cell srcCell, Cell targetCell, boolean copyValueFlag) {
+//    // 样式
+//    targetCell.setCellStyle(srcCell.getCellStyle());
+//    // 评论
+//    if (srcCell.getCellComment() != null) {
+//      targetCell.setCellComment(srcCell.getCellComment());
+//    }
+//    // 不同数据类型处理
+//    CellType srcCellType = srcCell.getCellTypeEnum();
+//    targetCell.setCellType(srcCellType);
+//    if (copyValueFlag) {
+//      if (srcCellType == CellType.NUMERIC) {
+//        if (DateUtil.isCellDateFormatted(srcCell)) {
+//          targetCell.setCellValue(srcCell.getDateCellValue());
+//        } else {
+//          targetCell.setCellValue(srcCell.getNumericCellValue());
+//        }
+//      } else if (srcCellType == CellType.STRING) {
+//        targetCell.setCellValue(srcCell.getRichStringCellValue());
+//      } else if (srcCellType == CellType.BLANK) {
+//        // nothing21
+//      } else if (srcCellType == CellType.BOOLEAN) {
+//        targetCell.setCellValue(srcCell.getBooleanCellValue());
+//      } else if (srcCellType == CellType.ERROR) {
+//        targetCell.setCellErrorValue(srcCell.getErrorCellValue());
+//      } else if (srcCellType == CellType.FORMULA) {
+//        targetCell.setCellFormula(srcCell.getCellFormula());
+//      } else { // nothing29
+//      }
+//    }
+//  }
 
   @Nullable
   public static Object getValue(@Nullable Cell cell) {
@@ -393,7 +360,6 @@ public class ExcelUtil {
   }
 
   public static String getStringValue(@Nullable Cell cell) {
-    // TODO 根据返回类型不同选择不同DataType?
     return Optional.ofNullable(cell).map(ExcelUtil::getValue)
         .map(value -> BaseDataType.STRING.cast(value, String.class)).orElse(null);
   }
@@ -420,7 +386,6 @@ public class ExcelUtil {
 
   public static Stream<Row> getRows(@Nullable Sheet sheet, @Nullable Integer firstRowIndex,
       @Nullable Integer lastRowIndex) {
-    // TODO sheet.getTopRow()? closed
     return Optional.ofNullable(sheet)
         .map(t -> IntStream.range(Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
             Optional.ofNullable(lastRowIndex).orElse(t.getLastRowNum())))

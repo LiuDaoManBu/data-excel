@@ -69,8 +69,7 @@ public class TableDataConfig {
   protected TableDataConfig(Builder builder) {
     constructType = builder.constructType;
     tableConfig = builder.tableConfig;
-    // TODO tip
-    Preconditions.checkState(Objects.nonNull(tableConfig));
+    Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
 

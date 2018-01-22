@@ -21,7 +21,6 @@ public class Config {
 
   public Config(Builder builder) {
     super();
-    //TODO
     this.id = Optional.ofNullable(builder.id).orElse(this.toString());
   }
 

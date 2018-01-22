@@ -3,8 +3,6 @@ package com.github.liudaomanbu.excel.parse.result;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.github.liudaomanbu.excel.config.SheetConfig;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
@@ -66,7 +64,6 @@ public class SheetParseResult {
   private final WorkbookParseResult workbookParseResult;
   private final Sheet sheet;
   private final SheetConfig config;
-  private final ImmutableList<ValidationError<Sheet>> errors;
   private final ImmutableList<Table> tables;
 
   public SheetParseResult(Builder builder) {
@@ -76,11 +73,6 @@ public class SheetParseResult {
     this.tables =
         builder.tableBuilders.stream().peek(tableBuilder -> tableBuilder.setSheetParseResult(this))
             .map(Table.Builder::build).collect(ImmutableList.toImmutableList());
-    // TODO need?
-    this.errors =
-        Optional.of(sheet).filter(sheet -> sheet.getLastRowNum() <= sheet.getFirstRowNum())
-            .map(sheet -> new ValidationError<Sheet>(sheet, "don't have any data"))
-            .map(ImmutableList::of).orElse(ImmutableList.of());
   }
 
   public Sheet getSheet() {
@@ -89,10 +81,6 @@ public class SheetParseResult {
 
   public SheetConfig getConfig() {
     return config;
-  }
-
-  public ImmutableList<ValidationError<Sheet>> getErrors() {
-    return errors;
   }
 
   public ImmutableList<Table> getTables() {
@@ -104,11 +92,8 @@ public class SheetParseResult {
   }
 
   public ImmutableList<ValidationError<Sheet>> getAllErrors() {
-    return Stream
-        .concat(errors.stream(),
-            tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
-                .map(error -> new ValidationError<Sheet>(sheet,
-                    sheet.getSheetName() + error.getMessage())))
+    return tables.stream().map(Table::getAllErrors).flatMap(Collection::stream)
+        .map(error -> new ValidationError<Sheet>(sheet, sheet.getSheetName() + error.getMessage()))
         .collect(ImmutableList.toImmutableList());
   }
 

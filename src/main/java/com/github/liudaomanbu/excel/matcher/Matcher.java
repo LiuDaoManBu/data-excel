@@ -8,14 +8,12 @@ import com.github.liudaomanbu.excel.matcher.constant.StringMatcherType;
 public interface Matcher<T> extends Predicate<T> {
   Matcher<T> add(Predicate<T> predicate);
 
-//  Matcher<T> add(Matcher<T> builder);
-
   <R> Matcher<T> add(Predicate<R> predicate, Function<T, R> transform);
 
   Matcher<T> add(StringMatcherType type, String predicateValue, Function<T, String> transformer);
 
   <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
-      Function<T, R> transform);
+      Function<T,? extends R> transform);
 
   Matcher<T> and();
 

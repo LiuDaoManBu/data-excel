@@ -1,12 +1,11 @@
 package com.github.liudaomanbu.excel.parse.result;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Workbook;
-import com.github.liudaomanbu.excel.config.SheetConfig;
 import com.github.liudaomanbu.excel.config.WorkbookConfig;
 import com.github.liudaomanbu.excel.constant.Necessity;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
@@ -20,7 +19,6 @@ public class WorkbookParseResult {
   public static class Builder {
     private Workbook workbook;
     private WorkbookConfig config;
-    private List<SheetParseResult.Builder> sheetParseResultBuilders;
 
     public WorkbookParseResult build() {
       return new WorkbookParseResult(this);
@@ -44,20 +42,7 @@ public class WorkbookParseResult {
       return this;
     }
 
-    public List<SheetParseResult.Builder> getSheetParseResultBuilders() {
-      return sheetParseResultBuilders;
-    }
-
-    public Builder setSheetParseResultBuilders(
-        List<SheetParseResult.Builder> sheetParseResultBuilders) {
-      this.sheetParseResultBuilders = sheetParseResultBuilders;
-      return this;
-    }
-
   }
-
-  private static final Function<SheetConfig, String> SHEET_CONFIG_NO_MATCH_MESSAGE_FUNCTION =
-      config -> config + "don't have any matches sheet";
 
   public static Builder builder() {
     return new Builder();
@@ -71,14 +56,7 @@ public class WorkbookParseResult {
   private WorkbookParseResult(Builder builder) {
     workbook = builder.workbook;
     config = builder.config;
-    // TODO sheet被多个matcher匹配的情况?
-    builder.setSheetParseResultBuilders(config.getSheetConfigs().stream()
-        .filter(config -> ExcelUtil.getSheets(workbook).anyMatch(config.getMatcher()::test))
-        .flatMap(config -> ExcelUtil.getSheets(workbook).filter(config.getMatcher()::test)
-            .map(config::parse))
-        .collect(ImmutableList.toImmutableList()));
-
-    sheetParseResults = builder.sheetParseResultBuilders.stream()
+    sheetParseResults = createSheetParseResultBuilders().stream()
         .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
         .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
     errors = Stream.concat(config.getValidators().stream(), Stream.of(createSheetConfigValidator()))
@@ -86,8 +64,14 @@ public class WorkbookParseResult {
         .collect(ImmutableList.toImmutableList());
   }
 
+  private ImmutableList<SheetParseResult.Builder> createSheetParseResultBuilders() {
+    return config.getSheetConfigs().stream()
+        .map(sheetConfig -> ExcelUtil.getSheets(workbook).filter(sheetConfig.getMatcher()::test)
+            .findAny().map(sheetConfig::parse))
+        .filter(Optional::isPresent).map(Optional::get).collect(ImmutableList.toImmutableList());
+  }
+
   private Validator<Workbook> createSheetConfigValidator() {
-    // TODO 注释,重复匹配?tip
     return new BaseValidator<>(
         config.getSheetConfigs().stream().filter(t -> Necessity.MUST.equals(t.getNecessity()))
             .collect(ImmutableMap.toImmutableMap(sheetConfig -> {

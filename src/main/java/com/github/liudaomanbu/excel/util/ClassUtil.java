@@ -109,9 +109,7 @@ public class ClassUtil {
   public static <T> Optional<Constructor<T>> getDefaultConstructor(Class<T> type) {
     return Arrays.stream(type.getDeclaredConstructors())
         .filter(constructor -> constructor.getParameterTypes().length == 0).findAny()
-        .map(constructor -> (Constructor<T>) constructor);// TODO
-
-    // TODO
+        .map(constructor -> (Constructor<T>) constructor);
     // if (defaultConstructor == null) {
     // if (type.isMemberClass() && !Modifier.isStatic(type.getModifiers())) {
     // Class<?>[] types;
