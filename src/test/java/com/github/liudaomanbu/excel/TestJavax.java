@@ -96,8 +96,6 @@ class Student {
 
 
 public class TestJavax {
-//  private static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-
   public static void main(String[] args) {
   }
 
@@ -116,28 +114,27 @@ public class TestJavax {
     return bean;
   }
 
-//  public static <T> List<String> validate(T t) {
-//    Validator validator = factory.getValidator();
-//    Set<ConstraintViolation<T>> constraintViolations = validator.validate(t);
-//
-//    List<String> messageList = new ArrayList<>();
-//    for (ConstraintViolation<T> constraintViolation : constraintViolations) {
-//      messageList.add(constraintViolation.getMessage());
-//      System.out.println();
-//      System.out.println("ExecutableReturnValue:" + constraintViolation.getExecutableReturnValue());
-//      System.out.println("InvalidValue:" + constraintViolation.getInvalidValue());
-//      // 方法含义?
-//      // System.out.println("LeafBean:" + constraintViolation.getLeafBean());
-//      System.out.println("Message:" + constraintViolation.getMessage());
-//      System.out.println("MessageTemplate:" + constraintViolation.getMessageTemplate());
-//      System.out.println("ConstraintDescriptor:" + constraintViolation.getConstraintDescriptor());
-//      System.out.println(
-//          "ExecutableParameters:" + Arrays.toString(constraintViolation.getExecutableParameters()));
-//      System.out.println("PropertyPath:" + constraintViolation.getPropertyPath());
-//      // System.out.println("RootBean:" + constraintViolation.getRootBean());
-//      // System.out.println("RootBeanClass:" + constraintViolation.getRootBeanClass());
-//      System.out.println();
-//    }
-//    return messageList;
-//  }
+  public static <T> List<String> validate(T t,Validator validator) {
+    Set<ConstraintViolation<T>> constraintViolations = validator.validate(t);
+
+    List<String> messageList = new ArrayList<>();
+    for (ConstraintViolation<T> constraintViolation : constraintViolations) {
+      messageList.add(constraintViolation.getMessage());
+      System.out.println();
+      System.out.println("ExecutableReturnValue:" + constraintViolation.getExecutableReturnValue());
+      System.out.println("InvalidValue:" + constraintViolation.getInvalidValue());
+      // 方法含义?
+      // System.out.println("LeafBean:" + constraintViolation.getLeafBean());
+      System.out.println("Message:" + constraintViolation.getMessage());
+      System.out.println("MessageTemplate:" + constraintViolation.getMessageTemplate());
+      System.out.println("ConstraintDescriptor:" + constraintViolation.getConstraintDescriptor());
+      System.out.println(
+          "ExecutableParameters:" + Arrays.toString(constraintViolation.getExecutableParameters()));
+      System.out.println("PropertyPath:" + constraintViolation.getPropertyPath());
+      // System.out.println("RootBean:" + constraintViolation.getRootBean());
+      // System.out.println("RootBeanClass:" + constraintViolation.getRootBeanClass());
+      System.out.println();
+    }
+    return messageList;
+  }
 }
