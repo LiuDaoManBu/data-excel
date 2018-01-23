@@ -13,7 +13,7 @@ public interface Matcher<T> extends Predicate<T> {
   Matcher<T> add(StringMatcherType type, String predicateValue, Function<T, String> transformer);
 
   <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
-      Function<T,? extends R> transform);
+      Function<T,R> transform);
 
   Matcher<T> and();
 

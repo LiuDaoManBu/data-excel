@@ -20,6 +20,7 @@ public class DataTypeMatcher extends BaseMatcher<Object> implements DataMatcher 
     return this;
   }
 
+  @SuppressWarnings("unchecked")
   public <T extends Comparable<T>> DataTypeMatcher addDataPredicate(ComparableMatcherType type,
       T predicateValue) {
     add(type, predicateValue, value ->(T)dataType.cast(value, predicateValue.getClass()));

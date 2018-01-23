@@ -54,7 +54,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
-      Function<T,? extends R> transformer) {
+      Function<T,R> transformer) {
     return add(value -> type.apply(value, predicateValue), transformer);
   }
 
