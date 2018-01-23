@@ -51,6 +51,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 
 
 public class ExcelUtil {
@@ -377,12 +378,11 @@ public class ExcelUtil {
   }
 
   public static Stream<Sheet> getSheets(@Nullable Workbook workbook) {
-    return Optional.ofNullable(workbook).map(t -> IntStream.range(0, t.getNumberOfSheets()))
-        .orElse(IntStream.empty()).mapToObj(workbook::getSheetAt);
+    return Optional.ofNullable(workbook).map(Streams::stream).orElse(Stream.empty());
   }
 
   public static Stream<Row> getRows(@Nullable Sheet sheet) {
-    return getRows(sheet, null, null);
+    return Optional.ofNullable(sheet).map(Streams::stream).orElse(Stream.empty());
   }
 
   public static Stream<Row> getRows(@Nullable Sheet sheet, @Nullable Integer firstRowIndex,
