@@ -9,11 +9,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Table;
 import com.google.common.reflect.TypeToken;
 
@@ -30,22 +28,12 @@ public class ClassUtil {
         .flatMap(Arrays::stream);
   }
 
-  public static ImmutableMultimap<String, Field> getNameToFields(Class<?> type) {
-    return getNameToFields(TypeToken.of(type));
-  }
-
-  public static ImmutableMultimap<String, Field> getNameToFields(TypeToken<?> token) {
-    return Multimaps.index(getAllFields(token).collect(ImmutableSet.toImmutableSet()),
-        Field::getName);
-  }
-
   public static Optional<Field> getField(Class<?> type, String fieldName) {
     return getField(TypeToken.of(type), fieldName);
   }
 
   public static Optional<Field> getField(TypeToken<?> token, String fieldName) {
-    return Optional
-        .ofNullable(Iterables.getOnlyElement(getNameToFields(token).get(fieldName), null));
+    return getAllFields(token).filter(field->field.getName().equals(fieldName)).findAny();
   }
 
   public static boolean isArrayOrIterable(Class<?> type) {
