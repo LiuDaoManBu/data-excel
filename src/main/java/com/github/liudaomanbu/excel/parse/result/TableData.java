@@ -28,7 +28,7 @@ public class TableData<T> {
     menus.forEach(menu -> {
       ImmutableList<StandardCell> valueCells = menu.getData().getValueCells();
       for (int j = 0; j < valueCells.size(); j++) {
-        StandardCell valueCell = valueCells.get(j);
+        StandardCell valueCell = menu.isSingleDataMenu()?valueCells.get(0):valueCells.get(j);
 
         Map<Menu<T>, StandardCell> map = null;
         if (j < menuTodatas.size()) {
