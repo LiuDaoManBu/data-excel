@@ -97,8 +97,18 @@ public class SheetParseResult {
         .collect(ImmutableList.toImmutableList());
   }
 
+  public boolean hasError() {
+    return !getAllErrors().isEmpty();
+  }
+  
   public Table<?> getById(Object id) {
     return tables.stream().filter(table -> Objects.equals(table.getConfig().getId(), id)).findAny()
+        .orElse(null);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public <T> Table<T> getByType(Class<T> type) {
+    return  (Table<T>)tables.stream().filter(table -> table.getData().getConfig().getType().equals(type)).findAny()
         .orElse(null);
   }
 }

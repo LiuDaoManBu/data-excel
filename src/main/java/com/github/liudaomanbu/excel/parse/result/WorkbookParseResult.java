@@ -92,6 +92,10 @@ public class WorkbookParseResult {
         .collect(ImmutableList.toImmutableList());
   }
 
+  public boolean hasError() {
+    return !getAllErrors().isEmpty();
+  }
+  
   public Workbook getWorkbook() {
     return workbook;
   }
@@ -100,7 +104,7 @@ public class WorkbookParseResult {
     return config;
   }
 
-  public ImmutableList<com.github.liudaomanbu.excel.parse.error.ValidationError<Workbook>> getErrors() {
+  public ImmutableList<ValidationError<Workbook>> getErrors() {
     return errors;
   }
 

@@ -2,7 +2,6 @@ package com.github.liudaomanbu.excel.config;
 
 import java.util.List;
 import java.util.Map;
-import com.github.liudaomanbu.excel.constant.ConstructType;
 import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
 import com.github.liudaomanbu.excel.validator.JavaxValidator;
@@ -15,7 +14,7 @@ public class TableDataConfig<T> {
 
   public static class Builder<T> {
     private TableConfig<T> tableConfig;
-    private ConstructType constructType;
+    private Class<T> type;
     private List<Validator<Map<Menu<T>, StandardCell>>> validators;
 
     public Builder() {
@@ -41,12 +40,13 @@ public class TableDataConfig<T> {
       return this;
     }
 
-    public ConstructType getConstructType() {
-      return constructType;
+
+    public Class<T> getType() {
+      return type;
     }
 
-    public Builder<T> setConstructType(ConstructType constructType) {
-      this.constructType = constructType;
+    public Builder<T> setType(Class<T> type) {
+      this.type = type;
       return this;
     }
 
@@ -62,18 +62,18 @@ public class TableDataConfig<T> {
   }
 
   private final TableConfig<T> tableConfig;
-  private final ConstructType constructType;
+  private final Class<T> type;
   private final ImmutableList<Validator<Map<Menu<T>, StandardCell>>> validators;
 
   protected TableDataConfig(Builder<T> builder) {
-    constructType = builder.constructType;
+    type = builder.type;
     tableConfig = builder.tableConfig;
     Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
 
-  public ConstructType getConstructType() {
-    return constructType;
+  public Class<T> getType() {
+    return type;
   }
 
   public TableConfig<T> getTableConfig() {

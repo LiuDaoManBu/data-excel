@@ -138,6 +138,10 @@ public class Table<T> {
         .collect(ImmutableList.toImmutableList());
   }
 
+  public boolean hasError() {
+    return !getAllErrors().isEmpty();
+  }
+  
   public TableConfig<T> getConfig() {
     return config;
   }

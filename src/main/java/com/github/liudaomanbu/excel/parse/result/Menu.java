@@ -186,6 +186,10 @@ public class Menu<T> {
         .collect(ImmutableList.toImmutableList());
   }
 
+  public boolean hasError() {
+    return !getAllErrors().isEmpty();
+  }
+  
   public String getName() {
     return BaseDataType.STRING.cast(cell.getValueCell(), String.class);
   }
