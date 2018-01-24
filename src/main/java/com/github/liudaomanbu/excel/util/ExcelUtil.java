@@ -9,8 +9,10 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,6 +43,7 @@ import com.github.liudaomanbu.excel.config.MenuDataConfig;
 import com.github.liudaomanbu.excel.config.SheetConfig;
 import com.github.liudaomanbu.excel.config.TableConfig;
 import com.github.liudaomanbu.excel.config.WorkbookConfig;
+import com.github.liudaomanbu.excel.matcher.constant.StringMatcherType;
 import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
 import com.github.liudaomanbu.excel.matcher.usermodel.SheetMatcher;
 import com.github.liudaomanbu.excel.matcher.usermodel.StandardCellMatcher;
@@ -48,9 +51,13 @@ import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
 import com.github.liudaomanbu.excel.parse.result.WorkbookParseResult;
 import com.google.common.base.Strings;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 
 
@@ -89,21 +96,39 @@ public class ExcelUtil {
 
   public static <T> TableConfig.Builder<T> parseToTableConfig(Class<T> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
+      List<MenuConfig.Builder<T>> topMenuConfigBuilders =
+          ClassUtil.getAllFields(type).map(f -> ExcelUtil.<T>parseToMenuConfig(f))
+              .filter(Objects::nonNull).collect(Collectors.toList());
+      
+      Multimap<Object, Object> idTochildrenIds=HashMultimap.create();
+      ClassUtil.getAllFields(type).forEach(field->{
+        ExcelMenu[] menus=field.getAnnotation(ExcelField.class).menus();
+        if(menus.length==0) {
+          idTochildrenIds.put(field.getName(), null);
+        }
+        if(menus.length==1) {
+          idTochildrenIds.put(menus[0].value(), null);
+        }
+        for(int i=0;i<menus.length-1;i++) {
+          idTochildrenIds.put(menus[i], menus[i+1]);
+        }
+      });
+      
+//      topMenuConfigBuilders.stream().map(MenuConfig.Builder::get)
+          
+
       TableConfig.Builder<T> builder =
-          TableConfig.<T>builder().setId(type).setTopMenuConfigBuilders(
-              ClassUtil.getAllFields(type).map(f -> ExcelUtil.<T>parseToMenuConfig(f))
-                  .filter(Objects::nonNull).collect(Collectors.toList()));
+          TableConfig.<T>builder().setId(type).setTopMenuConfigBuilders(topMenuConfigBuilders);
       return builder;
     }).orElse(null);
   }
 
   public static <T> T toJavaObject(Map<Menu<T>, StandardCell> menuToValueCell, Class<T> type) {
-    JSONObject jsonObject = toJsonObject(menuToValueCell);
-    return jsonObject.toJavaObject(type);
+    return new JSONObject(toJsonObject(menuToValueCell)).toJavaObject(type);
   }
 
-  public static <T> JSONObject toJsonObject(Map<Menu<T>, StandardCell> menuToValueCell) {
-    JSONObject jsonObject = new JSONObject();
+  public static <T> Map<String, Object> toJsonObject(Map<Menu<T>, StandardCell> menuToValueCell) {
+    Map<String, Object> jsonObject = Maps.newHashMap();
     menuToValueCell.forEach((menu, cell) -> {
       Field field = menu.getField();
       Object value = null;
@@ -120,16 +145,34 @@ public class ExcelUtil {
 
   public static <T> MenuConfig.Builder<T> parseToMenuConfig(Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
-      ExcelMenu excelMenu = f.menu();
-      MenuConfig.Builder<T> builder = MenuConfig.<T>builder().setId(excelMenu.value())
-          .setMatcher(new StandardCellMatcher().addDataPredicate(excelMenu.valueMatcherType(),
-              excelMenu.value(), value -> BaseDataType.STRING.cast(value, String.class)))
-          .setDirection(excelMenu.direction()).setDistance(excelMenu.distance())
-          .setNecessity(excelMenu.necessity())
-          .setDataConfigBuilder(MenuDataConfig.<T>builder().setLoadType(f.loadType())
-              .setDataType(findDataType(f.dataType(), field)).setField(field)
-              .setFieldName(field.getName()));
-      return builder;
+      ImmutableList<MenuConfig.Builder<T>> builders=Arrays.stream(f.menus()).map(menu -> ExcelUtil.<T>parseToMenuConfig(menu))
+          .collect(ImmutableList.toImmutableList());
+      
+      MenuConfig.Builder<T> dataMenuBuilder =builders.stream().reduce((first, second) -> {
+        first.getChildrenBuilders().add(second);
+        return second;
+      }).orElse(MenuConfig.<T>builder().setId(field.getName())
+          .setMatcher(new StandardCellMatcher().addDataPredicate(StringMatcherType.EQUALS,
+              field.getName(), value -> BaseDataType.STRING.cast(value, String.class))))
+      .setDataConfigBuilder(parseToMenuDataConfig(field));
+      
+      return builders.stream().findFirst().orElse(dataMenuBuilder);
+    }).orElse(null);
+  }
+
+  private static <T> MenuConfig.Builder<T> parseToMenuConfig(ExcelMenu excelMenu) {
+    return MenuConfig.<T>builder().setId(excelMenu.value())
+        .setMatcher(new StandardCellMatcher().addDataPredicate(excelMenu.valueMatcherType(),
+            excelMenu.value(), value -> BaseDataType.STRING.cast(value, String.class)))
+        .setDirection(excelMenu.direction()).setDistance(excelMenu.distance())
+        .setNecessity(excelMenu.necessity());
+  }
+
+  public static <T> MenuDataConfig.Builder<T> parseToMenuDataConfig(Field field) {
+    return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
+      return MenuDataConfig.<T>builder().setLoadType(f.loadType())
+          .setDataType(findDataType(f.dataType(), field)).setField(field)
+          .setFieldName(field.getName());
     }).orElse(null);
   }
 

@@ -105,7 +105,7 @@ class C {
 
 class User {
   public final String a;
-  @ExcelField(menu = @ExcelMenu(""))
+  @ExcelField(menus = @ExcelMenu(""))
   private String userName;
   private String passWord;
   private String region;

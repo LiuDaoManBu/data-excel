@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import com.alibaba.fastjson.JSONArray;
 import com.github.liudaomanbu.excel.config.TableDataConfig;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
 import com.github.liudaomanbu.excel.util.ExcelUtil;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -25,10 +26,10 @@ public class TableData<T> {
     this.config = table.getConfig().getDataConfig();
     List<Map<Menu<T>, StandardCell>> menuTodatas = Lists.newArrayList();
     ImmutableList<Menu<T>> menus = table.getDataMenus().collect(ImmutableList.toImmutableList());
-    menus.forEach(menu -> {
+    menus.stream().filter(Menu::isUnFixedDataMenu).forEach(menu -> {
       ImmutableList<StandardCell> valueCells = menu.getData().getValueCells();
       for (int j = 0; j < valueCells.size(); j++) {
-        StandardCell valueCell = menu.isSingleDataMenu()?valueCells.get(0):valueCells.get(j);
+        StandardCell valueCell = valueCells.get(j);
 
         Map<Menu<T>, StandardCell> map = null;
         if (j < menuTodatas.size()) {
@@ -40,6 +41,10 @@ public class TableData<T> {
         map.put(menu, valueCell);
       }
     });
+
+    menus.stream().filter(Menu::isSingleDataMenu)
+        .forEach(menu -> menuTodatas.forEach(menuTodata -> menuTodata.put(menu,
+            Iterables.getOnlyElement(menu.getData().getValueCells()))));
 
     menuToValueCells = menuTodatas
         .stream().filter(map -> map.values().stream().map(StandardCell::getValue)
@@ -80,14 +85,12 @@ public class TableData<T> {
     return errors;
   }
 
-  public ImmutableList<T> getDatas(Class<T> type) {
-    return menuToValueCells.stream().map(map -> (T) ExcelUtil.toJavaObject(map, type))
+  public ImmutableList<T> getDatas() {
+    return menuToValueCells.stream().map(map -> (T) ExcelUtil.toJavaObject(map, config.getType()))
         .collect(ImmutableList.toImmutableList());
   }
 
-  public JSONArray getJsonDatas() {
-    JSONArray array = new JSONArray();
-    menuToValueCells.forEach(map -> array.add(ExcelUtil.toJsonObject(map)));
-    return array;
+  public List<Map<String, Object>> getJsonDatas() {
+    return menuToValueCells.stream().map(ExcelUtil::toJsonObject).collect(Collectors.toList());
   }
 }

@@ -16,7 +16,5 @@ public @interface ExcelField {
 
   LoadType loadType() default LoadType.UNFIXED;
 
-  ExcelMenu menu();
-
-  ExcelMenu[] superMenus() default {};
+  ExcelMenu[] menus() default {};
 }
