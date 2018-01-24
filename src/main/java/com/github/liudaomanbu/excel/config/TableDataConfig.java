@@ -6,6 +6,7 @@ import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
 import com.github.liudaomanbu.excel.validator.JavaxValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -60,7 +61,7 @@ public class TableDataConfig<T> {
     }
 
   }
-
+  
   public static <T> Builder<T> builder(){
     return new Builder<>();
   }

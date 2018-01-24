@@ -36,8 +36,8 @@ public class JavaxValidator<T> implements Validator<Map<Menu<T>, StandardCell>> 
                 .filter(menu -> t.getPropertyPath().toString().equals(menu.getFieldName()))
                 .findAny().get(), ConstraintViolation::getMessage));
     return menuToMessages.entrySet().stream()
-        .map(entry -> entry.getKey().getName() + object.get(entry.getKey()).formatAsString()
-            + entry.getValue())
+        .map(entry -> entry.getKey().getFullName() + object.get(entry.getKey()).formatAsString()
+            + "单元格" + entry.getValue())
         .map(message -> new ValidationError<>(object, message))
         .collect(ImmutableSet.toImmutableSet());
   }

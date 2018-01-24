@@ -150,9 +150,9 @@ public class MenuDataConfig<T> {
   private Validator<StandardCell> createDataTypeValidator() {
     return new BaseValidator<StandardCell>(
         ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
-            .put(cell -> Objects.isNull(cell.getValue())||dataType.test(cell.getValue())
-                , cell -> JOINER.join(cell.formatAsString(),"单元格",cell.getValue(),
-                "不符合", DATA_TYPE_TO_TIPS.get(dataType), "格式"))
+            .put(cell -> Objects.isNull(cell.getValue()) || dataType.test(cell.getValue()),
+                cell -> JOINER.join(cell.formatAsString(), "单元格", cell.getValue(), "不符合",
+                    DATA_TYPE_TO_TIPS.get(dataType), "格式"))
             .build());
   }
 
