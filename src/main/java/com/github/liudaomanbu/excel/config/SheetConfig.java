@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -15,7 +16,7 @@ import com.google.common.collect.Lists;
 
 public class SheetConfig extends Config {
   public static class Builder extends Config.Builder {
-    private List<TableConfig.Builder<?>> tableConfigBuilders;
+    private Collection<TableConfig.Builder<?>> tableConfigBuilders;
     private WorkbookConfig workbookConfig;
     private Matcher<Sheet> matcher;
     private Necessity necessity;
@@ -44,11 +45,11 @@ public class SheetConfig extends Config {
       return this;
     }
 
-    public List<TableConfig.Builder<?>> getTableConfigBuilders() {
+    public Collection<TableConfig.Builder<?>> getTableConfigBuilders() {
       return tableConfigBuilders;
     }
 
-    public Builder setTableConfigBuilders(List<TableConfig.Builder<?>> tableConfigBuilders) {
+    public Builder setTableConfigBuilders(Collection<TableConfig.Builder<?>> tableConfigBuilders) {
       this.tableConfigBuilders = tableConfigBuilders;
       return this;
     }

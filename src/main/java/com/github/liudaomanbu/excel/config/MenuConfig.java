@@ -1,6 +1,7 @@
 package com.github.liudaomanbu.excel.config;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class MenuConfig<T> extends Config {
     private TableConfig<T> tableConfig;
     private MenuConfig<T> parent;
     private MenuDataConfig.Builder<T> dataConfigBuilder;
-    private List<MenuConfig.Builder<T>> childrenBuilders;
+    private Collection<MenuConfig.Builder<T>> childrenBuilders;
     // 菜单匹配器
     private Matcher<StandardCell> matcher;
     private List<Validator<Menu<T>>> validators;
@@ -106,11 +107,11 @@ public class MenuConfig<T> extends Config {
       return this;
     }
 
-    public List<MenuConfig.Builder<T>> getChildrenBuilders() {
+    public Collection<MenuConfig.Builder<T>> getChildrenBuilders() {
       return childrenBuilders;
     }
 
-    public Builder<T> setChildrenBuilders(List<MenuConfig.Builder<T>> childrenBuilders) {
+    public Builder<T> setChildrenBuilders(Collection<MenuConfig.Builder<T>> childrenBuilders) {
       this.childrenBuilders = childrenBuilders;
       return this;
     }

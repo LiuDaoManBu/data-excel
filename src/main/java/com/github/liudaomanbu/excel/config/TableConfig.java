@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -17,7 +18,7 @@ import com.google.common.graph.Traverser;
 
 public class TableConfig<T> extends Config {
   public static class Builder<T> extends Config.Builder {
-    private List<MenuConfig.Builder<T>> topMenuConfigBuilders;
+    private Collection<MenuConfig.Builder<T>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
     private Direction menuDirection;
     private TableDataConfig.Builder<T> dataConfigBuilder;
@@ -57,11 +58,11 @@ public class TableConfig<T> extends Config {
       return this;
     }
 
-    public List<MenuConfig.Builder<T>> getTopMenuConfigBuilders() {
+    public Collection<MenuConfig.Builder<T>> getTopMenuConfigBuilders() {
       return topMenuConfigBuilders;
     }
 
-    public Builder<T> setTopMenuConfigBuilders(List<MenuConfig.Builder<T>> topMenuConfigBuilders) {
+    public Builder<T> setTopMenuConfigBuilders(Collection<MenuConfig.Builder<T>> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }

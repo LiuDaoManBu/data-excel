@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -12,7 +13,7 @@ import com.google.common.collect.Lists;
 
 public class WorkbookConfig {
   public static class Builder {
-    private List<SheetConfig.Builder> sheetConfigBuilders;
+    private Collection<SheetConfig.Builder> sheetConfigBuilders;
     private List<Validator<Workbook>> validators;
     private ParserConfig parserConfig;
 
@@ -44,11 +45,11 @@ public class WorkbookConfig {
       return this;
     }
 
-    public List<SheetConfig.Builder> getSheetConfigBuilders() {
+    public Collection<SheetConfig.Builder> getSheetConfigBuilders() {
       return sheetConfigBuilders;
     }
 
-    public Builder setSheetConfigBuilders(List<SheetConfig.Builder> sheetConfigBuilders) {
+    public Builder setSheetConfigBuilders(Collection<SheetConfig.Builder> sheetConfigBuilders) {
       this.sheetConfigBuilders = sheetConfigBuilders;
       return this;
     }
