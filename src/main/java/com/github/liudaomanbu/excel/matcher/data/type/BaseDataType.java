@@ -9,6 +9,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.stream.Stream;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.util.TypeUtils;
@@ -139,6 +140,9 @@ public enum BaseDataType implements DataType {
     @Override
     public <T> T cast(Object value, TypeToken<T> type) {
       Date date=TypeUtils.castToDate(value);
+      if(Objects.isNull(date)) {
+        return (T) date;
+      }
       if(type.isSubtypeOf(Date.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
@@ -178,6 +182,9 @@ public enum BaseDataType implements DataType {
     @Override
     public <T> T cast(Object value, TypeToken<T> type) {
       Date date=TypeUtils.castToDate(value);
+      if(Objects.isNull(date)) {
+        return (T) date;
+      }
       if(type.isSubtypeOf(Date.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
@@ -216,6 +223,9 @@ public enum BaseDataType implements DataType {
     @Override
     public <T> T cast(Object value, TypeToken<T> type) {
       Date date=TypeUtils.castToDate(value);
+      if(Objects.isNull(date)) {
+        return (T) date;
+      }
       if(type.isSubtypeOf(Date.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }

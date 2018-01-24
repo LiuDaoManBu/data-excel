@@ -61,6 +61,10 @@ public class TableDataConfig<T> {
 
   }
 
+  public static <T> Builder<T> builder(){
+    return new Builder<>();
+  }
+  
   private final TableConfig<T> tableConfig;
   private final Class<T> type;
   private final ImmutableList<Validator<Map<Menu<T>, StandardCell>>> validators;

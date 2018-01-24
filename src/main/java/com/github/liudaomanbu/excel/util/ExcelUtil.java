@@ -42,6 +42,7 @@ import com.github.liudaomanbu.excel.config.MenuConfig;
 import com.github.liudaomanbu.excel.config.MenuDataConfig;
 import com.github.liudaomanbu.excel.config.SheetConfig;
 import com.github.liudaomanbu.excel.config.TableConfig;
+import com.github.liudaomanbu.excel.config.TableDataConfig;
 import com.github.liudaomanbu.excel.config.WorkbookConfig;
 import com.github.liudaomanbu.excel.matcher.constant.StringMatcherType;
 import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
@@ -51,13 +52,11 @@ import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
 import com.github.liudaomanbu.excel.parse.result.WorkbookParseResult;
 import com.google.common.base.Strings;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 
 
@@ -100,25 +99,26 @@ public class ExcelUtil {
           ClassUtil.getAllFields(type).map(f -> ExcelUtil.<T>parseToMenuConfig(f))
               .filter(Objects::nonNull).collect(Collectors.toList());
       
-      Multimap<Object, Object> idTochildrenIds=HashMultimap.create();
-      ClassUtil.getAllFields(type).forEach(field->{
-        ExcelMenu[] menus=field.getAnnotation(ExcelField.class).menus();
-        if(menus.length==0) {
-          idTochildrenIds.put(field.getName(), null);
-        }
-        if(menus.length==1) {
-          idTochildrenIds.put(menus[0].value(), null);
-        }
-        for(int i=0;i<menus.length-1;i++) {
-          idTochildrenIds.put(menus[i], menus[i+1]);
-        }
-      });
+//      Multimap<Object, Object> idTochildrenIds=HashMultimap.create();
+//      ClassUtil.getAllFields(type).forEach(field->{
+//        ExcelMenu[] menus=field.getAnnotation(ExcelField.class).menus();
+//        if(menus.length==0) {
+//          idTochildrenIds.put(field.getName(), null);
+//        }
+//        if(menus.length==1) {
+//          idTochildrenIds.put(menus[0].value(), null);
+//        }
+//        for(int i=0;i<menus.length-1;i++) {
+//          idTochildrenIds.put(menus[i], menus[i+1]);
+//        }
+//      });
       
 //      topMenuConfigBuilders.stream().map(MenuConfig.Builder::get)
           
 
       TableConfig.Builder<T> builder =
-          TableConfig.<T>builder().setId(type).setTopMenuConfigBuilders(topMenuConfigBuilders);
+          TableConfig.<T>builder().setId(type).setTopMenuConfigBuilders(topMenuConfigBuilders)
+          .setDataConfigBuilder(TableDataConfig.<T>builder().setType(type));
       return builder;
     }).orElse(null);
   }
@@ -177,8 +177,14 @@ public class ExcelUtil {
   }
 
   private static BaseDataType findDataType(BaseDataType dataType, Field field) {
-    if (field.getType().equals(String.class) && BaseDataType.STRING.equals(dataType)) {
+    if(!BaseDataType.NATURAL.equals(dataType)) {
       return dataType;
+    }
+    if (field.getType().equals(String.class)) {
+      return BaseDataType.STRING;
+    }
+    if (field.getType().isEnum()) {
+      return BaseDataType.ENUM;
     }
     ImmutableCollection<Class<?>> wholeNumbers =
         ImmutableSet.of(byte.class, Byte.class, short.class, Short.class, int.class, Integer.class,

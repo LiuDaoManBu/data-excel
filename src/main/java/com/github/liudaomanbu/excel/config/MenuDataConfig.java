@@ -2,6 +2,7 @@ package com.github.liudaomanbu.excel.config;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -137,7 +138,7 @@ public class MenuDataConfig<T> {
     Preconditions.checkNotNull(menuConfig, "menuConfig can't be null");
     loadType = Optional.ofNullable(builder.loadType).orElse(DEFAULT_LOAD_TYPE);
     field = builder.field;
-    fieldName = Optional.ofNullable(builder.fieldName).orElse(field.getName());
+    fieldName = Optional.ofNullable(builder.fieldName).orElseGet(field::getName);
     dataType = builder.dataType;
     Preconditions.checkNotNull(dataType, "dataType can't be null");
 
@@ -149,7 +150,7 @@ public class MenuDataConfig<T> {
   private Validator<StandardCell> createDataTypeValidator() {
     return new BaseValidator<StandardCell>(
         ImmutableMap.<Predicate<StandardCell>, Function<StandardCell, String>>builder()
-            .put(cell -> dataType.test(cell.getValue()), cell -> JOINER.join(cell.formatAsString(),
+            .put(cell -> Objects.isNull(cell.getValue())||dataType.test(cell.getValue()), cell -> JOINER.join(cell.formatAsString(),
                 "不符合", DATA_TYPE_TO_TIPS.get(dataType), "格式"))
             .build());
   }

@@ -124,7 +124,7 @@ public class TableConfig<T> extends Config {
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
-    dataConfig = builder.dataConfigBuilder.build();
+    dataConfig = builder.dataConfigBuilder.setTableConfig(this).build();
     parserConfig = builder.parserConfig;
   }
 

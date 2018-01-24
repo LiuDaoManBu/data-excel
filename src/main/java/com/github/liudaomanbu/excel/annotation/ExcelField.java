@@ -12,7 +12,7 @@ import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface ExcelField {
-  BaseDataType dataType() default BaseDataType.STRING;
+  BaseDataType dataType() default BaseDataType.NATURAL;
 
   LoadType loadType() default LoadType.UNFIXED;
 
