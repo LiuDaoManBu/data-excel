@@ -4,5 +4,7 @@ import com.github.liudaomanbu.excel.parse.error.ValidationError;
 import com.google.common.collect.ImmutableCollection;
 
 public interface Validator<T> {
-  ImmutableCollection<ValidationError<T>> validate(T object);
+  boolean premise(T value);
+
+  ImmutableCollection<ValidationError<T>> validate(T value);
 }

@@ -48,12 +48,13 @@ public class Table<T> {
     }
   }
 
-  private final Traverser<Menu<T>> MENU_TRAVERSER = Traverser.forTree(new SuccessorsFunction<Menu<T>>() {
-    @Override
-    public Iterable<? extends Menu<T>> successors(Menu<T> node) {
-      return node.getChildrens();
-    }
-  });
+  private final Traverser<Menu<T>> MENU_TRAVERSER =
+      Traverser.forTree(new SuccessorsFunction<Menu<T>>() {
+        @Override
+        public Iterable<? extends Menu<T>> successors(Menu<T> node) {
+          return node.getChildrens();
+        }
+      });
 
   public static <T> Builder<T> builder() {
     return new Builder<>();
@@ -69,7 +70,8 @@ public class Table<T> {
     config = builder.config;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
-    errors = createMenuConfigValidator().validate(this).stream()
+    errors = Stream.of(createMenuConfigValidator()).filter(validator -> validator.premise(this))
+        .map(validator -> validator.validate(this)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
     this.data = new TableData<>(this);
   }
@@ -141,7 +143,7 @@ public class Table<T> {
   public boolean hasError() {
     return !getAllErrors().isEmpty();
   }
-  
+
   public TableConfig<T> getConfig() {
     return config;
   }

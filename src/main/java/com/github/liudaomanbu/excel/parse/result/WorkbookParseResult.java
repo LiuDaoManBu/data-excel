@@ -12,6 +12,7 @@ import com.github.liudaomanbu.excel.parse.error.ValidationError;
 import com.github.liudaomanbu.excel.util.ExcelUtil;
 import com.github.liudaomanbu.excel.validator.BaseValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -60,6 +61,7 @@ public class WorkbookParseResult {
         .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
         .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
     errors = Stream.concat(config.getValidators().stream(), Stream.of(createSheetConfigValidator()))
+        .filter(validator -> validator.premise(workbook))
         .map(validator -> validator.validate(workbook)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
   }
@@ -95,7 +97,7 @@ public class WorkbookParseResult {
   public boolean hasError() {
     return !getAllErrors().isEmpty();
   }
-  
+
   public Workbook getWorkbook() {
     return workbook;
   }
