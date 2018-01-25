@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.liudaomanbu</groupId>
 	<artifactId>data-excel</artifactId>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	
 	<name>${project.artifactId}</name>
 	<url>https://github.com/liudaomanbu/data-excel</url>
