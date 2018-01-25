@@ -16,7 +16,7 @@
         <fastjson.version>1.2.44</fastjson.version>
         <guava.version>23.6-jre</guava.version>
         <aviator.version>3.3.0</aviator.version>
-        <validation-api.version>1.1.0.Final</validation-api.version>
+        <validation-api.version>2.0.1.Final</validation-api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
