@@ -1,12 +1,9 @@
 package com.github.liudaomanbu.excel.config;
 
 import java.util.List;
-import java.util.Map;
-import com.github.liudaomanbu.excel.parse.result.Menu;
-import com.github.liudaomanbu.excel.parse.result.StandardCell;
+import com.github.liudaomanbu.excel.parse.result.TableData;
 import com.github.liudaomanbu.excel.validator.JavaxValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -16,7 +13,7 @@ public class TableDataConfig<T> {
   public static class Builder<T> {
     private TableConfig<T> tableConfig;
     private Class<T> type;
-    private List<Validator<Map<Menu<T>, StandardCell>>> validators;
+    private List<Validator<TableData<T>.Data>> validators;
 
     public Builder() {
       validators = Lists.newLinkedList();
@@ -26,9 +23,8 @@ public class TableDataConfig<T> {
       return new TableDataConfig<>(this);
     }
 
-    public Builder<T> addJavaxValidator(javax.validation.Validator validator, Class<T> type,
-        Class<?>... groups) {
-      validators.add(new JavaxValidator<>(validator, type, groups));
+    public Builder<T> addJavaxValidator(javax.validation.Validator validator,Class<?>... groups) {
+      validators.add(new JavaxValidator<T>(validator, groups));
       return this;
     }
 
@@ -51,11 +47,11 @@ public class TableDataConfig<T> {
       return this;
     }
 
-    public List<Validator<Map<Menu<T>, StandardCell>>> getValidators() {
+    public List<Validator<TableData<T>.Data>> getValidators() {
       return validators;
     }
 
-    public Builder<T> setValidators(List<Validator<Map<Menu<T>, StandardCell>>> validators) {
+    public Builder<T> setValidators(List<Validator<TableData<T>.Data>> validators) {
       this.validators = validators;
       return this;
     }
@@ -68,7 +64,7 @@ public class TableDataConfig<T> {
   
   private final TableConfig<T> tableConfig;
   private final Class<T> type;
-  private final ImmutableList<Validator<Map<Menu<T>, StandardCell>>> validators;
+  private final ImmutableList<Validator<TableData<T>.Data>> validators;
 
   protected TableDataConfig(Builder<T> builder) {
     type = builder.type;
@@ -85,7 +81,7 @@ public class TableDataConfig<T> {
     return tableConfig;
   }
 
-  public ImmutableList<Validator<Map<Menu<T>, StandardCell>>> getValidators() {
+  public ImmutableList<Validator<TableData<T>.Data>> getValidators() {
     return validators;
   }
 

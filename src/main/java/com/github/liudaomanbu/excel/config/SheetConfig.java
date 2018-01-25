@@ -84,7 +84,7 @@ public class SheetConfig extends Config {
 
   }
 
-  private static final Predicate<Sheet> DEFAULT_MATCHER = Predicates.alwaysTrue();
+  private static final Predicate<Sheet> DEFAULT_MATCHER = sheet->sheet.getWorkbook().getSheetIndex(sheet)==0;
 
   public static Builder builder() {
     return new Builder();

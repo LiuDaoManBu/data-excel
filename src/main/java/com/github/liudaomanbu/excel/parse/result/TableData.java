@@ -89,7 +89,7 @@ public class TableData<T> {
 
     Stream<ValidationError<TableData<T>>> tableDataMatcherErrors = Optional.ofNullable(config)
         .map(TableDataConfig::getValidators).orElse(ImmutableList.of()).stream()
-        .flatMap(validator -> datas.stream().map(t -> t.menuToValueCells)
+        .flatMap(validator -> datas.stream()
             .map(map -> validator.validate(map)).flatMap(Collection::stream))
         .map(error -> new ValidationError<>(this, error.getMessage()));
 
