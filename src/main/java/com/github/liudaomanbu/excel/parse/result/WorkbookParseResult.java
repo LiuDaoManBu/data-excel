@@ -60,8 +60,7 @@ public class WorkbookParseResult {
     sheetParseResults = createSheetParseResultBuilders().stream()
         .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
         .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
-    errors = Stream.concat(config.getValidators().stream(), Stream.of(createSheetConfigValidator()))
-        .filter(validator -> validator.premise(workbook))
+    errors = getValidators().filter(validator -> validator.premise(workbook))
         .map(validator -> validator.validate(workbook)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
   }
@@ -71,6 +70,10 @@ public class WorkbookParseResult {
         .map(sheetConfig -> ExcelUtil.getSheets(workbook).filter(sheetConfig.getMatcher()::test)
             .findAny().map(sheetConfig::parse))
         .filter(Optional::isPresent).map(Optional::get).collect(ImmutableList.toImmutableList());
+  }
+
+  private Stream<Validator<Workbook>> getValidators() {
+    return Stream.concat(config.getValidators().stream(), Stream.of(createSheetConfigValidator()));
   }
 
   private Validator<Workbook> createSheetConfigValidator() {

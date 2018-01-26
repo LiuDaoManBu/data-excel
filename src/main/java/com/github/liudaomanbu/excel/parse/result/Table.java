@@ -70,7 +70,7 @@ public class Table<T> {
     config = builder.config;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
-    errors = Stream.of(createMenuConfigValidator()).filter(validator -> validator.premise(this))
+    errors = getValidators().filter(validator -> validator.premise(this))
         .map(validator -> validator.validate(this)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
     this.data = new TableData<>(this);
@@ -84,6 +84,10 @@ public class Table<T> {
           menuConfigs.stream().filter(menuConfig -> menuConfig.getMatcher().test(cell)).findAny();
       return optional.map(t -> Menu.<T>builder().setCell(cell).setConfig(t).setTable(this));
     }).filter(Optional::isPresent).map(Optional::get);
+  }
+
+  private Stream<Validator<Table<T>>> getValidators() {
+    return Stream.of(createMenuConfigValidator());
   }
 
   private Validator<Table<T>> createMenuConfigValidator() {

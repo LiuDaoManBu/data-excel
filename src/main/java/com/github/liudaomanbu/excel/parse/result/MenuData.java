@@ -16,12 +16,6 @@ public class MenuData<T> {
         : ImmutableList.of();
   }
 
-  // public ImmutableList getCellValues() {
-  // // cell不是必然有值,为null时ImmutableList会无法放入null而报错
-  // return valueCells.stream().map(StandardCell::getValue).map(dataConfig::cast)
-  // .collect(ImmutableList.toImmutableList());
-  // }
-
   public Menu<T> getMenu() {
     return menu;
   }

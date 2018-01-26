@@ -92,7 +92,8 @@ public class Menu<T> {
             .map(Builder::build).collect(ImmutableList.toImmutableList());
     data = new MenuData<>(this);
 
-    errors = createMenuConfigValidator().validate(this).stream()
+    errors = getValidators().filter(validator -> validator.premise(this))
+        .map(validator -> validator.validate(this)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
   }
 
@@ -103,6 +104,10 @@ public class Menu<T> {
         .map(t -> menuCells.stream().filter(t::matches).findAny()
             .map(cell -> Menu.<T>builder().setCell(cell).setParent(this).setConfig(t)))
         .filter(Optional::isPresent).map(Optional::get);
+  }
+
+  private Stream<Validator<Menu<T>>> getValidators() {
+    return Stream.of(createMenuConfigValidator());
   }
 
   private Validator<Menu<T>> createMenuConfigValidator() {
@@ -189,7 +194,7 @@ public class Menu<T> {
   public boolean hasError() {
     return !getAllErrors().isEmpty();
   }
-  
+
   public String getName() {
     return BaseDataType.STRING.cast(cell.getValueCell(), String.class);
   }
