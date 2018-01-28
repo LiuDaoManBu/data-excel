@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import com.github.liudaomanbu.excel.config.MenuDataConfig;
 import com.github.liudaomanbu.excel.config.TableDataConfig;
 import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;

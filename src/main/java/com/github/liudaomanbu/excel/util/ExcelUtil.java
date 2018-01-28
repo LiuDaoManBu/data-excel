@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -72,17 +72,35 @@ public class ExcelUtil {
   public static final MissingCellPolicy DEFAULT_MISSING_CELL_POLICY =
       MissingCellPolicy.RETURN_NULL_AND_BLANK;
 
-  public static WorkbookParseResult parse(File file, WorkbookConfig config)
-      throws EncryptedDocumentException, InvalidFormatException, IOException {
-    return config.parse(WorkbookFactory.create(file));
+  public static WorkbookParseResult parse(File file, WorkbookConfig config) {
+    try {
+      return config.parse(WorkbookFactory.create(file));
+    } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
-  public static WorkbookParseResult parse(InputStream inputStream, WorkbookConfig config)
-      throws EncryptedDocumentException, InvalidFormatException, IOException {
-    return config.parse(WorkbookFactory.create(inputStream));
+  public static WorkbookParseResult parse(InputStream inputStream, WorkbookConfig config) {
+    try {
+      return config.parse(WorkbookFactory.create(inputStream));
+    } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    } finally {
+      try {
+        if (Objects.nonNull(inputStream)) {
+          inputStream.close();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
+    }
   }
 
-  public static SheetConfig.Builder parseToSheetConfig(Class<?> type) {
+  @Nullable
+  public static SheetConfig.Builder parseToSheetConfig(@Nullable Class<?> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelSheet.class)).map(t -> {
       SheetConfig.Builder builder = SheetConfig.builder();
       if (!Strings.isNullOrEmpty(t.value())) {
@@ -93,32 +111,33 @@ public class ExcelUtil {
     }).orElse(null);
   }
 
-  public static <T> TableConfig.Builder<T> parseToTableConfig(Class<T> type) {
+  @Nullable
+  public static <T> TableConfig.Builder<T> parseToTableConfig(@Nullable Class<T> type) {
     return Optional.ofNullable(type).map(t -> t.getAnnotation(ExcelTable.class)).map(t -> {
       List<MenuConfig.Builder<T>> topMenuConfigBuilders =
           ClassUtil.getAllFields(type).map(f -> ExcelUtil.<T>parseToMenuConfig(f))
               .filter(Objects::nonNull).collect(Collectors.toList());
-      
-//      Multimap<Object, Object> idTochildrenIds=HashMultimap.create();
-//      ClassUtil.getAllFields(type).forEach(field->{
-//        ExcelMenu[] menus=field.getAnnotation(ExcelField.class).menus();
-//        if(menus.length==0) {
-//          idTochildrenIds.put(field.getName(), null);
-//        }
-//        if(menus.length==1) {
-//          idTochildrenIds.put(menus[0].value(), null);
-//        }
-//        for(int i=0;i<menus.length-1;i++) {
-//          idTochildrenIds.put(menus[i], menus[i+1]);
-//        }
-//      });
-      
-//      topMenuConfigBuilders.stream().map(MenuConfig.Builder::get)
-          
+
+      // Multimap<Object, Object> idTochildrenIds=HashMultimap.create();
+      // ClassUtil.getAllFields(type).forEach(field->{
+      // ExcelMenu[] menus=field.getAnnotation(ExcelField.class).menus();
+      // if(menus.length==0) {
+      // idTochildrenIds.put(field.getName(), null);
+      // }
+      // if(menus.length==1) {
+      // idTochildrenIds.put(menus[0].value(), null);
+      // }
+      // for(int i=0;i<menus.length-1;i++) {
+      // idTochildrenIds.put(menus[i], menus[i+1]);
+      // }
+      // });
+
+      // topMenuConfigBuilders.stream().map(MenuConfig.Builder::get)
+
 
       TableConfig.Builder<T> builder =
           TableConfig.<T>builder().setId(type).setTopMenuConfigBuilders(topMenuConfigBuilders)
-          .setDataConfigBuilder(TableDataConfig.<T>builder().setType(type));
+              .setDataConfigBuilder(TableDataConfig.<T>builder().setType(type));
       return builder;
     }).orElse(null);
   }
@@ -143,19 +162,21 @@ public class ExcelUtil {
     return jsonObject;
   }
 
-  public static <T> MenuConfig.Builder<T> parseToMenuConfig(Field field) {
+  @Nullable
+  public static <T> MenuConfig.Builder<T> parseToMenuConfig(@Nullable Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
-      ImmutableList<MenuConfig.Builder<T>> builders=Arrays.stream(f.menus()).map(menu -> ExcelUtil.<T>parseToMenuConfig(menu))
-          .collect(ImmutableList.toImmutableList());
-      
-      MenuConfig.Builder<T> dataMenuBuilder =builders.stream().reduce((first, second) -> {
+      ImmutableList<MenuConfig.Builder<T>> builders =
+          Arrays.stream(f.menus()).map(menu -> ExcelUtil.<T>parseToMenuConfig(menu))
+              .collect(ImmutableList.toImmutableList());
+
+      MenuConfig.Builder<T> dataMenuBuilder = builders.stream().reduce((first, second) -> {
         first.getChildrenBuilders().add(second);
         return second;
       }).orElse(MenuConfig.<T>builder().setId(field.getName())
           .setMatcher(new StandardCellMatcher().addDataPredicate(StringMatcherType.EQUALS,
               field.getName(), value -> BaseDataType.STRING.cast(value, String.class))))
-      .setDataConfigBuilder(parseToMenuDataConfig(field));
-      
+          .setDataConfigBuilder(parseToMenuDataConfig(field));
+
       return builders.stream().findFirst().orElse(dataMenuBuilder);
     }).orElse(null);
   }
@@ -168,7 +189,8 @@ public class ExcelUtil {
         .setNecessity(excelMenu.necessity());
   }
 
-  public static <T> MenuDataConfig.Builder<T> parseToMenuDataConfig(Field field) {
+  @Nullable
+  public static <T> MenuDataConfig.Builder<T> parseToMenuDataConfig(@Nullable Field field) {
     return Optional.ofNullable(field).map(f -> f.getAnnotation(ExcelField.class)).map(f -> {
       return MenuDataConfig.<T>builder().setLoadType(f.loadType())
           .setDataType(findDataType(f.dataType(), field)).setField(field)
@@ -177,7 +199,7 @@ public class ExcelUtil {
   }
 
   private static BaseDataType findDataType(BaseDataType dataType, Field field) {
-    if(!BaseDataType.NATURAL.equals(dataType)) {
+    if (!BaseDataType.NATURAL.equals(dataType)) {
       return dataType;
     }
     if (field.getType().equals(String.class)) {
@@ -231,27 +253,25 @@ public class ExcelUtil {
         .orElse(null);
   }
 
-  public static boolean isMergedRegion(@Nullable Cell cell) {
-    return getMergedRegion(cell).isPresent();
+  public static boolean inMergedRegion(@Nullable Cell cell) {
+    return findMergedRegion(cell).isPresent();
   }
 
-  public static Optional<CellRangeAddress> getMergedRegion(@Nullable Cell cell) {
+  public static Optional<CellRangeAddress> findMergedRegion(@Nullable Cell cell) {
     return Optional.ofNullable(cell)
-        .map(t -> getMergedRegion(t.getSheet(), t.getRowIndex(), t.getColumnIndex())).get();
+        .map(t -> findMergedRegion(t.getSheet(), t.getRowIndex(), t.getColumnIndex())).get();
   }
 
-  public static Optional<CellRangeAddress> getMergedRegion(@Nullable Sheet sheet, int rowIndex,
+  public static Optional<CellRangeAddress> findMergedRegion(@Nullable Sheet sheet, int rowIndex,
       int columnIndex) {
-    return getMergedRegions(sheet).filter(address -> address.isInRange(rowIndex, columnIndex))
+    return Optional.ofNullable(sheet).map(Sheet::getMergedRegions).map(Collection::stream)
+        .orElseGet(Stream::empty).filter(address -> address.isInRange(rowIndex, columnIndex))
         .findAny();
   }
 
-  public static Optional<StandardCell> toStandardCell(@Nullable Cell cell) {
-    return Optional.ofNullable(cell).map(StandardCell::valueOf);
-  }
-
-  public static boolean hasMergedRegion(@Nullable Sheet sheet) {
-    return Optional.ofNullable(sheet).map(Sheet::getNumMergedRegions).map(n -> n > 0).orElse(false);
+  @Nullable
+  public static StandardCell toStandardCell(@Nullable Cell cell) {
+    return Optional.ofNullable(cell).map(StandardCell::valueOf).orElse(null);
   }
 
   // 指定cellType?
@@ -410,6 +430,7 @@ public class ExcelUtil {
         .map(CELL_TYPE_TO_VALUE_FUNCTIONS::get).map(function -> function.apply(cell)).orElse(null);
   }
 
+  @Nullable
   public static String getStringValue(@Nullable Cell cell) {
     return Optional.ofNullable(cell).map(ExcelUtil::getValue)
         .map(value -> BaseDataType.STRING.cast(value, String.class)).orElse(null);
@@ -417,13 +438,9 @@ public class ExcelUtil {
 
   public static void removeMergedRegion(@Nullable Sheet sheet,
       @Nullable CellRangeAddress cellAddress) {
-    if (Objects.nonNull(sheet) && Objects.nonNull(cellAddress)) {
-      AtomicInteger index = new AtomicInteger();
-      getMergedRegions(sheet)
-          .collect(ImmutableMap.toImmutableMap(Function.identity(), t -> index.incrementAndGet()))
-          .entrySet().stream().filter(entry -> cellAddress.equals(entry.getKey())).findAny()
-          .ifPresent(entry -> sheet.removeMergedRegion(entry.getValue()));
-    }
+    Optional.ofNullable(sheet).map(t -> IntStream.range(0, t.getNumMergedRegions()))
+        .orElse(IntStream.empty()).filter(i -> sheet.getMergedRegion(i).equals(cellAddress))
+        .findAny().ifPresent(i -> sheet.removeMergedRegion(i));
   }
 
   public static Stream<Sheet> getSheets(@Nullable Workbook workbook) {
@@ -440,11 +457,6 @@ public class ExcelUtil {
         .map(t -> IntStream.range(Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
             Optional.ofNullable(lastRowIndex).orElse(t.getLastRowNum())))
         .orElse(IntStream.empty()).mapToObj(sheet::getRow);
-  }
-
-  public static Stream<CellRangeAddress> getMergedRegions(@Nullable Sheet sheet) {
-    return Optional.ofNullable(sheet).map(t -> IntStream.range(0, t.getNumMergedRegions()))
-        .orElse(IntStream.empty()).mapToObj(sheet::getMergedRegion);
   }
 
   public static Stream<Cell> getCells(@Nullable Sheet sheet) {
@@ -497,5 +509,9 @@ public class ExcelUtil {
             Optional.ofNullable(firstColumnIndex).orElse((int) t.getFirstCellNum()),
             Optional.ofNullable(lastColumnIndex).orElse((int) t.getLastCellNum())))
         .orElse(IntStream.empty()).mapToObj(i -> row.getCell(i, effectivePolicy));
+  }
+
+  private ExcelUtil() {
+    throw new AssertionError();
   }
 }

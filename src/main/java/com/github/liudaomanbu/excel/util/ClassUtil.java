@@ -33,7 +33,7 @@ public class ClassUtil {
   }
 
   public static Optional<Field> getField(TypeToken<?> token, String fieldName) {
-    return getAllFields(token).filter(field->field.getName().equals(fieldName)).findAny();
+    return getAllFields(token).filter(field -> field.getName().equals(fieldName)).findAny();
   }
 
   public static boolean isArrayOrIterable(Class<?> type) {

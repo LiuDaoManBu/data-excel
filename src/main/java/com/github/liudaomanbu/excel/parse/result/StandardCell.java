@@ -32,7 +32,7 @@ public class StandardCell extends CellRangeAddress implements Cell {
 
   public static StandardCell valueOf(Cell cell) {
     Preconditions.checkNotNull(cell);
-    return ExcelUtil.getMergedRegion(cell)
+    return ExcelUtil.findMergedRegion(cell)
         .map(address -> new StandardCell(cell.getSheet(), address))
         .orElse(new StandardCell(cell.getSheet(), new CellRangeAddress(cell.getRowIndex(),
             cell.getRowIndex(), cell.getColumnIndex(), cell.getColumnIndex())));

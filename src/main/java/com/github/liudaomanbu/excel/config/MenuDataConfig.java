@@ -2,23 +2,16 @@ package com.github.liudaomanbu.excel.config;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 import com.github.liudaomanbu.excel.constant.LoadType;
 import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
 import com.github.liudaomanbu.excel.matcher.data.type.DataType;
 import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
-import com.github.liudaomanbu.excel.validator.BaseValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 
@@ -106,21 +99,7 @@ public class MenuDataConfig<T> {
 
   }
 
-  private static final Joiner JOINER = Joiner.on("").skipNulls();
   private static final LoadType DEFAULT_LOAD_TYPE = LoadType.UNFIXED;
-  private static final ImmutableBiMap<BaseDataType, String> DATA_TYPE_TO_TIPS =
-      ImmutableBiMap.<BaseDataType, String>builder().put(BaseDataType.BOOLEAN, "是否")
-          .put(BaseDataType.CHINESE, "中文").put(BaseDataType.DATE, "日期")
-          .put(BaseDataType.DATE_TIME, "日期时间").put(BaseDataType.DECIMAL, "小数")
-          .put(BaseDataType.EMAIL, "邮箱").put(BaseDataType.ENGLISH, "英语")
-          .put(BaseDataType.ENGLISH_OR_NUMBER, "英语或数字").put(BaseDataType.ENUM, "枚举")
-          .put(BaseDataType.ID_CARD_NUMBER, "身份证号码").put(BaseDataType.NATURAL_NUMBER, "自然数")
-          .put(BaseDataType.NEGATIVE_DECIMAL, "负小数").put(BaseDataType.NEGATIVE_NUMBER, "负数")
-          .put(BaseDataType.NEGATIVE_WHOLE_NUMBER, "负整数").put(BaseDataType.NUMBER, "数字")
-          .put(BaseDataType.PHONE, "电话号码").put(BaseDataType.POSITIVE_DECIMAL, "正小数")
-          .put(BaseDataType.POSITIVE_NUMBER, "正数").put(BaseDataType.POSITIVE_WHOLE_NUMBER, "正整数")
-          .put(BaseDataType.STRING, "字符串").put(BaseDataType.TELEPHONE, "手机号码")
-          .put(BaseDataType.TIME, "时间").put(BaseDataType.WHOLE_NUMBER, "整数").build();
 
   public static <T> Builder<T> builder() {
     return new Builder<>();
@@ -142,15 +121,8 @@ public class MenuDataConfig<T> {
     dataType = builder.dataType;
     Preconditions.checkNotNull(dataType, "dataType can't be null");
 
-    validators = Stream.concat(Stream.of(createDataTypeValidator()), builder.validators.stream())
-        .collect(ImmutableList.toImmutableList());
+    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
 
-  }
-
-  private Validator<StandardCell> createDataTypeValidator() {
-    return new BaseValidator<StandardCell>(cell -> dataType.test(cell.getValue()),
-        cell -> JOINER.join(cell.formatAsString(), "单元格", cell.getValue(), "不符合",
-            DATA_TYPE_TO_TIPS.get(dataType), "格式"));
   }
 
   public <V> V cast(Object value, TypeToken<V> type) {
