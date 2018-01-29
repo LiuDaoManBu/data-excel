@@ -1,7 +1,9 @@
 package com.github.liudaomanbu.excel.config;
 
 import java.util.List;
-import com.github.liudaomanbu.excel.parse.result.TableData;
+import java.util.Map;
+import java.util.function.Consumer;
+import com.github.liudaomanbu.excel.parse.result.Data;
 import com.github.liudaomanbu.excel.validator.JavaxValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
 import com.google.common.base.Preconditions;
@@ -13,7 +15,9 @@ public class TableDataConfig<T> {
   public static class Builder<T> {
     private TableConfig<T> tableConfig;
     private Class<T> type;
-    private List<Validator<TableData<T>.Data>> validators;
+    private List<Validator<Data<T>>> validators;
+    private Consumer<Map<String, Object>> beforeTransform;
+    private Consumer<T> beforeValidator;
 
     public Builder() {
       validators = Lists.newLinkedList();
@@ -23,7 +27,7 @@ public class TableDataConfig<T> {
       return new TableDataConfig<>(this);
     }
 
-    public Builder<T> addJavaxValidator(javax.validation.Validator validator,Class<?>... groups) {
+    public Builder<T> addValidator(javax.validation.Validator validator, Class<?>... groups) {
       validators.add(new JavaxValidator<T>(validator, groups));
       return this;
     }
@@ -47,30 +51,52 @@ public class TableDataConfig<T> {
       return this;
     }
 
-    public List<Validator<TableData<T>.Data>> getValidators() {
+    public List<Validator<Data<T>>> getValidators() {
       return validators;
     }
 
-    public Builder<T> setValidators(List<Validator<TableData<T>.Data>> validators) {
+    public Builder<T> setValidators(List<Validator<Data<T>>> validators) {
       this.validators = validators;
       return this;
     }
 
+    public Consumer<T> getBeforeValidator() {
+      return beforeValidator;
+    }
+
+    public Builder<T> setBeforeValidator(Consumer<T> beforeValidator) {
+      this.beforeValidator = beforeValidator;
+      return this;
+    }
+
+    public Consumer<Map<String, Object>> getBeforeTransform() {
+      return beforeTransform;
+    }
+
+    public Builder<T> setBeforeTransform(Consumer<Map<String, Object>> beforeTransform) {
+      this.beforeTransform = beforeTransform;
+      return this;
+    }
+
   }
-  
-  public static <T> Builder<T> builder(){
+
+  public static <T> Builder<T> builder() {
     return new Builder<>();
   }
-  
+
   private final TableConfig<T> tableConfig;
   private final Class<T> type;
-  private final ImmutableList<Validator<TableData<T>.Data>> validators;
+  private final ImmutableList<Validator<Data<T>>> validators;
+  private final Consumer<Map<String, Object>> beforeTransform;
+  private final Consumer<T> beforeValidator;
 
   protected TableDataConfig(Builder<T> builder) {
     type = builder.type;
     tableConfig = builder.tableConfig;
     Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
+    beforeTransform = builder.beforeTransform;
+    beforeValidator = builder.beforeValidator;
   }
 
   public Class<T> getType() {
@@ -81,8 +107,16 @@ public class TableDataConfig<T> {
     return tableConfig;
   }
 
-  public ImmutableList<Validator<TableData<T>.Data>> getValidators() {
+  public ImmutableList<Validator<Data<T>>> getValidators() {
     return validators;
+  }
+
+  public Consumer<Map<String, Object>> getBeforeTransform() {
+    return beforeTransform;
+  }
+
+  public Consumer<T> getBeforeValidator() {
+    return beforeValidator;
   }
 
 }

@@ -22,35 +22,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class TableData<T> {
-  public class Data {
-    private final Map<Menu<T>, StandardCell> menuToValueCells;
-    private final Map<String, Object> json;
-    private final T value;
-
-    private Data(Map<Menu<T>, StandardCell> menuToValueCells) {
-      this.menuToValueCells = menuToValueCells;
-      json = ExcelUtil.toJsonObject(menuToValueCells);
-      value = ExcelUtil.toJavaObject(menuToValueCells, config.getType());
-    }
-
-    public Menu<T> getMenuByFieldName(String fieldName) {
-      return menuToValueCells.keySet().stream()
-          .filter(menu -> menu.getFieldName().equals(fieldName)).findAny().orElse(null);
-    }
-
-    public Map<Menu<T>, StandardCell> getMenuToValueCells() {
-      return menuToValueCells;
-    }
-
-    public Map<String, Object> getJson() {
-      return json;
-    }
-
-    public T getValue() {
-      return value;
-    }
-  }
-
   private static final Joiner JOINER = Joiner.on("").skipNulls();
   private static final ImmutableBiMap<BaseDataType, String> DATA_TYPE_TO_TIPS =
       ImmutableBiMap.<BaseDataType, String>builder().put(BaseDataType.BOOLEAN, "是否")
@@ -68,7 +39,7 @@ public class TableData<T> {
 
   private final Table<T> table;
   private final TableDataConfig<T> config;
-  private final ImmutableList<Data> datas;
+  private final ImmutableList<Data<T>> datas;
   private final ImmutableList<ValidationError<TableData<T>>> errors;
 
   public TableData(Table<T> table) {
@@ -98,7 +69,9 @@ public class TableData<T> {
       }
     });
 
-    datas = menuTodatas.stream().map(Data::new).collect(ImmutableList.toImmutableList());
+    datas = menuTodatas.stream().map(map -> new Data<>(map, config.getType(),
+        config.getBeforeTransform(), config.getBeforeValidator()))
+        .collect(ImmutableList.toImmutableList());
 
     this.errors = getValidators()
         .flatMap(validator -> datas.stream().filter(validator::premise).map(validator::validate)
@@ -107,18 +80,20 @@ public class TableData<T> {
         .collect(ImmutableList.toImmutableList());
   }
 
-  private Stream<Validator<TableData<T>.Data>> getValidators() {
+  private Stream<Validator<Data<T>>> getValidators() {
     return Stream.concat(createDataValidator(), Optional.ofNullable(config)
         .map(TableDataConfig::getValidators).map(Collection::stream).orElseGet(Stream::empty));
   }
 
-  private Stream<Validator<TableData<T>.Data>> createDataValidator() {
-    return table.getDataMenus().map(menu -> new BaseValidator<TableData<T>.Data>(
-        data -> menu.getData().getConfig().getDataType()
-            .test(data.menuToValueCells.get(menu).getValue()),
-        data -> JOINER.join(menu.getFullName(), data.menuToValueCells.get(menu).formatAsString(),
-            "单元格", data.menuToValueCells.get(menu).getValue(), "不符合",
-            DATA_TYPE_TO_TIPS.get(menu.getData().getConfig().getDataType()), "格式")));
+  private Stream<Validator<Data<T>>> createDataValidator() {
+    return table.getDataMenus()
+        .map(menu -> new BaseValidator<Data<T>>(
+            data -> menu.getData().getConfig().getDataType()
+                .test(data.getMenuToValueCells().get(menu).getValue()),
+            data -> JOINER.join(menu.getFullName(),
+                data.getMenuToValueCells().get(menu).formatAsString(), "单元格",
+                data.getMenuToValueCells().get(menu).getValue(), "不符合",
+                DATA_TYPE_TO_TIPS.get(menu.getData().getConfig().getDataType()), "格式")));
   }
 
   public Table<T> getTable() {
@@ -134,18 +109,18 @@ public class TableData<T> {
     return errors;
   }
 
-  public ImmutableList<Data> getDatas() {
+  public ImmutableList<Data<T>> getDatas() {
     return datas;
   }
 
-  public ImmutableList<Data> getEffectiveDatas() {
-    return getDatas().stream().filter(data -> !data.json.values().isEmpty())
+  public ImmutableList<Data<T>> getEffectiveDatas() {
+    return getDatas().stream().filter(data -> !data.getJson().values().isEmpty())
         .collect(ImmutableList.toImmutableList());
   }
 
   public ImmutableList<T> getEffectiveValues() {
     return getEffectiveDatas().stream()
-        .map(t -> (T) ExcelUtil.toJavaObject(t.menuToValueCells, config.getType()))
+        .map(t -> (T) ExcelUtil.toJavaObject(t.getMenuToValueCells(), config.getType()))
         .collect(ImmutableList.toImmutableList());
   }
 

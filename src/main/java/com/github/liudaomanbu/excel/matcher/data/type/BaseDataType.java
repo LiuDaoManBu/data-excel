@@ -124,7 +124,7 @@ public enum BaseDataType implements DataType {
   DATE(Date.class, Calendar.class, LocalDate.class, String.class) {
     @Override
     public boolean test(Object value) {
-      if(value instanceof Number || value instanceof Boolean) {
+      if (value instanceof Number || value instanceof Boolean) {
         return false;
       }
       try {
@@ -135,30 +135,30 @@ public enum BaseDataType implements DataType {
         return false;
       }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T cast(Object value, TypeToken<T> type) {
-      Date date=TypeUtils.castToDate(value);
-      if(Objects.isNull(date)) {
+      Date date = TypeUtils.castToDate(value);
+      if (Objects.isNull(date)) {
         return (T) date;
       }
-      if(type.isSubtypeOf(Date.class)) {
+      if (type.isSubtypeOf(Date.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
-      
-      if(type.isSubtypeOf(Calendar.class)) {
+
+      if (type.isSubtypeOf(Calendar.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
-      
-      if(LocalDate.class.equals(type.getRawType())) {
+
+      if (LocalDate.class.equals(type.getRawType())) {
         return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalDate();
       }
-      
-      if(String.class.equals(type.getRawType())) {
-        return (T) cast(date,LocalDate.class).toString();
+
+      if (String.class.equals(type.getRawType())) {
+        return (T) cast(date, LocalDate.class).toString();
       }
-      
+
       throw new IllegalArgumentException();
     }
   },
@@ -166,7 +166,7 @@ public enum BaseDataType implements DataType {
   TIME(Date.class, Calendar.class, LocalTime.class, String.class) {
     @Override
     public boolean test(Object value) {
-      if(value instanceof Number || value instanceof Boolean) {
+      if (value instanceof Number || value instanceof Boolean) {
         return false;
       }
       try {
@@ -177,30 +177,30 @@ public enum BaseDataType implements DataType {
         return false;
       }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T cast(Object value, TypeToken<T> type) {
-      Date date=TypeUtils.castToDate(value);
-      if(Objects.isNull(date)) {
+      Date date = TypeUtils.castToDate(value);
+      if (Objects.isNull(date)) {
         return (T) date;
       }
-      if(type.isSubtypeOf(Date.class)) {
+      if (type.isSubtypeOf(Date.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
-      
-      if(type.isSubtypeOf(Calendar.class)) {
+
+      if (type.isSubtypeOf(Calendar.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
-      
-      if(LocalTime.class.equals(type.getRawType())) {
+
+      if (LocalTime.class.equals(type.getRawType())) {
         return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()).toLocalTime();
       }
-      
-      if(String.class.equals(type.getRawType())) {
-        return (T) cast(date,LocalTime.class).toString();
+
+      if (String.class.equals(type.getRawType())) {
+        return (T) cast(date, LocalTime.class).toString();
       }
-      
+
       throw new IllegalArgumentException();
     }
   },
@@ -208,7 +208,7 @@ public enum BaseDataType implements DataType {
   DATE_TIME(Date.class, Calendar.class, LocalDateTime.class, String.class) {
     @Override
     public boolean test(Object value) {
-      if(value instanceof Number || value instanceof Boolean) {
+      if (value instanceof Number || value instanceof Boolean) {
         return false;
       }
       try {
@@ -218,30 +218,30 @@ public enum BaseDataType implements DataType {
         return false;
       }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T cast(Object value, TypeToken<T> type) {
-      Date date=TypeUtils.castToDate(value);
-      if(Objects.isNull(date)) {
+      Date date = TypeUtils.castToDate(value);
+      if (Objects.isNull(date)) {
         return (T) date;
       }
-      if(type.isSubtypeOf(Date.class)) {
+      if (type.isSubtypeOf(Date.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
-      
-      if(type.isSubtypeOf(Calendar.class)) {
+
+      if (type.isSubtypeOf(Calendar.class)) {
         return (T) TypeUtils.castToJavaBean(date, type.getRawType());
       }
-      
-      if(LocalDateTime.class.equals(type.getRawType())) {
+
+      if (LocalDateTime.class.equals(type.getRawType())) {
         return (T) LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
       }
-      
-      if(String.class.equals(type.getRawType())) {
-        return (T) cast(date,LocalDateTime.class).toString();
+
+      if (String.class.equals(type.getRawType())) {
+        return (T) cast(date, LocalDateTime.class).toString();
       }
-      
+
       throw new IllegalArgumentException();
     }
   },
@@ -308,37 +308,37 @@ public enum BaseDataType implements DataType {
       return STRING.cast(t, String.class).matches(ID_CARD_NUMBER_REGEX);
     }
   },
-  //boolean
-  BOOLEAN(boolean.class,Boolean.class,String.class) {
-   @Override
-   public boolean test(Object t) {
-     try {
-       TypeUtils.castToBoolean(t);
-       return true;
-     } catch (JSONException e) {
-       return false;
-     }
-   }
- },
-  //enum
-  ENUM(Enum.class,int.class,Integer.class,String.class) {
-   @Override
-   public boolean test(Object t) {
-     return STRING.test(t) || POSITIVE_WHOLE_NUMBER.test(t);
-   }
- },
-  //natural
+  // boolean
+  BOOLEAN(boolean.class, Boolean.class, String.class) {
+    @Override
+    public boolean test(Object t) {
+      try {
+        TypeUtils.castToBoolean(t);
+        return true;
+      } catch (JSONException e) {
+        return false;
+      }
+    }
+  },
+  // enum
+  ENUM(Enum.class, int.class, Integer.class, String.class) {
+    @Override
+    public boolean test(Object t) {
+      return STRING.test(t) || POSITIVE_WHOLE_NUMBER.test(t);
+    }
+  },
+  // natural
   NATURAL() {
-   @Override
-   public <T> boolean canCast(TypeToken<T> type) {
-     return true;
-   }
-   
-   @Override
-   public boolean test(Object t) {
-     return true;
-   }
- };
+    @Override
+    public <T> boolean canCast(TypeToken<T> type) {
+      return true;
+    }
+
+    @Override
+    public boolean test(Object t) {
+      return true;
+    }
+  };
 
   private static final String WORD_REGEX = "^(\\w|[\\u0391-\\uFFE5])*$";
   private static final String ENGLISH_OR_NUMBER_REGEX = "^[A-Za-z0-9]*$";
