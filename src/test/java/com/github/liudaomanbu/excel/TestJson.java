@@ -8,9 +8,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.github.liudaomanbu.excel.matcher.constant.Type;
+import com.google.auto.value.AutoValue;
 import com.google.common.collect.Multimap;
 
 class Data {
+  
   private Class<?> type;
   private Type t;
   
@@ -35,7 +37,6 @@ class Data {
 
 public class TestJson {
   public static void main(String[] args) {
-    testEnum();
   }
 
   public static void testCastLocalDate() {
