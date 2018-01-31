@@ -1,11 +1,11 @@
 package com.github.liudaomanbu.excel;
 
+import com.github.liudaomanbu.excel.config.TypeConfig;
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import com.github.liudaomanbu.excel.config.TypeConfig;
-import com.google.common.collect.ImmutableList;
 
 class ResultA {
   public static class Builder {
@@ -23,7 +23,6 @@ class ResultA {
     b = builder.builder.build();
   }
 }
-
 
 class ResultB {
   public static class Builder {
@@ -71,8 +70,9 @@ class Config<T> extends TypeConfig<T>{
 
 public class TestBuilder {
   public static void main(String[] args) {
+    testCyclicReference();
   }
-  
+
   public static void testParent() {
     Node.Builder builder = new Node.Builder();
     builder.parent = builder.build();

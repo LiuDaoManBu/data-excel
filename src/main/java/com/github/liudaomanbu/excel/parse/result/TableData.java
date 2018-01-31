@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.parse.result;
 
+import com.google.common.collect.Streams;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -22,21 +23,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class TableData<T> {
-  private static final Joiner JOINER = Joiner.on("").skipNulls();
-  private static final ImmutableBiMap<BaseDataType, String> DATA_TYPE_TO_TIPS =
-      ImmutableBiMap.<BaseDataType, String>builder().put(BaseDataType.BOOLEAN, "是否")
-          .put(BaseDataType.CHINESE, "中文").put(BaseDataType.DATE, "日期")
-          .put(BaseDataType.DATE_TIME, "日期时间").put(BaseDataType.DECIMAL, "小数")
-          .put(BaseDataType.EMAIL, "邮箱").put(BaseDataType.ENGLISH, "英语")
-          .put(BaseDataType.ENGLISH_OR_NUMBER, "英语或数字").put(BaseDataType.ENUM, "枚举")
-          .put(BaseDataType.ID_CARD_NUMBER, "身份证号码").put(BaseDataType.NATURAL_NUMBER, "自然数")
-          .put(BaseDataType.NEGATIVE_DECIMAL, "负小数").put(BaseDataType.NEGATIVE_NUMBER, "负数")
-          .put(BaseDataType.NEGATIVE_WHOLE_NUMBER, "负整数").put(BaseDataType.NUMBER, "数字")
-          .put(BaseDataType.PHONE, "电话号码").put(BaseDataType.POSITIVE_DECIMAL, "正小数")
-          .put(BaseDataType.POSITIVE_NUMBER, "正数").put(BaseDataType.POSITIVE_WHOLE_NUMBER, "正整数")
-          .put(BaseDataType.STRING, "字符串").put(BaseDataType.TELEPHONE, "手机号码")
-          .put(BaseDataType.TIME, "时间").put(BaseDataType.WHOLE_NUMBER, "整数").build();
-
   private final Table<T> table;
   private final TableDataConfig<T> config;
   private final ImmutableList<Data<T>> datas;
@@ -69,31 +55,20 @@ public class TableData<T> {
       }
     });
 
-    datas = menuTodatas.stream().map(map -> new Data<>(map, config.getType(),
-        config.getBeforeTransform(), config.getBeforeValidator()))
+    datas = menuTodatas.stream().map(map -> new Data<>(this,map))
         .collect(ImmutableList.toImmutableList());
 
-    this.errors = getValidators()
-        .flatMap(validator -> datas.stream().filter(validator::premise).map(validator::validate)
-            .flatMap(Collection::stream))
-        .map(error -> new ValidationError<>(this, error.getMessage()))
-        .collect(ImmutableList.toImmutableList());
+//    this.errors = getValidators()
+//        .flatMap(validator -> datas.stream().filter(validator::premise).map(validator::validate)
+//            .flatMap(Collection::stream))
+//        .map(error -> new ValidationError<>(this, error.getMessage()))
+//        .collect(ImmutableList.toImmutableList());
+    this.errors =ImmutableList.of();
   }
 
   private Stream<Validator<Data<T>>> getValidators() {
-    return Stream.concat(createDataValidator(), Optional.ofNullable(config)
-        .map(TableDataConfig::getValidators).map(Collection::stream).orElseGet(Stream::empty));
-  }
-
-  private Stream<Validator<Data<T>>> createDataValidator() {
-    return table.getDataMenus()
-        .map(menu -> new BaseValidator<Data<T>>(
-            data -> menu.getData().getConfig().getDataType()
-                .test(data.getMenuToValueCells().get(menu).getValue()),
-            data -> JOINER.join(menu.getFullName(),
-                data.getMenuToValueCells().get(menu).formatAsString(), "单元格",
-                data.getMenuToValueCells().get(menu).getValue(), "不符合",
-                DATA_TYPE_TO_TIPS.get(menu.getData().getConfig().getDataType()), "格式")));
+    return  Optional.ofNullable(config)
+        .map(TableDataConfig::getValidators).map(Collection::stream).orElseGet(Stream::empty);
   }
 
   public Table<T> getTable() {
@@ -111,6 +86,14 @@ public class TableData<T> {
 
   public ImmutableList<Data<T>> getDatas() {
     return datas;
+  }
+
+  public ImmutableList<ValidationError<TableData<T>>> getAllErrors() {
+    return Stream
+        .concat(errors.stream(),
+            datas.stream().map(Data::getErrors).flatMap(Collection::stream)
+                .map(error -> new ValidationError<>(this, error.getMessage())))
+        .collect(ImmutableList.toImmutableList());
   }
 
   public ImmutableList<Data<T>> getEffectiveDatas() {

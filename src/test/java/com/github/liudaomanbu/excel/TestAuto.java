@@ -1,8 +1,10 @@
 package com.github.liudaomanbu.excel;
 
+import com.github.liudaomanbu.excel.annotation.ExcelTable;
 import com.google.auto.value.AutoValue;
-//
+
 //@AutoValue
+//@ExcelTable
 //abstract class Animal {
 //  abstract String name();
 //  abstract int numberOfLegs();
@@ -34,17 +36,18 @@ import com.google.auto.value.AutoValue;
 //  }
 //}
 //
-//class Person{
-//  private final Animal Animal;
+//@AutoValue
+//abstract class Person{
+//  abstract Animal animal();
 //
-//  public Person(com.github.liudaomanbu.excel.Animal animal) {
-//    Animal = animal;
+//  public static Person create(Animal.Builder animal) {
+//    return new AutoValue_Person(animal.build());
 //  }
+//
 //}
 public class TestAuto {
 
   public static void main(String[] args) {
-//    Animal animal=Animal.create("abc",4,null);
-//    System.out.println(animal);
+//    System.out.println(Person.create(Animal.builder().name("sdfs").numberOfLegs(5)));
   }
 }
