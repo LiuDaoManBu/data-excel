@@ -1,19 +1,15 @@
 package com.github.liudaomanbu.excel;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.Reflection;
@@ -82,9 +78,31 @@ interface Ib extends Ia {
 }
 
 
+class FieldTest {
+  public Class<?> type;
+  public Field field;
+
+  public FieldTest(Field field) {
+    this.field = field;
+    this.type = field.getType();
+  }
+
+  @Override
+  public String toString() {
+    return "FieldTest [type=" + type + ", field=" + field + "]";
+  }
+
+}
+
+
 public class TestGuava {
   public static <T> void main(String[] args) throws Exception {
-    testTypeToken(new TypeToken<List<String>>() {});
+    Field field = BBB.class.getDeclaredField("type");
+    FieldTest fieldTest = new FieldTest(field);
+    System.out.println(fieldTest);
+    BBB<Long> b=new BBB<Long>();
+    fieldTest.field.set(b, BaseDataType.NATURAL.cast(157, fieldTest.type));
+    System.out.println(b.type);
   }
 
   public static void testFluentIterable() {
@@ -135,7 +153,9 @@ public class TestGuava {
   }
 
   public static <T> void testTypeToken(TypeToken<T> token) {
-    System.out.println(token.resolveType(token.getRawType().getTypeParameters()[0]));
+    System.out.println(token.getRawType());
+    TypeToken<?> genericToken = token.resolveType(token.getRawType().getTypeParameters()[0]);
+    System.out.println(genericToken.getRawType());
   }
 
   public static <T> void testInvokableCast() throws Exception {
