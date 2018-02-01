@@ -214,14 +214,6 @@ public class Test {
 
   }
 
-  public static <T> T getValue(Class<T> type) {
-    Object value = null;
-    if (value != null && !value.getClass().equals(type)) {
-      value = BaseDataType.DECIMAL.cast(value, type);
-    }
-    return (T) value;
-  }
-
   public static Set<Integer> test1(A a) {
     System.out.println(a.getValues().contains(1));
     return Sets.newHashSet(1);
