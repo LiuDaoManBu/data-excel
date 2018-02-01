@@ -47,7 +47,7 @@ public class Data<T> {
     value = new JSONObject(json).toJavaObject(tableData.getConfig().getType());
     tableData.getConfig().getBeforeValidator().accept(value);
     errors = getValidators()
-        .filter(validator -> validator.premise(this)).map(validator -> validator.validate(this))
+        .filter(validator -> validator.needValidate(this)).map(validator -> validator.validate(this))
         .flatMap(
             Collection::stream).collect(ImmutableList.toImmutableList());
   }

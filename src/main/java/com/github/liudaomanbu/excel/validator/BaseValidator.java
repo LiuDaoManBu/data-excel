@@ -38,7 +38,7 @@ public class BaseValidator<T> implements Validator<T> {
   }
 
   @Override
-  public boolean premise(T value) {
+  public boolean needValidate(T value) {
     return premisePredicate.test(value);
   }
 

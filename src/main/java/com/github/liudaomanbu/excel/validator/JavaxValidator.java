@@ -3,7 +3,6 @@ package com.github.liudaomanbu.excel.validator;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
 import com.github.liudaomanbu.excel.parse.result.Data;
 import com.github.liudaomanbu.excel.parse.result.Menu;
-import com.github.liudaomanbu.excel.parse.result.TableData;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 
@@ -19,7 +18,7 @@ public class JavaxValidator<T> implements Validator<Data<T>> {
   }
 
   @Override
-  public boolean premise(Data<T> value) {
+  public boolean needValidate(Data<T> value) {
     return true;
   }
 

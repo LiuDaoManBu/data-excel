@@ -60,7 +60,7 @@ public class WorkbookParseResult {
     sheetParseResults = createSheetParseResultBuilders().stream()
         .peek(sheetParseResultBuilder -> sheetParseResultBuilder.setWorkbookParseResult(this))
         .map(SheetParseResult.Builder::build).collect(ImmutableList.toImmutableList());
-    errors = getValidators().filter(validator -> validator.premise(workbook))
+    errors = getValidators().filter(validator -> validator.needValidate(workbook))
         .map(validator -> validator.validate(workbook)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
   }

@@ -70,7 +70,7 @@ public class Table<T> {
     config = builder.config;
     sheetParseResult = builder.sheetParseResult;
     topMenus = loadTopMenus().map(Menu.Builder::build).collect(ImmutableSet.toImmutableSet());
-    errors = getValidators().filter(validator -> validator.premise(this))
+    errors = getValidators().filter(validator -> validator.needValidate(this))
         .map(validator -> validator.validate(this)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
     this.data = new TableData<>(this);

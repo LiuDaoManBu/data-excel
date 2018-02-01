@@ -92,7 +92,7 @@ public class Menu<T> {
             .map(Builder::build).collect(ImmutableList.toImmutableList());
     data = new MenuData<>(this);
 
-    errors = getValidators().filter(validator -> validator.premise(this))
+    errors = getValidators().filter(validator -> validator.needValidate(this))
         .map(validator -> validator.validate(this)).flatMap(Collection::stream)
         .collect(ImmutableList.toImmutableList());
   }
