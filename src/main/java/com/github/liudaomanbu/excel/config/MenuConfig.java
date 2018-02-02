@@ -2,7 +2,6 @@ package com.github.liudaomanbu.excel.config;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -12,22 +11,20 @@ import com.github.liudaomanbu.excel.constant.Necessity;
 import com.github.liudaomanbu.excel.matcher.Matcher;
 import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
-import com.github.liudaomanbu.excel.validator.Validator;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-public class MenuConfig<T> extends Config {
-  public static class Builder<T> extends Config.Builder {
+public class MenuConfig<T> extends Config<Menu<T>> {
+  public static class Builder<T> extends Config.Builder<Menu<T>> {
     private TableConfig<T> tableConfig;
     private MenuConfig<T> parent;
     private MenuDataConfig.Builder<T> dataConfigBuilder;
     private Collection<MenuConfig.Builder<T>> childrenBuilders;
     // 菜单匹配器
     private Matcher<StandardCell> matcher;
-    private List<Validator<Menu<T>>> validators;
     // 第一个数据单元格相对于菜单单元格的单元格距离
     private Integer distance;
     private Necessity necessity;
@@ -35,7 +32,6 @@ public class MenuConfig<T> extends Config {
 
     public Builder() {
       childrenBuilders = Lists.newLinkedList();
-      validators = Lists.newLinkedList();
     }
 
     public MenuConfig<T> build() {
@@ -50,15 +46,6 @@ public class MenuConfig<T> extends Config {
 
     public TableConfig<T> getTableConfig() {
       return tableConfig;
-    }
-
-    public List<Validator<Menu<T>>> getValidators() {
-      return validators;
-    }
-
-    public Builder<T> setValidators(List<Validator<Menu<T>>> validators) {
-      this.validators = validators;
-      return this;
     }
 
     public Builder<T> setTableConfig(TableConfig<T> tableConfig) {
@@ -147,7 +134,6 @@ public class MenuConfig<T> extends Config {
   private final Direction direction;
   private final MenuConfig<T> parent;
   private final ImmutableCollection<MenuConfig<T>> childrens;
-  private final ImmutableList<Validator<Menu<T>>> validators;
   private final MenuDataConfig<T> dataConfig;
 
   private MenuConfig(Builder<T> builder) {
@@ -167,7 +153,6 @@ public class MenuConfig<T> extends Config {
     childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
-    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
 
     Preconditions.checkState(!(!childrens.isEmpty() && Objects.nonNull(dataConfig)));
@@ -253,9 +238,4 @@ public class MenuConfig<T> extends Config {
   public TableConfig<T> getTableConfig() {
     return tableConfig;
   }
-
-  public ImmutableList<Validator<Menu<T>>> getValidators() {
-    return validators;
-  }
-
 }

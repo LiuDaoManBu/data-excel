@@ -1,17 +1,21 @@
 package com.github.liudaomanbu.excel.config;
 
+import java.util.List;
 import java.util.Optional;
+import com.github.liudaomanbu.excel.validator.Validator;
+import com.google.common.collect.ImmutableList;
 
-public class Config {
-  public static class Builder {
+public class Config<T> {
+  public static class Builder<T> {
     private Object id;
     private ParserConfig parserConfig;
-
+    private List<Validator<T>> validators;
+    
     public Object getId() {
       return id;
     }
 
-    public Builder setId(Object id) {
+    public Builder<T> setId(Object id) {
       this.id = id;
       return this;
     }
@@ -20,8 +24,17 @@ public class Config {
       return parserConfig;
     }
 
-    public Builder setParserConfig(ParserConfig parserConfig) {
+    public Builder<T> setParserConfig(ParserConfig parserConfig) {
       this.parserConfig = parserConfig;
+      return this;
+    }
+
+    public List<Validator<T>> getValidators() {
+      return validators;
+    }
+
+    public Builder<T> setValidators(List<Validator<T>> validators) {
+      this.validators = validators;
       return this;
     }
     
@@ -29,11 +42,12 @@ public class Config {
 
   private final Object id;
   private final ParserConfig parserConfig;
+  private final ImmutableList<Validator<T>> validators;
 
-  public Config(Builder builder) {
-    super();
+  public Config(Builder<T> builder) {
     id = Optional.ofNullable(builder.id).orElse(this.toString());
     parserConfig=builder.parserConfig;
+    validators=builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
 
   public Object getId() {
@@ -44,34 +58,7 @@ public class Config {
     return parserConfig;
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    return result;
+  public ImmutableList<Validator<T>> getValidators() {
+    return validators;
   }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Config other = (Config) obj;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
-    return true;
-  }
-
-  @Override
-  public String toString() {
-    return "Config [id=" + id + "]";
-  }
-
 }

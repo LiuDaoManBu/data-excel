@@ -12,8 +12,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-public class SheetConfig extends Config {
-  public static class Builder extends Config.Builder {
+public class SheetConfig extends Config<Sheet> {
+  public static class Builder extends Config.Builder<Sheet> {
     private Collection<TableConfig.Builder<?>> tableConfigBuilders;
     private WorkbookConfig workbookConfig;
     private Matcher<Sheet> matcher;

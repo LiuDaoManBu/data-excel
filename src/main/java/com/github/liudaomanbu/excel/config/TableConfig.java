@@ -1,32 +1,27 @@
 package com.github.liudaomanbu.excel.config;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.github.liudaomanbu.excel.constant.Direction;
 import com.github.liudaomanbu.excel.parse.result.Table;
-import com.github.liudaomanbu.excel.validator.Validator;
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
-public class TableConfig<T> extends Config {
-  public static class Builder<T> extends Config.Builder {
+public class TableConfig<T> extends Config<Table<T>> {
+  public static class Builder<T> extends Config.Builder<Table<T>> {
     private Collection<MenuConfig.Builder<T>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
     private Direction menuDirection;
     private TableDataConfig.Builder<T> dataConfigBuilder;
-    private List<Validator<Table<T>>> validators;
 
     public Builder() {
       topMenuConfigBuilders = Lists.newLinkedList();
-      validators = Lists.newLinkedList();
     }
 
     public TableConfig<T> build() {
@@ -75,15 +70,6 @@ public class TableConfig<T> extends Config {
       return this;
     }
 
-    public List<Validator<Table<T>>> getValidators() {
-      return validators;
-    }
-
-    public Builder<T> setValidators(List<Validator<Table<T>>> validators) {
-      this.validators = validators;
-      return this;
-    }
-
   }
 
   public static final Direction DEFAULT_MENU_DIRECTION = Direction.BOTTOM;
@@ -95,7 +81,6 @@ public class TableConfig<T> extends Config {
   private final SheetConfig sheetConfig;
   private final Direction menuDirection;
   private final ImmutableCollection<MenuConfig<T>> topMenuConfigs;
-  private final ImmutableList<Validator<Table<T>>> validators;
   private final TableDataConfig<T> dataConfig;
 
   private final Traverser<MenuConfig<T>> MENU_CONFIG_TRAVERSER =
@@ -113,7 +98,6 @@ public class TableConfig<T> extends Config {
     topMenuConfigs = builder.topMenuConfigBuilders.stream()
         .peek(topMenuConfigBuilder -> topMenuConfigBuilder.setTableConfig(this))
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
-    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setTableConfig(this).build();
   }
 
@@ -146,10 +130,6 @@ public class TableConfig<T> extends Config {
 
   public TableDataConfig<T> getDataConfig() {
     return dataConfig;
-  }
-
-  public ImmutableList<Validator<Table<T>>> getValidators() {
-    return validators;
   }
 
 }
