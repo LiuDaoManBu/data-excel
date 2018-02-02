@@ -90,6 +90,7 @@ public class TableDataConfig<T> {
   private final Consumer<T> beforeValidator;
 
   protected TableDataConfig(Builder<T> builder) {
+
     type = builder.type;
     tableConfig = builder.tableConfig;
     Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");

@@ -1,8 +1,5 @@
 package com.github.liudaomanbu.excel;
 
-import com.github.liudaomanbu.excel.annotation.ExcelTable;
-import com.google.auto.value.AutoValue;
-
 //@AutoValue
 //@ExcelTable
 //abstract class Animal {
