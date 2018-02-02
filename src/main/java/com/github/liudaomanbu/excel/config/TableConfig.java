@@ -23,7 +23,6 @@ public class TableConfig<T> extends Config {
     private Direction menuDirection;
     private TableDataConfig.Builder<T> dataConfigBuilder;
     private List<Validator<Table<T>>> validators;
-    private ParserConfig parserConfig;
 
     public Builder() {
       topMenuConfigBuilders = Lists.newLinkedList();
@@ -67,15 +66,6 @@ public class TableConfig<T> extends Config {
       return this;
     }
 
-    public ParserConfig getParserConfig() {
-      return parserConfig;
-    }
-
-    public Builder<T> setParserConfig(ParserConfig parserConfig) {
-      this.parserConfig = parserConfig;
-      return this;
-    }
-
     public TableDataConfig.Builder<T> getDataConfigBuilder() {
       return dataConfigBuilder;
     }
@@ -107,7 +97,6 @@ public class TableConfig<T> extends Config {
   private final ImmutableCollection<MenuConfig<T>> topMenuConfigs;
   private final ImmutableList<Validator<Table<T>>> validators;
   private final TableDataConfig<T> dataConfig;
-  private final ParserConfig parserConfig;
 
   private final Traverser<MenuConfig<T>> MENU_CONFIG_TRAVERSER =
       Traverser.forTree(new SuccessorsFunction<MenuConfig<T>>() {
@@ -126,7 +115,6 @@ public class TableConfig<T> extends Config {
         .map(MenuConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setTableConfig(this).build();
-    parserConfig = builder.parserConfig;
   }
 
   public Table.Builder<T> parse(Sheet sheet) {
@@ -135,7 +123,7 @@ public class TableConfig<T> extends Config {
   }
 
   public ParserConfig getEffectiveParserConfig() {
-    return Optional.ofNullable(parserConfig).orElse(sheetConfig.getEffectiveParserConfig());
+    return Optional.ofNullable(getParserConfig()).orElse(sheetConfig.getEffectiveParserConfig());
   }
 
   public Stream<MenuConfig<T>> getMenuConfigs() {
@@ -154,10 +142,6 @@ public class TableConfig<T> extends Config {
 
   public Direction getMenuDirection() {
     return menuDirection;
-  }
-
-  public ParserConfig getParserConfig() {
-    return parserConfig;
   }
 
   public TableDataConfig<T> getDataConfig() {

@@ -32,7 +32,6 @@ public class MenuConfig<T> extends Config {
     private Integer distance;
     private Necessity necessity;
     private Direction direction;
-    private ParserConfig parserConfig;
 
     public Builder() {
       childrenBuilders = Lists.newLinkedList();
@@ -130,15 +129,6 @@ public class MenuConfig<T> extends Config {
       return this;
     }
 
-    public ParserConfig getParserConfig() {
-      return parserConfig;
-    }
-
-    public Builder<T> setParserConfig(ParserConfig parserConfig) {
-      this.parserConfig = parserConfig;
-      return this;
-    }
-
   }
 
   public static final int DEFAULT_DISTANCE = 1;
@@ -159,7 +149,6 @@ public class MenuConfig<T> extends Config {
   private final ImmutableCollection<MenuConfig<T>> childrens;
   private final ImmutableList<Validator<Menu<T>>> validators;
   private final MenuDataConfig<T> dataConfig;
-  private final ParserConfig parserConfig;
 
   private MenuConfig(Builder<T> builder) {
     super(builder);
@@ -180,7 +169,6 @@ public class MenuConfig<T> extends Config {
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
-    parserConfig = builder.parserConfig;
 
     Preconditions.checkState(!(!childrens.isEmpty() && Objects.nonNull(dataConfig)));
   }
@@ -222,7 +210,7 @@ public class MenuConfig<T> extends Config {
   }
 
   public ParserConfig getEffectiveParserConfig() {
-    return Optional.ofNullable(parserConfig).orElse(Optional.ofNullable(parent)
+    return Optional.ofNullable(getParserConfig()).orElse(Optional.ofNullable(parent)
         .map(MenuConfig::getParserConfig).orElse(tableConfig.getEffectiveParserConfig()));
   }
 
@@ -264,10 +252,6 @@ public class MenuConfig<T> extends Config {
 
   public TableConfig<T> getTableConfig() {
     return tableConfig;
-  }
-
-  public ParserConfig getParserConfig() {
-    return parserConfig;
   }
 
   public ImmutableList<Validator<Menu<T>>> getValidators() {

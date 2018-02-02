@@ -5,6 +5,7 @@ import java.util.Optional;
 public class Config {
   public static class Builder {
     private Object id;
+    private ParserConfig parserConfig;
 
     public Object getId() {
       return id;
@@ -15,17 +16,32 @@ public class Config {
       return this;
     }
 
+    public ParserConfig getParserConfig() {
+      return parserConfig;
+    }
+
+    public Builder setParserConfig(ParserConfig parserConfig) {
+      this.parserConfig = parserConfig;
+      return this;
+    }
+    
   }
 
   private final Object id;
+  private final ParserConfig parserConfig;
 
   public Config(Builder builder) {
     super();
-    this.id = Optional.ofNullable(builder.id).orElse(this.toString());
+    id = Optional.ofNullable(builder.id).orElse(this.toString());
+    parserConfig=builder.parserConfig;
   }
 
   public Object getId() {
     return id;
+  }
+
+  public ParserConfig getParserConfig() {
+    return parserConfig;
   }
 
   @Override

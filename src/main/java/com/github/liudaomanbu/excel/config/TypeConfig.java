@@ -3,7 +3,7 @@ package com.github.liudaomanbu.excel.config;
 import java.lang.reflect.TypeVariable;
 import com.google.common.reflect.TypeToken;
 
-public abstract class TypeConfig<T> {
+abstract class TypeConfig<T> {
   private TypeToken<T> type;
 
   @SuppressWarnings({"unchecked", "rawtypes"})

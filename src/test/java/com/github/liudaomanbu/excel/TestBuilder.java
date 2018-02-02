@@ -1,11 +1,10 @@
 package com.github.liudaomanbu.excel;
 
-import com.github.liudaomanbu.excel.config.TypeConfig;
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import com.google.common.collect.ImmutableList;
 
 class ResultA {
   public static class Builder {
@@ -62,10 +61,6 @@ class Node {
         .orElse(Stream.empty()).collect(ImmutableList.toImmutableList());
     this.value = builder.value;
   }
-}
-
-class Config<T> extends TypeConfig<T>{
-  
 }
 
 public class TestBuilder {

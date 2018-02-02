@@ -1,14 +1,12 @@
 package com.github.liudaomanbu.excel.config;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.apache.poi.ss.usermodel.Sheet;
 import com.github.liudaomanbu.excel.constant.Necessity;
 import com.github.liudaomanbu.excel.matcher.Matcher;
 import com.github.liudaomanbu.excel.parse.result.SheetParseResult;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -20,7 +18,6 @@ public class SheetConfig extends Config {
     private WorkbookConfig workbookConfig;
     private Matcher<Sheet> matcher;
     private Necessity necessity;
-    private ParserConfig parserConfig;
 
     public Builder() {
       tableConfigBuilders = Lists.newLinkedList();
@@ -73,15 +70,6 @@ public class SheetConfig extends Config {
       return this;
     }
 
-    public ParserConfig getParserConfig() {
-      return parserConfig;
-    }
-
-    public Builder setParserConfig(ParserConfig parserConfig) {
-      this.parserConfig = parserConfig;
-      return this;
-    }
-
   }
 
   private static final Predicate<Sheet> DEFAULT_MATCHER = sheet->sheet.getWorkbook().getSheetIndex(sheet)==0;
@@ -94,7 +82,6 @@ public class SheetConfig extends Config {
   private final WorkbookConfig workbookConfig;
   private final Predicate<Sheet> matcher;
   private final Necessity necessity;
-  private final ParserConfig parserConfig;
 
   private SheetConfig(Builder builder) {
     super(builder);
@@ -104,7 +91,6 @@ public class SheetConfig extends Config {
     workbookConfig = builder.workbookConfig;
     necessity = builder.necessity;
     matcher = Optional.ofNullable(builder.matcher).map(Matcher::reduce).orElse(DEFAULT_MATCHER);
-    parserConfig = builder.parserConfig;
   }
 
   public SheetParseResult.Builder parse(Sheet sheet) {
@@ -113,7 +99,7 @@ public class SheetConfig extends Config {
   }
 
   public ParserConfig getEffectiveParserConfig() {
-    return Optional.ofNullable(parserConfig).orElse(workbookConfig.getEffectiveParserConfig());
+    return Optional.ofNullable(getParserConfig()).orElse(workbookConfig.getEffectiveParserConfig());
   }
 
   public ImmutableCollection<TableConfig<?>> getTableConfigs() {
@@ -126,10 +112,6 @@ public class SheetConfig extends Config {
 
   public Predicate<Sheet> getMatcher() {
     return matcher;
-  }
-
-  public ParserConfig getParserConfig() {
-    return parserConfig;
   }
 
   public Necessity getNecessity() {

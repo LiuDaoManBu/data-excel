@@ -11,11 +11,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-public class WorkbookConfig {
-  public static class Builder {
+public class WorkbookConfig extends Config{
+  public static class Builder extends Config.Builder{
     private Collection<SheetConfig.Builder> sheetConfigBuilders;
     private List<Validator<Workbook>> validators;
-    private ParserConfig parserConfig;
 
     public Builder() {
       sheetConfigBuilders = Lists.newLinkedList();
@@ -32,16 +31,6 @@ public class WorkbookConfig {
 
     public Builder setValidators(List<Validator<Workbook>> validators) {
       this.validators = validators;
-      return this;
-    }
-
-
-    public ParserConfig getParserConfig() {
-      return parserConfig;
-    }
-
-    public Builder setParserConfig(ParserConfig parserConfig) {
-      this.parserConfig = parserConfig;
       return this;
     }
 
@@ -62,14 +51,13 @@ public class WorkbookConfig {
 
   private final ImmutableCollection<SheetConfig> sheetConfigs;
   private final ImmutableList<Validator<Workbook>> validators;
-  private final ParserConfig parserConfig;
 
   private WorkbookConfig(Builder builder) {
+    super(builder);
     sheetConfigs = builder.sheetConfigBuilders.stream()
         .peek(sheetConfigBuilder -> sheetConfigBuilder.setWorkbookConfig(this))
         .map(SheetConfig.Builder::build).collect(ImmutableSet.toImmutableSet());
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
-    parserConfig = builder.parserConfig;
   }
 
   public WorkbookParseResult parse(Workbook workbook) {
@@ -77,15 +65,11 @@ public class WorkbookConfig {
   }
 
   public ParserConfig getEffectiveParserConfig() {
-    return Optional.ofNullable(parserConfig).orElse(ParserConfig.GLOBAL);
+    return Optional.ofNullable(getParserConfig()).orElse(ParserConfig.GLOBAL);
   }
 
   public ImmutableCollection<SheetConfig> getSheetConfigs() {
     return sheetConfigs;
-  }
-
-  public ParserConfig getParserConfig() {
-    return parserConfig;
   }
 
   public ImmutableList<Validator<Workbook>> getValidators() {

@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class TableDataConfig<T> {
-
   public static class Builder<T> {
     private TableConfig<T> tableConfig;
     private Class<T> type;
