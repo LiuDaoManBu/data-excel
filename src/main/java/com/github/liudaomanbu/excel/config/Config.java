@@ -10,7 +10,7 @@ public class Config<T> {
     private Object id;
     private ParserConfig parserConfig;
     private List<Validator<T>> validators;
-    
+
     public Object getId() {
       return id;
     }
@@ -37,7 +37,7 @@ public class Config<T> {
       this.validators = validators;
       return this;
     }
-    
+
   }
 
   private final Object id;
@@ -46,8 +46,8 @@ public class Config<T> {
 
   public Config(Builder<T> builder) {
     id = Optional.ofNullable(builder.id).orElse(this.toString());
-    parserConfig=builder.parserConfig;
-    validators=builder.validators.stream().collect(ImmutableList.toImmutableList());
+    parserConfig = builder.parserConfig;
+    validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
 
   public Object getId() {

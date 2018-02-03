@@ -8,8 +8,8 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
-public class WorkbookConfig extends Config<Workbook>{
-  public static class Builder extends Config.Builder<Workbook>{
+public class WorkbookConfig extends Config<Workbook> {
+  public static class Builder extends Config.Builder<Workbook> {
     private Collection<SheetConfig.Builder> sheetConfigBuilders;
 
     public Builder() {

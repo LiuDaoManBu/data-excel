@@ -33,7 +33,7 @@ public class TableConfig<T> extends Config<Table<T>> {
       super.setId(id);
       return this;
     }
-    
+
     public SheetConfig getSheetConfig() {
       return sheetConfig;
     }
@@ -56,7 +56,8 @@ public class TableConfig<T> extends Config<Table<T>> {
       return topMenuConfigBuilders;
     }
 
-    public Builder<T> setTopMenuConfigBuilders(Collection<MenuConfig.Builder<T>> topMenuConfigBuilders) {
+    public Builder<T> setTopMenuConfigBuilders(
+        Collection<MenuConfig.Builder<T>> topMenuConfigBuilders) {
       this.topMenuConfigBuilders = topMenuConfigBuilders;
       return this;
     }

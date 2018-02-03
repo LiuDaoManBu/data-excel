@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.parse.result;
 
+import com.github.liudaomanbu.excel.validator.Validators;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
@@ -91,7 +92,7 @@ public class Table<T> {
   }
 
   private Validator<Table<T>> createMenuConfigValidator() {
-    return new BaseValidator<>(
+    return Validators.create(
         config.getTopMenuConfigs().stream().collect(ImmutableMap.toImmutableMap(topMenuConfig -> {
           Predicate<Table<T>> predicate = table -> table.getTopMenus().stream().map(Menu::getConfig)
               .filter(topMenuConfig::equals).findAny().isPresent();

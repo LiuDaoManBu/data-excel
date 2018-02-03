@@ -141,7 +141,6 @@ public class MenuConfig<T> extends Config<Menu<T>> {
     Preconditions.checkNotNull(builder.matcher, "matcher can't be null");
     matcher = builder.matcher.reduce();
 
-
     distance = Optional.ofNullable(builder.distance).orElse(DEFAULT_DISTANCE);
     parent = builder.parent;
     necessity = Optional.ofNullable(builder.necessity).orElse(DEFAULT_MENU_NECESSITY);

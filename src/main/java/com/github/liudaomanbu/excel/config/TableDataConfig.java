@@ -1,14 +1,14 @@
 package com.github.liudaomanbu.excel.config;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import com.github.liudaomanbu.excel.parse.result.Data;
-import com.github.liudaomanbu.excel.validator.JavaxValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
+import com.github.liudaomanbu.excel.validator.Validators;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class TableDataConfig<T> {
   public static class Builder<T> {
@@ -27,7 +27,7 @@ public class TableDataConfig<T> {
     }
 
     public Builder<T> addValidator(javax.validation.Validator validator, Class<?>... groups) {
-      validators.add(new JavaxValidator<T>(validator, groups));
+      validators.add(Validators.create(validator,groups));
       return this;
     }
 

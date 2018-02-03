@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.parse.result;
 
+import com.github.liudaomanbu.excel.validator.Validators;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Objects;
@@ -111,7 +112,7 @@ public class Menu<T> {
   }
 
   private Validator<Menu<T>> createMenuConfigValidator() {
-    return new BaseValidator<>(
+    return Validators.create(
         config.getChildrens().stream().collect(ImmutableMap.toImmutableMap(children -> {
           Predicate<Menu<T>> predicate = menu -> menu.getChildrens().stream().map(Menu::getConfig)
               .filter(children::equals).findAny().isPresent();

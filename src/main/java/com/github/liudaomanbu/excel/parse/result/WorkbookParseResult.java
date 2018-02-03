@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.parse.result;
 
+import com.github.liudaomanbu.excel.validator.Validators;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
@@ -77,7 +78,7 @@ public class WorkbookParseResult {
   }
 
   private Validator<Workbook> createSheetConfigValidator() {
-    return new BaseValidator<>(
+    return Validators.create(
         config.getSheetConfigs().stream().filter(t -> Necessity.MUST.equals(t.getNecessity()))
             .collect(ImmutableMap.toImmutableMap(sheetConfig -> {
               Predicate<Workbook> predicate = workbook -> ExcelUtil.getSheets(workbook)

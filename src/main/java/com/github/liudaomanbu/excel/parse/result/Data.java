@@ -5,6 +5,7 @@ import com.github.liudaomanbu.excel.matcher.data.type.BaseDataType;
 import com.github.liudaomanbu.excel.parse.error.ValidationError;
 import com.github.liudaomanbu.excel.validator.BaseValidator;
 import com.github.liudaomanbu.excel.validator.Validator;
+import com.github.liudaomanbu.excel.validator.Validators;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
@@ -60,7 +61,7 @@ public class Data<T> {
 
   private Stream<Validator<Data<T>>> createDataValidator() {
     return tableData.getTable().getDataMenus()
-        .map(menu -> new BaseValidator<Data<T>>(
+        .map(menu -> Validators.create(
             data -> menu.getData().getConfig().getDataType()
                 .test(data.getMenuToValueCells().get(menu).getValue()),
             data -> JOINER.join(menu.getFullName(),
