@@ -108,7 +108,7 @@ public class TableConfig<T> extends Config<Table<T>> {
   }
 
   public ParserConfig getEffectiveParserConfig() {
-    return Optional.ofNullable(getParserConfig()).orElse(sheetConfig.getEffectiveParserConfig());
+    return Optional.ofNullable(getParserConfig()).orElseGet(sheetConfig::getEffectiveParserConfig);
   }
 
   public Stream<MenuConfig<T>> getMenuConfigs() {

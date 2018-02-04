@@ -439,16 +439,16 @@ public class ExcelUtil {
   public static void removeMergedRegion(@Nullable Sheet sheet,
       @Nullable CellRangeAddress cellAddress) {
     Optional.ofNullable(sheet).map(t -> IntStream.range(0, t.getNumMergedRegions()))
-        .orElse(IntStream.empty()).filter(i -> sheet.getMergedRegion(i).equals(cellAddress))
+        .orElseGet(IntStream::empty).filter(i -> sheet.getMergedRegion(i).equals(cellAddress))
         .findAny().ifPresent(i -> sheet.removeMergedRegion(i));
   }
 
   public static Stream<Sheet> getSheets(@Nullable Workbook workbook) {
-    return Optional.ofNullable(workbook).map(Streams::stream).orElse(Stream.empty());
+    return Optional.ofNullable(workbook).map(Streams::stream).orElseGet(Stream::empty);
   }
 
   public static Stream<Row> getRows(@Nullable Sheet sheet) {
-    return Optional.ofNullable(sheet).map(Streams::stream).orElse(Stream.empty());
+    return Optional.ofNullable(sheet).map(Streams::stream).orElseGet(Stream::empty);
   }
 
   public static Stream<Row> getRows(@Nullable Sheet sheet, @Nullable Integer firstRowIndex,
@@ -456,7 +456,7 @@ public class ExcelUtil {
     return Optional.ofNullable(sheet)
         .map(t -> IntStream.range(Optional.ofNullable(firstRowIndex).orElse(t.getFirstRowNum()),
             Optional.ofNullable(lastRowIndex).orElse(t.getLastRowNum())))
-        .orElse(IntStream.empty()).mapToObj(sheet::getRow);
+        .orElseGet(IntStream::empty).mapToObj(sheet::getRow);
   }
 
   public static Stream<Cell> getCells(@Nullable Sheet sheet) {
@@ -508,7 +508,7 @@ public class ExcelUtil {
         .map(t -> IntStream.range(
             Optional.ofNullable(firstColumnIndex).orElse((int) t.getFirstCellNum()),
             Optional.ofNullable(lastColumnIndex).orElse((int) t.getLastCellNum())))
-        .orElse(IntStream.empty()).mapToObj(i -> row.getCell(i, effectivePolicy));
+        .orElseGet(IntStream::empty).mapToObj(i -> row.getCell(i, effectivePolicy));
   }
 
   private ExcelUtil() {

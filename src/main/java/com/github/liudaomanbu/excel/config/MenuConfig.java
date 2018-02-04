@@ -148,8 +148,8 @@ public class MenuConfig<T> extends Config<Menu<T>> {
         .orElse(Optional.ofNullable(parent).map(MenuConfig::getTableConfig).orElse(null));
     Preconditions.checkNotNull(tableConfig, "tableConfig can't be null");
     direction = Optional.ofNullable(builder.direction).orElse(Optional.ofNullable(parent)
-        .map(MenuConfig::getDirection).orElse(tableConfig.getMenuDirection()));
-    childrens = Optional.ofNullable(builder.childrenBuilders).orElse(ImmutableList.of()).stream()
+        .map(MenuConfig::getDirection).orElseGet(tableConfig::getMenuDirection));
+    childrens = Optional.ofNullable(builder.childrenBuilders).orElseGet(ImmutableList::of).stream()
         .peek(childrenBuilder -> childrenBuilder.setParent(this).setTableConfig(tableConfig))
         .map(Builder::build).collect(ImmutableSet.toImmutableSet());
     dataConfig = builder.dataConfigBuilder.setMenuConfig(this).build();
@@ -195,7 +195,7 @@ public class MenuConfig<T> extends Config<Menu<T>> {
 
   public ParserConfig getEffectiveParserConfig() {
     return Optional.ofNullable(getParserConfig()).orElse(Optional.ofNullable(parent)
-        .map(MenuConfig::getParserConfig).orElse(tableConfig.getEffectiveParserConfig()));
+        .map(MenuConfig::getParserConfig).orElseGet(tableConfig::getEffectiveParserConfig));
   }
 
   // delegate methods start

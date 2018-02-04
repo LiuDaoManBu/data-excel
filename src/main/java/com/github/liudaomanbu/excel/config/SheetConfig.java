@@ -100,7 +100,7 @@ public class SheetConfig extends Config<Sheet> {
   }
 
   public ParserConfig getEffectiveParserConfig() {
-    return Optional.ofNullable(getParserConfig()).orElse(workbookConfig.getEffectiveParserConfig());
+    return Optional.ofNullable(getParserConfig()).orElseGet(workbookConfig::getEffectiveParserConfig);
   }
 
   public ImmutableCollection<TableConfig<?>> getTableConfigs() {

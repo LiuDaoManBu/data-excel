@@ -27,7 +27,7 @@ public class BaseMatcher<T> implements Matcher<T> {
     super();
     this.type = Optional.ofNullable(type).orElse(DEFAULT_TYPE);
     this.parent = parent;
-    this.predicates = Optional.ofNullable(predicates).orElse(Lists.newLinkedList());
+    this.predicates = Optional.ofNullable(predicates).orElseGet(Lists::newLinkedList);
   }
 
   @Override
@@ -54,7 +54,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public <R extends Comparable<R>> Matcher<T> add(ComparableMatcherType type, R predicateValue,
-      Function<T,R> transformer) {
+      Function<T, R> transformer) {
     return add(value -> type.apply(value, predicateValue), transformer);
   }
 
@@ -90,7 +90,7 @@ public class BaseMatcher<T> implements Matcher<T> {
 
   @Override
   public Predicate<T> reduce() {
-    Preconditions.checkState(!predicates.isEmpty(),"predicates can't empty");
+    Preconditions.checkState(!predicates.isEmpty(), "predicates can't empty");
     return type.reduce(predicates);
   }
 

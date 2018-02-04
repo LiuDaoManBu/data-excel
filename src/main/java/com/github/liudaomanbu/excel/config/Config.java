@@ -45,7 +45,7 @@ public class Config<T> {
   private final ImmutableList<Validator<T>> validators;
 
   public Config(Builder<T> builder) {
-    id = Optional.ofNullable(builder.id).orElse(this.toString());
+    id = Optional.ofNullable(builder.id).orElseGet(this::toString);
     parserConfig = builder.parserConfig;
     validators = builder.validators.stream().collect(ImmutableList.toImmutableList());
   }
