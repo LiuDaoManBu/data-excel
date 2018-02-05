@@ -17,8 +17,8 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class WorkbookParseResult {
-  public static class Builder {
+public class WorkbookParseResult{
+  public static class Builder{
     private Workbook workbook;
     private WorkbookConfig config;
 

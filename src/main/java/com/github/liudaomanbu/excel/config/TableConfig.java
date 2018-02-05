@@ -14,7 +14,9 @@ import com.google.common.graph.SuccessorsFunction;
 import com.google.common.graph.Traverser;
 
 public class TableConfig<T> extends Config<Table<T>> {
+
   public static class Builder<T> extends Config.Builder<Table<T>> {
+
     private Collection<MenuConfig.Builder<T>> topMenuConfigBuilders;
     private SheetConfig sheetConfig;
     private Direction menuDirection;
@@ -83,14 +85,7 @@ public class TableConfig<T> extends Config<Table<T>> {
   private final Direction menuDirection;
   private final ImmutableCollection<MenuConfig<T>> topMenuConfigs;
   private final TableDataConfig<T> dataConfig;
-
-  private final Traverser<MenuConfig<T>> MENU_CONFIG_TRAVERSER =
-      Traverser.forTree(new SuccessorsFunction<MenuConfig<T>>() {
-        @Override
-        public Iterable<? extends MenuConfig<T>> successors(MenuConfig<T> node) {
-          return node.getChildrens();
-        }
-      });
+  private final Traverser<MenuConfig<T>> MENU_CONFIG_TRAVERSER =Traverser.forTree(MenuConfig::getChildrens);
 
   private TableConfig(Builder<T> builder) {
     super(builder);

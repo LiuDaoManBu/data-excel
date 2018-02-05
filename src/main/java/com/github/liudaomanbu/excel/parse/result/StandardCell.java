@@ -84,18 +84,22 @@ public class StandardCell extends CellRangeAddress implements Cell {
   }
 
   // delegate Cell methods start
+  @Override
   public int getColumnIndex() {
     return valueCell.getColumnIndex();
   }
 
+  @Override
   public int getRowIndex() {
     return valueCell.getRowIndex();
   }
 
+  @Override
   public Row getRow() {
     return valueCell.getRow();
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   @Deprecated
   @Removal(version = "1.0")
@@ -103,139 +107,172 @@ public class StandardCell extends CellRangeAddress implements Cell {
     cells.forEach(cell -> cell.setCellType(cellType));
   }
 
+  @Override
   public void setCellType(CellType cellType) {
     cells.forEach(cell -> cell.setCellType(cellType));
   }
 
+  @Override
   @Deprecated
   @Removal(version = "1.0")
   public int getCellType() {
     return valueCell.getCellType();
   }
 
+  @Override
   public CellType getCellTypeEnum() {
     return valueCell.getCellTypeEnum();
   }
 
+  @Override
   @Deprecated
   @Removal(version = "1.0")
   public int getCachedFormulaResultType() {
     return valueCell.getCachedFormulaResultType();
   }
 
+  @Override
   public CellType getCachedFormulaResultTypeEnum() {
     return valueCell.getCachedFormulaResultTypeEnum();
   }
 
+  @Override
   public void setCellValue(double value) {
     valueCell.setCellValue(value);
   }
 
+  @Override
   public void setCellValue(Date value) {
     valueCell.setCellValue(value);
   }
 
+  @Override
   public void setCellValue(Calendar value) {
     valueCell.setCellValue(value);
   }
 
+  @Override
   public void setCellValue(RichTextString value) {
     valueCell.setCellValue(value);
   }
 
+  @Override
   public void setCellValue(String value) {
     valueCell.setCellValue(value);
   }
 
+  @Override
   public void setCellFormula(String formula) throws FormulaParseException {
     valueCell.setCellFormula(formula);
   }
 
+  @Override
   public String getCellFormula() {
     return valueCell.getCellFormula();
   }
 
+  @Override
   public double getNumericCellValue() {
     return valueCell.getNumericCellValue();
   }
 
+  @Override
   public Date getDateCellValue() {
     return valueCell.getDateCellValue();
   }
 
+  @Override
   public RichTextString getRichStringCellValue() {
     return valueCell.getRichStringCellValue();
   }
 
+  @Override
   public String getStringCellValue() {
     return valueCell.getStringCellValue();
   }
 
+  @Override
   public void setCellValue(boolean value) {
     valueCell.setCellValue(value);
   }
 
+  @Override
   public void setCellErrorValue(byte value) {
     valueCell.setCellErrorValue(value);
   }
 
+  @Override
   public boolean getBooleanCellValue() {
     return valueCell.getBooleanCellValue();
   }
 
+  @Override
   public byte getErrorCellValue() {
     return valueCell.getErrorCellValue();
   }
 
+  @Override
   public void setCellStyle(CellStyle style) {
     cells.forEach(cell -> cell.setCellStyle(style));
   }
 
+  @Override
   public CellStyle getCellStyle() {
     return valueCell.getCellStyle();
   }
 
+  @Override
   public void setAsActiveCell() {
     valueCell.setAsActiveCell();
   }
 
+  @Override
   public CellAddress getAddress() {
     return valueCell.getAddress();
   }
 
+  @Override
   public void setCellComment(Comment comment) {
     valueCell.setCellComment(comment);
   }
 
+  @Override
   public Comment getCellComment() {
     return valueCell.getCellComment();
   }
 
+  @Override
   public void removeCellComment() {
     valueCell.removeCellComment();
   }
 
+  @Override
   public Hyperlink getHyperlink() {
     return valueCell.getHyperlink();
   }
 
+  @Override
   public void setHyperlink(Hyperlink link) {
     valueCell.setHyperlink(link);
   }
 
+  @Override
   public void removeHyperlink() {
     valueCell.removeHyperlink();
   }
 
+  @Override
   public CellRangeAddress getArrayFormulaRange() {
     return valueCell.getArrayFormulaRange();
   }
 
+  @Override
   public boolean isPartOfArrayFormulaGroup() {
     return valueCell.isPartOfArrayFormulaGroup();
   }
   // delegate Cell methods end
 
+  @Override
   public Sheet getSheet() {
     return sheet;
   }

@@ -350,6 +350,7 @@ class AviatorTypeUtil {
       return scriptFunction.getName();
     }
 
+    @Override
     public ScriptObject call(Map<String, Object> env, ScriptObject... args) {
       return scriptFunction.call(env, args);
     }
@@ -614,6 +615,7 @@ class AviatorTypeUtil {
       this.aviatorFunction = aviatorFunction;
     }
 
+    @Override
     public String getName() {
       return aviatorFunction.getName();
     }
@@ -778,62 +780,74 @@ class AviatorTypeUtil {
       return AviatorTypeUtil.to(aviatorObject);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env) {
       return aviatorFunction.call(env);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1) {
       return aviatorFunction.call(env, arg1);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2) {
       return aviatorFunction.call(env, arg1, arg2);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3) {
       return aviatorFunction.call(env, arg1, arg2, arg3);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4, arg5);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4, arg5, arg6);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10) {
       return aviatorFunction.call(env, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -842,6 +856,7 @@ class AviatorTypeUtil {
           arg11);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -850,6 +865,7 @@ class AviatorTypeUtil {
           arg11, arg12);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -858,6 +874,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -866,6 +883,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -875,6 +893,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14, arg15);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -884,6 +903,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14, arg15, arg16);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -893,6 +913,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14, arg15, arg16, arg17);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -902,6 +923,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -912,6 +934,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -922,6 +945,7 @@ class AviatorTypeUtil {
           arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
     }
 
+    @Override
     public AviatorObject call(Map<String, Object> env, AviatorObject arg1, AviatorObject arg2,
         AviatorObject arg3, AviatorObject arg4, AviatorObject arg5, AviatorObject arg6,
         AviatorObject arg7, AviatorObject arg8, AviatorObject arg9, AviatorObject arg10,
@@ -959,18 +983,22 @@ class AviatorTypeUtil {
       this.expression = expression;
     }
 
+    @Override
     public Object execute(Map<String, Object> env) {
       return expression.execute(env);
     }
 
+    @Override
     public Object execute() {
       return expression.execute();
     }
 
+    @Override
     public List<String> getVariableNames() {
       return expression.getVariableNames();
     }
 
+    @Override
     public List<String> getVariableFullNames() {
       return expression.getVariableFullNames();
     }
