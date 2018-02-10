@@ -6,7 +6,7 @@ import java.util.Map;
 import com.github.liudaomanbu.excel.script.constant.ScriptType;
 import com.github.liudaomanbu.excel.script.expression.ScriptExpression;
 import com.github.liudaomanbu.excel.script.runtime.function.ScriptFunction;
-import com.github.liudaomanbu.excel.script.runtime.type.ScriptObject;
+import com.github.liudaomanbu.excel.script.runtime.type.BaseScriptObject;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.googlecode.aviator.Expression;
@@ -50,170 +50,170 @@ class AviatorTypeUtil {
     return AviatorScriptExpression.to(expression);
   }
 
-  public static ScriptObject to(AviatorObject aviatorObject) {
-    return AviatorScriptObject.to(aviatorObject);
+  public static BaseScriptObject to(AviatorObject aviatorObject) {
+    return AviatorBaseScriptObject.to(aviatorObject);
   }
 
-  public static ScriptObject[] to(AviatorObject... aviatorObjects) {
-    return Arrays.stream(aviatorObjects).map(AviatorTypeUtil::to).toArray(ScriptObject[]::new);
+  public static BaseScriptObject[] to(AviatorObject... aviatorObjects) {
+    return Arrays.stream(aviatorObjects).map(AviatorTypeUtil::to).toArray(BaseScriptObject[]::new);
   }
 
-  public static AviatorObject to(ScriptObject scriptObject) {
-    return ScriptAviatorObject.to(scriptObject);
+  public static AviatorObject to(BaseScriptObject baseScriptObject) {
+    return ScriptAviatorObject.to(baseScriptObject);
   }
 
-  public static AviatorObject[] to(ScriptObject... scriptObjects) {
-    return Arrays.stream(scriptObjects).map(AviatorTypeUtil::to).toArray(AviatorObject[]::new);
+  public static AviatorObject[] to(BaseScriptObject... baseScriptObjects) {
+    return Arrays.stream(baseScriptObjects).map(AviatorTypeUtil::to).toArray(AviatorObject[]::new);
   }
 
   private static class ScriptAviatorObject extends AviatorObject {
-    private static ScriptAviatorObject to(ScriptObject scriptObject) {
-      return new ScriptAviatorObject(scriptObject);
+    private static ScriptAviatorObject to(BaseScriptObject baseScriptObject) {
+      return new ScriptAviatorObject(baseScriptObject);
     }
 
-    private final ScriptObject scriptObject;
+    private final BaseScriptObject baseScriptObject;
     
-    private ScriptAviatorObject(ScriptObject scriptObject) {
+    private ScriptAviatorObject(BaseScriptObject baseScriptObject) {
       super();
-      this.scriptObject = scriptObject;
+      this.baseScriptObject = baseScriptObject;
     }
 
     @Override
     public int compare(AviatorObject other, Map<String, Object> env) {
-      return scriptObject.compare(AviatorTypeUtil.to(other), env);
+      return baseScriptObject.compare(AviatorTypeUtil.to(other), env);
     }
 
     @Override
     public AviatorType getAviatorType() {
-      return AviatorTypeUtil.to(scriptObject.getScriptType());
+      return AviatorTypeUtil.to(baseScriptObject.getScriptType());
     }
 
     @Override
     public boolean isNull(Map<String, Object> env) {
-      return scriptObject.isNull(env);
+      return baseScriptObject.isNull(env);
     }
 
     @Override
     public AviatorObject match(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.match(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.match(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject neg(Map<String, Object> env) {
-      return to(scriptObject.neg(env));
+      return to(baseScriptObject.neg(env));
     }
 
     @Override
     public AviatorObject not(Map<String, Object> env) {
-      return to(scriptObject.not(env));
+      return to(baseScriptObject.not(env));
     }
 
     @Override
     public String desc(Map<String, Object> env) {
-      return scriptObject.desc(env);
+      return baseScriptObject.desc(env);
     }
 
     @Override
     public Object getValue(Map<String, Object> env) {
-      return scriptObject.getValue(env);
+      return baseScriptObject.getValue(env);
     }
 
     @Override
     public AviatorObject add(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.add(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.add(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject bitAnd(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.bitAnd(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.bitAnd(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject bitOr(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.bitOr(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.bitOr(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject bitXor(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.bitXor(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.bitXor(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject shiftRight(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.shiftRight(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.shiftRight(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject shiftLeft(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.shiftLeft(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.shiftLeft(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject unsignedShiftRight(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.unsignedShiftRight(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.unsignedShiftRight(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject bitNot(Map<String, Object> env) {
-      return to(scriptObject.bitNot(env));
+      return to(baseScriptObject.bitNot(env));
     }
 
     @Override
     public AviatorObject sub(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.sub(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.sub(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject mod(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.mod(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.mod(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject div(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.div(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.div(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public AviatorObject mult(AviatorObject other, Map<String, Object> env) {
-      return to(scriptObject.mult(AviatorTypeUtil.to(other), env));
+      return to(baseScriptObject.mult(AviatorTypeUtil.to(other), env));
     }
 
     @Override
     public Number numberValue(Map<String, Object> env) {
-      return scriptObject.numberValue(env);
+      return baseScriptObject.numberValue(env);
     }
 
     @Override
     public String stringValue(Map<String, Object> env) {
-      return scriptObject.stringValue(env);
+      return baseScriptObject.stringValue(env);
     }
 
     @Override
     public boolean booleanValue(Map<String, Object> env) {
-      return scriptObject.booleanValue(env);
+      return baseScriptObject.booleanValue(env);
     }
 
     @Override
     public AviatorObject getElement(Map<String, Object> env, AviatorObject indexObject) {
-      return to(scriptObject.getElement(env, AviatorTypeUtil.to(indexObject)));
+      return to(baseScriptObject.getElement(env, AviatorTypeUtil.to(indexObject)));
     }
   }
 
-  private static class AviatorScriptObject extends ScriptObject {
+  private static class AviatorBaseScriptObject extends BaseScriptObject {
 
-    public static AviatorScriptObject to(AviatorObject aviatorObject) {
-      return new AviatorScriptObject(aviatorObject);
+    public static AviatorBaseScriptObject to(AviatorObject aviatorObject) {
+      return new AviatorBaseScriptObject(aviatorObject);
     }
 
     private final AviatorObject aviatorObject;
     
-    private AviatorScriptObject(AviatorObject aviatorObject) {
+    private AviatorBaseScriptObject(AviatorObject aviatorObject) {
       super();
       this.aviatorObject = aviatorObject;
     }
 
     @Override
-    public int compare(ScriptObject other, Map<String, Object> env) {
+    public int compare(BaseScriptObject other, Map<String, Object> env) {
       return aviatorObject.compare(AviatorTypeUtil.to(other), env);
     }
 
@@ -228,17 +228,17 @@ class AviatorTypeUtil {
     }
 
     @Override
-    public ScriptObject match(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject match(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.match(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject neg(Map<String, Object> env) {
+    public BaseScriptObject neg(Map<String, Object> env) {
       return to(aviatorObject.neg(env));
     }
 
     @Override
-    public ScriptObject not(Map<String, Object> env) {
+    public BaseScriptObject not(Map<String, Object> env) {
       return to(aviatorObject.not(env));
     }
 
@@ -253,62 +253,62 @@ class AviatorTypeUtil {
     }
 
     @Override
-    public ScriptObject add(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject add(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.add(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject bitAnd(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject bitAnd(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.bitAnd(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject bitOr(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject bitOr(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.bitOr(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject bitXor(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject bitXor(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.bitXor(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject shiftRight(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject shiftRight(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.shiftRight(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject shiftLeft(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject shiftLeft(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.shiftLeft(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject unsignedShiftRight(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject unsignedShiftRight(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.unsignedShiftRight(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject bitNot(Map<String, Object> env) {
+    public BaseScriptObject bitNot(Map<String, Object> env) {
       return to(aviatorObject.bitNot(env));
     }
 
     @Override
-    public ScriptObject sub(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject sub(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.sub(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject mod(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject mod(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.mod(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject div(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject div(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.div(AviatorTypeUtil.to(other), env));
     }
 
     @Override
-    public ScriptObject mult(ScriptObject other, Map<String, Object> env) {
+    public BaseScriptObject mult(BaseScriptObject other, Map<String, Object> env) {
       return to(aviatorObject.mult(AviatorTypeUtil.to(other), env));
     }
 
@@ -328,7 +328,7 @@ class AviatorTypeUtil {
     }
 
     @Override
-    public ScriptObject getElement(Map<String, Object> env, ScriptObject indexObject) {
+    public BaseScriptObject getElement(Map<String, Object> env, BaseScriptObject indexObject) {
       return to(aviatorObject.getElement(env, AviatorTypeUtil.to(indexObject)));
     }
   }
@@ -351,7 +351,7 @@ class AviatorTypeUtil {
     }
 
     @Override
-    public ScriptObject call(Map<String, Object> env, ScriptObject... args) {
+    public BaseScriptObject call(Map<String, Object> env, BaseScriptObject... args) {
       return scriptFunction.call(env, args);
     }
 
@@ -591,11 +591,11 @@ class AviatorTypeUtil {
         return call(env, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
             arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
       } else {
-        ScriptObject[] allArgs = new ScriptObject[20 + args.length];
-        ScriptObject[] firstTwentyArgs =
+        BaseScriptObject[] allArgs = new BaseScriptObject[20 + args.length];
+        BaseScriptObject[] firstTwentyArgs =
             AviatorTypeUtil.to(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
                 arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
-        ScriptObject[] otherArgs = AviatorTypeUtil.to(args);
+        BaseScriptObject[] otherArgs = AviatorTypeUtil.to(args);
         System.arraycopy(firstTwentyArgs, 0, allArgs, 0, firstTwentyArgs.length);
         System.arraycopy(otherArgs, 0, allArgs, firstTwentyArgs.length, otherArgs.length);
         return AviatorTypeUtil.to(scriptFunction.call(env, allArgs));
@@ -621,7 +621,7 @@ class AviatorTypeUtil {
     }
 
     @Override
-    public ScriptObject call(Map<String, Object> env, ScriptObject... args) {
+    public BaseScriptObject call(Map<String, Object> env, BaseScriptObject... args) {
       AviatorObject aviatorObject = null;
       switch (args.length) {
         case 0:
