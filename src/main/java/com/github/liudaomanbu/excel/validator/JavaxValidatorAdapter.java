@@ -6,12 +6,12 @@ import com.github.liudaomanbu.excel.parse.result.Menu;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 
-public class JavaxValidator<T> implements Validator<Data<T>> {
+public class JavaxValidatorAdapter<T> implements Validator<Data<T>> {
 
   private final javax.validation.Validator validator;
   private final Class<?>[] groups;
 
-  public JavaxValidator(javax.validation.Validator validator, Class<?>... groups) {
+  public JavaxValidatorAdapter(javax.validation.Validator validator, Class<?>... groups) {
     super();
     this.validator = validator;
     this.groups = groups;

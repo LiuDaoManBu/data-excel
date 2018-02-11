@@ -23,7 +23,7 @@ public class Validators {
   }
 
   public static <T> Validator<Data<T>> create(javax.validation.Validator validator, Class<?>... groups){
-    return new JavaxValidator<>(validator,groups);
+    return new JavaxValidatorAdapter<>(validator,groups);
   }
 
   private Validators() {
