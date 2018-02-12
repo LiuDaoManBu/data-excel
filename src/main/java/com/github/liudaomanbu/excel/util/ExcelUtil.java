@@ -76,7 +76,6 @@ public class ExcelUtil {
     try {
       return config.parse(WorkbookFactory.create(file));
     } catch (EncryptedDocumentException | InvalidFormatException | IOException e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
@@ -93,7 +92,6 @@ public class ExcelUtil {
           inputStream.close();
         }
       } catch (IOException e) {
-        e.printStackTrace();
         throw new RuntimeException(e);
       }
     }
@@ -460,7 +458,7 @@ public class ExcelUtil {
   }
 
   public static Stream<Cell> getCells(@Nullable Sheet sheet) {
-    return getCells(sheet, DEFAULT_MISSING_CELL_POLICY);
+    return Optional.ofNullable(sheet).map(Streams::stream).orElseGet(Stream::empty).flatMap(ExcelUtil::getCells);
   }
 
   public static Stream<Cell> getCells(@Nullable Sheet sheet, @Nullable MissingCellPolicy policy) {
@@ -488,7 +486,7 @@ public class ExcelUtil {
   }
 
   public static Stream<Cell> getCells(@Nullable Row row) {
-    return getCells(row, DEFAULT_MISSING_CELL_POLICY);
+    return Optional.ofNullable(row).map(Streams::stream).orElseGet(Stream::empty);
   }
 
   public static Stream<Cell> getCells(@Nullable Row row, @Nullable MissingCellPolicy policy) {
