@@ -1,12 +1,21 @@
 package com.github.liudaomanbu.excel.matcher.data.type;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public enum CellDataType implements Predicate<Object>{
   BOOLEAN {
     @Override
     public boolean test(Object t) {
-      return false;
+      if(t instanceof String) {
+        String string=(String) t;
+        return "Y".equalsIgnoreCase(string) || "N".equalsIgnoreCase(string) || "YES".equalsIgnoreCase(string) 
+            || "NO".equalsIgnoreCase(string) || "是".equals(string) || "否".equals(string);
+      }
+      if(DOUBLE.test(t)) {
+        
+      }
+      return t instanceof Boolean;
     }
   },STRING {
     @Override
@@ -24,5 +33,4 @@ public enum CellDataType implements Predicate<Object>{
       return false;
     }
   };
-  public abstract boolean test(Object t);
 }
