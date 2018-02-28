@@ -111,7 +111,7 @@ public enum Direction {
     for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
       for (int columnIndex = address.getFirstColumn(); columnIndex <= address
           .getLastColumn(); columnIndex++) {
-        Cell cell = ExcelUtil.getCellByIndex(original.getSheet(), rowIndex, columnIndex);
+        Cell cell = ExcelUtil.getCell(original.getSheet(), rowIndex, columnIndex);
         StandardCell standardCell = StandardCell.valueOf(cell);
         if (standardCell.getValueCell().equals(cell)) {
           cells.add(standardCell);

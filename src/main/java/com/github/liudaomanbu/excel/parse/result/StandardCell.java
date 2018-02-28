@@ -47,7 +47,7 @@ public class StandardCell extends CellRangeAddress implements Cell {
         cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
 
     this.sheet = sheet;
-    this.valueCell = ExcelUtil.getCellByIndex(sheet, getFirstRow(), getFirstColumn());
+    this.valueCell = ExcelUtil.getCell(sheet, getFirstRow(), getFirstColumn());
     this.cells = ExcelUtil.getCells(sheet, this).collect(ImmutableSet.toImmutableSet());
   }
 

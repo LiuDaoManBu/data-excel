@@ -239,7 +239,7 @@ public class ExcelUtil {
   }
 
   @Nullable
-  public static Cell getCellByIndex(Sheet sheet, int rowIndex, int columnIndex) {
+  public static Cell getCell(Sheet sheet, int rowIndex, int columnIndex) {
     return getCell(sheet, rowIndex, columnIndex, DEFAULT_MISSING_CELL_POLICY);
   }
 

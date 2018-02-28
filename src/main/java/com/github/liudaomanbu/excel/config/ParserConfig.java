@@ -21,9 +21,11 @@ import com.google.common.reflect.TypeToken;
 public class ParserConfig {
   public static final ParserConfig GLOBAL = new ParserConfig();
 
-  private final Map<Class<?>, Supplier<?>> classToSuppliers = Maps.newHashMap();
-  private final Map<Class<?>, ConstructType> classToConstructTypes = Maps.newHashMap();
-
+  private final Map<Class<?>, Supplier<?>> classToSuppliers = Maps.newConcurrentMap();
+  private final Map<Class<?>, ConstructType> classToConstructTypes = Maps.newConcurrentMap();
+  private final Set<String> trueStrings=Sets.newConcurrentHashSet();
+  private final Set<String> falseStrings=Sets.newConcurrentHashSet();
+  
   public ParserConfig() {
     setSupplier(List.class, Lists::newArrayList);
     setSupplier(Set.class, Sets::newHashSet);
@@ -36,6 +38,16 @@ public class ParserConfig {
     setConstructType(Set.class, ConstructType.ITERABLE);
     setConstructType(Collection.class, ConstructType.ITERABLE);
     setConstructType(Iterable.class, ConstructType.ITERABLE);
+    
+    trueStrings.add("true");
+    trueStrings.add("是");
+    trueStrings.add("yes");
+    trueStrings.add("y");
+    
+    falseStrings.add("false");
+    falseStrings.add("否");
+    falseStrings.add("no");
+    falseStrings.add("n");
   }
 
   public <T> void setConstructType(Class<T> type, ConstructType constructType) {
