@@ -3,6 +3,7 @@ package com.github.liudaomanbu.excel.constant;
 import java.util.Collection;
 import java.util.Optional;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressBase;
 import com.github.liudaomanbu.excel.parse.result.StandardCell;
@@ -111,7 +112,7 @@ public enum Direction {
     for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++) {
       for (int columnIndex = address.getFirstColumn(); columnIndex <= address
           .getLastColumn(); columnIndex++) {
-        Cell cell = ExcelUtil.getCell(original.getSheet(), rowIndex, columnIndex);
+        Cell cell = ExcelUtil.getCell(original.getSheet(), rowIndex, columnIndex,MissingCellPolicy.CREATE_NULL_AS_BLANK);
         StandardCell standardCell = StandardCell.valueOf(cell);
         if (standardCell.getValueCell().equals(cell)) {
           cells.add(standardCell);

@@ -10,7 +10,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class BaseValidator<T> implements Validator<T> {
   private static <T> Predicate<T> getDefaultPremisePredicate() {
-    return Objects::nonNull;
+    return value -> Objects.isNull(value)|| (value instanceof String && ((String)value)
+        .isEmpty());
   }
 
   private final Predicate<T> premisePredicate;
