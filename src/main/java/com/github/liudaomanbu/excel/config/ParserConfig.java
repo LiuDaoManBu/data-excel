@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
+import com.sun.org.apache.xerces.internal.xs.StringList;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -151,6 +152,53 @@ public class ParserConfig {
 
   public boolean isDate(Date value){
     return true;
+  }
+
+  public boolean castToBoolean(String value){
+    Optional<String> trueOptional=trueStrings.stream().filter(s -> s.equalsIgnoreCase(value)).findAny();
+    if(trueOptional.isPresent()){
+      return Boolean.TRUE;
+    }
+
+    Optional<String> falseOptional=falseStrings.stream().filter(s -> s.equalsIgnoreCase(value)).findAny();
+    if(trueOptional.isPresent()){
+      return Boolean.FALSE;
+    }
+
+    throw new IllegalArgumentException(value+"can't cast to boolean");
+  }
+
+  public boolean castToBoolean(double value){
+    throw new IllegalArgumentException(value+"can't cast to boolean");
+  }
+
+  public boolean castToBoolean(Date value){
+    throw new IllegalArgumentException(value+"can't cast to boolean");
+  }
+
+  public double castToDouble(boolean value){
+    throw new IllegalArgumentException(value+"can't cast to double");
+  }
+
+  public double castToDouble(String value){
+    return new BigDecimal(value).doubleValue();
+  }
+
+  public double castToDouble(Date value){
+    throw new IllegalArgumentException(value+"can't cast to double");
+  }
+
+  public Date castToDate(boolean value){
+    throw new IllegalArgumentException(value+"can't cast to Date");
+  }
+
+  public Date castToDate(String value){
+    //TODO
+    return null;
+  }
+
+  public Date castToDate(double value){
+    throw new IllegalArgumentException(value+"can't cast to Date");
   }
 
   public <T> void setConstructType(Class<T> type, ConstructType constructType) {
