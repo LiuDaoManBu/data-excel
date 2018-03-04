@@ -3,6 +3,7 @@ package com.github.liudaomanbu.excel.config;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
@@ -136,47 +137,12 @@ public class ParserConfig {
   public boolean isDate(String value){
     return dateFormatters.stream().anyMatch(formatter->{
       try{
-//        LocalDateTime.parse(value,formatter);
-//        LocalDate.parse(value,formatter);
         formatter.parse(value);
         return true;
       }catch (DateTimeParseException e){
         return false;
       }
     });
-  }
-
-  public static void main(String[] args) {
-    LocalDateTime localDateTime=LocalDateTime.now();
-    try {
-      System.out
-          .println("BASIC_ISO_DATE:" + DateTimeFormatter.BASIC_ISO_DATE.format(localDateTime));
-      System.out.println("ISO_DATE:" + DateTimeFormatter.ISO_DATE.format(localDateTime));
-      System.out.println("ISO_DATE_TIME:" + DateTimeFormatter.ISO_DATE_TIME.format(localDateTime));
-      System.out.println("ISO_INSTANT:" + DateTimeFormatter.ISO_INSTANT.format(localDateTime));
-      System.out
-          .println("ISO_LOCAL_DATE:" + DateTimeFormatter.ISO_LOCAL_DATE.format(localDateTime));
-      System.out.println(
-          "ISO_LOCAL_DATE_TIME:" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(localDateTime));
-      System.out
-          .println("ISO_LOCAL_TIME:" + DateTimeFormatter.ISO_LOCAL_TIME.format(localDateTime));
-      System.out
-          .println("ISO_OFFSET_DATE:" + DateTimeFormatter.ISO_OFFSET_DATE.format(localDateTime));
-      System.out.println(
-          "ISO_OFFSET_DATE_TIME:" + DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(localDateTime));
-      System.out
-          .println("ISO_OFFSET_TIME:" + DateTimeFormatter.ISO_OFFSET_TIME.format(localDateTime));
-      System.out
-          .println("ISO_ORDINAL_DATE:" + DateTimeFormatter.ISO_ORDINAL_DATE.format(localDateTime));
-      System.out.println("ISO_TIME:" + DateTimeFormatter.ISO_TIME.format(localDateTime));
-      System.out.println("ISO_WEEK_DATE:" + DateTimeFormatter.ISO_WEEK_DATE.format(localDateTime));
-      System.out.println(
-          "ISO_ZONED_DATE_TIME:" + DateTimeFormatter.ISO_ZONED_DATE_TIME.format(localDateTime));
-      System.out.println(
-          "RFC_1123_DATE_TIME:" + DateTimeFormatter.RFC_1123_DATE_TIME.format(localDateTime));
-    }catch (Exception e){
-
-    }
   }
 
   public boolean isDate(double value){
