@@ -1,7 +1,9 @@
 package com.github.liudaomanbu.excel.config;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
 import org.junit.Assert;
@@ -45,5 +47,18 @@ public class ParserConfigTest {
     }catch (Exception e){
       Assert.assertTrue(false);
     }
+  }
+
+  @Test
+  public void testFommater(){
+    LocalDateTime localDateTime=LocalDateTime.now();
+    System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(localDateTime));
+    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(localDateTime));
+//    System.out.println(DateTimeFormatter.ISO_DATE_TIME.parse("2015-05-12"));
+    System.out.println(DateTimeFormatter.ISO_DATE_TIME.parse("2015-05-12T22:11:33.44"));
+//    System.out.println(DateTimeFormatter.ISO_DATE_TIME.parse("22:11:33.44"));
+//    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("2015-05-12"));
+    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("2015-05-12T22:11:33.44"));
+    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("22:11:33.44"));
   }
 }
