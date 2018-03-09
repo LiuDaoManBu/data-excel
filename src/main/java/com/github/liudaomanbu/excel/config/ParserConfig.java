@@ -1,10 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
-import com.sun.org.apache.xerces.internal.xs.StringList;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
@@ -25,9 +21,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 import com.google.common.reflect.TypeToken;
-import org.apache.poi.ss.formula.functions.T;
 
-public class ParserConfig {
+public final class ParserConfig {
   public static final ParserConfig GLOBAL = new ParserConfig();
 
   private final Map<Class<?>, Supplier<?>> classToSuppliers = Maps.newConcurrentMap();
@@ -37,17 +32,17 @@ public class ParserConfig {
   private final Set<DateTimeFormatter> dateFormatters=Sets.newConcurrentHashSet();
   
   public ParserConfig() {
-    setSupplier(List.class, Lists::newArrayList);
-    setSupplier(Set.class, Sets::newHashSet);
-    setSupplier(Collection.class, Lists::newArrayList);
-    setSupplier(Iterable.class, Lists::newArrayList);
-    setSupplier(Multimap.class, ArrayListMultimap::create);
-    setSupplier(Table.class, HashBasedTable::create);
+    classToSuppliers.put(List.class, Lists::newArrayList);
+    classToSuppliers.put(Set.class, Sets::newHashSet);
+    classToSuppliers.put(Collection.class, Lists::newArrayList);
+    classToSuppliers.put(Iterable.class, Lists::newArrayList);
+    classToSuppliers.put(Multimap.class, ArrayListMultimap::create);
+    classToSuppliers.put(Table.class, HashBasedTable::create);
 
-    setConstructType(List.class, ConstructType.ITERABLE);
-    setConstructType(Set.class, ConstructType.ITERABLE);
-    setConstructType(Collection.class, ConstructType.ITERABLE);
-    setConstructType(Iterable.class, ConstructType.ITERABLE);
+    classToConstructTypes.put(List.class, ConstructType.ITERABLE);
+    classToConstructTypes.put(Set.class, ConstructType.ITERABLE);
+    classToConstructTypes.put(Collection.class, ConstructType.ITERABLE);
+    classToConstructTypes.put(Iterable.class, ConstructType.ITERABLE);
     
     trueStrings.add("true");
     trueStrings.add("t");
@@ -161,7 +156,7 @@ public class ParserConfig {
     }
 
     Optional<String> falseOptional=falseStrings.stream().filter(s -> s.equalsIgnoreCase(value)).findAny();
-    if(trueOptional.isPresent()){
+    if(falseOptional.isPresent()){
       return Boolean.FALSE;
     }
 
