@@ -6,14 +6,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-public class ParserConfigTest {
+public class ParserConfigTest{
+  private final ParserConfig parserConfig=ParserConfig.GLOBAL;
+
   @Test
   public void testIsCellDataType(){
-    ParserConfig parserConfig=ParserConfig.GLOBAL;
-
     try {
       parserConfig.isBoolean(Boolean.TRUE);
       parserConfig.isBoolean(Boolean.FALSE);
@@ -35,17 +36,17 @@ public class ParserConfigTest {
       parserConfig.isDate(new Date());
 
       parserConfig.isBoolean(UUID.randomUUID().toString());
-      Assert.assertTrue(parserConfig.isBoolean(Boolean.TRUE.toString()));
-      Assert.assertTrue(parserConfig.isBoolean(Boolean.FALSE.toString()));
+      Assertions.assertTrue(parserConfig.isBoolean(Boolean.TRUE.toString()));
+      Assertions.assertTrue(parserConfig.isBoolean(Boolean.FALSE.toString()));
       parserConfig.isString(UUID.randomUUID().toString());
       parserConfig.isDouble(UUID.randomUUID().toString());
-      Assert.assertTrue(parserConfig.isDouble(Math.random()+""));
+      Assertions.assertTrue(parserConfig.isDouble(Math.random() + ""));
       parserConfig.isDate(UUID.randomUUID().toString());
-      Assert.assertTrue(parserConfig.isDate(LocalDate.now().toString()));
-      Assert.assertTrue(parserConfig.isDate(LocalTime.now().toString()));
-      Assert.assertTrue(parserConfig.isDate(LocalTime.now().toString()));
+      Assertions.assertTrue(parserConfig.isDate(LocalDate.now().toString()));
+      Assertions.assertTrue(parserConfig.isDate(LocalTime.now().toString()));
+      Assertions.assertTrue(parserConfig.isDate(LocalTime.now().toString()));
     }catch (Exception e){
-      Assert.assertTrue(false);
+      Assertions.assertTrue(false);
     }
   }
 
@@ -59,6 +60,6 @@ public class ParserConfigTest {
 //    System.out.println(DateTimeFormatter.ISO_DATE_TIME.parse("22:11:33.44"));
 //    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("2015-05-12"));
     System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("2015-05-12T22:11:33.44"));
-    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("22:11:33.44"));
+//    System.out.println(DateTimeFormatter.ISO_LOCAL_DATE_TIME.parse("22:11:33.44"));
   }
 }

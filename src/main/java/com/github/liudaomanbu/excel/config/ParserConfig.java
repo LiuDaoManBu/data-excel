@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
+import com.github.liudaomanbu.excel.convert.DateTimeFormatterAdapter;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Vector;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import com.github.liudaomanbu.excel.base.function.InvokableSupplier;
 import com.github.liudaomanbu.excel.constant.ConstructType;
@@ -30,7 +33,9 @@ public final class ParserConfig {
   private final Set<String> trueStrings=Sets.newConcurrentHashSet();
   private final Set<String> falseStrings=Sets.newConcurrentHashSet();
   private final Set<DateTimeFormatter> dateFormatters=Sets.newConcurrentHashSet();
-  
+
+  private final List<Function<String,Date>> stringToDateConverters=new Vector<>();
+
   public ParserConfig() {
     classToSuppliers.put(List.class, Lists::newArrayList);
     classToSuppliers.put(Set.class, Sets::newHashSet);
@@ -71,6 +76,22 @@ public final class ParserConfig {
     dateFormatters.add(DateTimeFormatter.ISO_WEEK_DATE);
     dateFormatters.add(DateTimeFormatter.ISO_ZONED_DATE_TIME);
     dateFormatters.add(DateTimeFormatter.RFC_1123_DATE_TIME);
+
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.RFC_1123_DATE_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_DATE_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_INSTANT));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_OFFSET_DATE));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_LOCAL_DATE));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_DATE));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_ORDINAL_DATE));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_WEEK_DATE));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.BASIC_ISO_DATE));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_OFFSET_TIME));
+    registerConverter(DateTimeFormatterAdapter.create(DateTimeFormatter.ISO_LOCAL_TIME));
   }
 
   public boolean isBoolean(boolean value){
@@ -160,19 +181,19 @@ public final class ParserConfig {
       return Boolean.FALSE;
     }
 
-    throw new IllegalArgumentException(value+"can't cast to boolean");
+    throw new IllegalArgumentException(value+" can't cast to boolean");
   }
 
   public boolean castToBoolean(double value){
-    throw new IllegalArgumentException(value+"can't cast to boolean");
+    throw new IllegalArgumentException(value+" can't cast to boolean");
   }
 
   public boolean castToBoolean(Date value){
-    throw new IllegalArgumentException(value+"can't cast to boolean");
+    throw new IllegalArgumentException(value+" can't cast to boolean");
   }
 
   public double castToDouble(boolean value){
-    throw new IllegalArgumentException(value+"can't cast to double");
+    throw new IllegalArgumentException(value+" can't cast to double");
   }
 
   public double castToDouble(String value){
@@ -180,20 +201,30 @@ public final class ParserConfig {
   }
 
   public double castToDouble(Date value){
-    throw new IllegalArgumentException(value+"can't cast to double");
+    throw new IllegalArgumentException(value+" can't cast to double");
   }
 
   public Date castToDate(boolean value){
-    throw new IllegalArgumentException(value+"can't cast to Date");
+    throw new IllegalArgumentException(value+" can't cast to Date");
   }
 
   public Date castToDate(String value){
-    //TODO
-    return null;
+    return stringToDateConverters.stream().filter(converter->{
+      try {
+        converter.apply(value);
+      return true;
+      }catch (DateTimeParseException e){
+        return false;
+      }
+    }).findFirst().map(converter->converter.apply(value)).orElseThrow(()->new IllegalArgumentException(value+" can't cast to Date"));
   }
 
   public Date castToDate(double value){
     throw new IllegalArgumentException(value+"can't cast to Date");
+  }
+
+  public void registerConverter(Function<String,Date> converter){
+    stringToDateConverters.add(converter);
   }
 
   public <T> void setConstructType(Class<T> type, ConstructType constructType) {
