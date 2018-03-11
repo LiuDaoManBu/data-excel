@@ -186,7 +186,7 @@ public class Test {
     // Object array = new int[] {2, 3, 1};
 //    String[] strings = ConstructType.toArray(array);
 //    System.out.println(Arrays.toString(strings));
-    // Array.class.cast(array);
+    // Array.class.convert(array);
   }
 
   public static void testGeneric() {

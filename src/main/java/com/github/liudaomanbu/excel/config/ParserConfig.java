@@ -1,5 +1,6 @@
 package com.github.liudaomanbu.excel.config;
 
+import com.github.liudaomanbu.excel.convert.Converter;
 import com.github.liudaomanbu.excel.convert.DateTimeFormatterAdapter;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +35,7 @@ public final class ParserConfig {
   private final Set<String> falseStrings=Sets.newConcurrentHashSet();
   private final Set<DateTimeFormatter> dateFormatters=Sets.newConcurrentHashSet();
 
-  private final List<Function<String,Date>> stringToDateConverters=new Vector<>();
+  private final List<Converter<String,Date>> stringToDateConverters=new Vector<>();
 
   public ParserConfig() {
     classToSuppliers.put(List.class, Lists::newArrayList);
@@ -181,19 +182,19 @@ public final class ParserConfig {
       return Boolean.FALSE;
     }
 
-    throw new IllegalArgumentException(value+" can't cast to boolean");
+    throw new IllegalArgumentException(value+" can't convert to boolean");
   }
 
   public boolean castToBoolean(double value){
-    throw new IllegalArgumentException(value+" can't cast to boolean");
+    throw new IllegalArgumentException(value+" can't convert to boolean");
   }
 
   public boolean castToBoolean(Date value){
-    throw new IllegalArgumentException(value+" can't cast to boolean");
+    throw new IllegalArgumentException(value+" can't convert to boolean");
   }
 
   public double castToDouble(boolean value){
-    throw new IllegalArgumentException(value+" can't cast to double");
+    throw new IllegalArgumentException(value+" can't convert to double");
   }
 
   public double castToDouble(String value){
@@ -201,29 +202,29 @@ public final class ParserConfig {
   }
 
   public double castToDouble(Date value){
-    throw new IllegalArgumentException(value+" can't cast to double");
+    throw new IllegalArgumentException(value+" can't convert to double");
   }
 
   public Date castToDate(boolean value){
-    throw new IllegalArgumentException(value+" can't cast to Date");
+    throw new IllegalArgumentException(value+" can't convert to Date");
   }
 
   public Date castToDate(String value){
     return stringToDateConverters.stream().filter(converter->{
       try {
-        converter.apply(value);
+        converter.convert(value);
       return true;
       }catch (DateTimeParseException e){
         return false;
       }
-    }).findFirst().map(converter->converter.apply(value)).orElseThrow(()->new IllegalArgumentException(value+" can't cast to Date"));
+    }).findFirst().map(converter->converter.convert(value)).orElseThrow(()->new IllegalArgumentException(value+" can't convert to Date"));
   }
 
   public Date castToDate(double value){
-    throw new IllegalArgumentException(value+"can't cast to Date");
+    throw new IllegalArgumentException(value+"can't convert to Date");
   }
 
-  public void registerConverter(Function<String,Date> converter){
+  public void registerConverter(Converter<String,Date> converter){
     stringToDateConverters.add(converter);
   }
 

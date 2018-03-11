@@ -18,6 +18,7 @@
     <maven.gpg.version>1.6</maven.gpg.version>
     <maven.source.version>2.2.1</maven.source.version>
     <maven.javadoc.version>2.10.3</maven.javadoc.version>
+    <auto.value.version>1.5</auto.value.version>
     <junit.jupiter.version>5.1.0</junit.jupiter.version>
     <junit.platform.version>1.1.0</junit.platform.version>
     <slf4j.version>1.7.25</slf4j.version>
@@ -29,6 +30,26 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>${auto.value.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- slf4j -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -68,28 +89,10 @@
       <artifactId>validation-api</artifactId>
       <version>${validation-api.version}</version>
     </dependency>
-    <!-- 		<dependency>
-          <groupId>com.google.auto.value</groupId>
-          <artifactId>auto-value</artifactId>
-          <version>1.5</version>
-          <scope>provided</scope>
-        </dependency> -->
     <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
       <version>13.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit.jupiter.version}</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
