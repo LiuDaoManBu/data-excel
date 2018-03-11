@@ -1,8 +1,8 @@
 package com.github.liudaomanbu.excel.convert;
 
 /**
- * @author: liudaomanbu
- * @create: 2018-03-11 20:47
+ * @author liudaomanbu
+ * @date 2018-03-11 20:47
  **/
 public class ConvertException extends IllegalArgumentException{
   private static String generateMessage(Object value,Class<?> targetClass){
