@@ -18,13 +18,15 @@
     <maven.gpg.version>1.6</maven.gpg.version>
     <maven.source.version>2.2.1</maven.source.version>
     <maven.javadoc.version>2.10.3</maven.javadoc.version>
-    <auto.value.version>1.5</auto.value.version>
     <junit.jupiter.version>5.1.0</junit.jupiter.version>
     <junit.platform.version>1.1.0</junit.platform.version>
     <slf4j.version>1.7.25</slf4j.version>
-    <poi.version>3.17</poi.version>
-    <fastjson.version>1.2.44</fastjson.version>
+    <auto.value.version>1.5</auto.value.version>
+
     <guava.version>23.6-jre</guava.version>
+    <fastjson.version>1.2.44</fastjson.version>
+    <jackson.version>2.9.4</jackson.version>
+    <poi.version>3.17</poi.version>
     <aviator.version>3.3.0</aviator.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
   </properties>
@@ -70,14 +72,19 @@
     </dependency>
 
     <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>fastjson</artifactId>
-      <version>${fastjson.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>fastjson</artifactId>
+      <version>${fastjson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.googlecode.aviator</groupId>
